@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../HexColorCode/HexColor.dart';
 
-Color homepageColor = HexColor("#083159");
+Color bgColor = HexColor("#061c7f");
 Color primaryColor = HexColor("#4d6b53");
 // Color primaryColor = HexColor("#083159");
 Color greenColorQ = HexColor('#4d6b53');

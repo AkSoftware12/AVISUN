@@ -71,7 +71,7 @@ class _HomeBottomNavigationState extends State<HomeBottom> {
       builder: (context, onInit, onDispose) =>    WillPopScope(
         onWillPop: () async => false,
         child: Scaffold(
-          backgroundColor: homepageColor,
+          backgroundColor: bgColor,
           drawerEnableOpenDragGesture: false,
 
           appBar:  AppBar(
@@ -141,14 +141,14 @@ class _HomeBottomNavigationState extends State<HomeBottom> {
 
 
             centerTitle: true,
-            backgroundColor: homepageColor,
+            backgroundColor: bgColor,
           ),
 
 
           body: SafeArea(
             top: false,
             child: Container(
-              decoration: BoxDecoration(color: homepageColor),
+              decoration: BoxDecoration(color: bgColor),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -192,7 +192,7 @@ class _HomeBottomNavigationState extends State<HomeBottom> {
               currentIndex: _selectedIndex,
               selectedItemColor: Colors.white,
               unselectedItemColor: Colors.grey,
-              backgroundColor: homepageColor,
+              backgroundColor: bgColor,
               type: BottomNavigationBarType.fixed,  // Ensures all items are shown
               selectedLabelStyle: GoogleFonts.radioCanada(
                 textStyle: TextStyle(

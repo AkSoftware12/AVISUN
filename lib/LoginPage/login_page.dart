@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.lightBlueAccent,
+      backgroundColor: bgColor,
       body: SingleChildScrollView(
         child: Form(
           key: formKey,
@@ -103,19 +103,19 @@ class _LoginPageState extends State<LoginPage> {
             // crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Container(
-                height: 280.sp,
-                color: Colors.lightBlueAccent,
+                height: 320.sp,
+                color: bgColor,
                 child: ClipPath(
                   clipper: WaveClipper(),
                   child: Stack(
                     children: [
                       Container(
-                        height: 280.sp, // Adjust height according to your need
+                        height: 320.sp, // Adjust height according to your need
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
                               Colors.blueGrey,
-                             Colors.blue,
+                              bgColor,
 
                             ],
                             begin: Alignment.topLeft,
@@ -123,38 +123,21 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(0.0),
                           child: Center(
                               child: SizedBox(
+                                width: 170.sp,
+                                  height: 120.sp,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.sp),
+                                    child: Image.asset(
+                                      logo, // Replace with your image path
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                              ),
 
-                                  height: 150.sp,
-                                  // child: Image.asset('assets/log_in.png')
-
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                          width: 150.sp ,
-                                          height: 120.sp,
-                                          child: Image.asset(logo)),
-                                      Text.rich(TextSpan(
-                                        text: AppConstants.appLogoName,
-                                        style: GoogleFonts.poppins(
-                                          textStyle: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold,color: Colors.white),
-                                        ),
-                                        children: <TextSpan>[
-                                          TextSpan(
-                                            text: AppConstants.appLogoName2,
-                                            style: GoogleFonts.poppins(
-                                              textStyle: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold,color: Colors.white),
-                                            ),
-                                          )
-                                        ],
-                                      )),
-
-                                    ],
-                                  )
-
-                              )),
+                              ),
                         ),
                       ),
 
@@ -169,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                 child:   Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.sp),
                   child: Container(
-                    color:Colors.lightBlueAccent,
+                    color:bgColor,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -203,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                                           style: GoogleFonts.poppins(
                                             textStyle: TextStyle(fontSize: 15.sp,
                                                 fontWeight: FontWeight.bold,
-                                                color: Colors.black),
+                                                color: Colors.white),
                                           ),
                                         ),
                                         Text('')
@@ -216,7 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                                           width: double.infinity,
                                           height: 50.sp,
                                           decoration: BoxDecoration(
-                                            color: primaryColor,
+                                            color: bgColor,
                                             borderRadius: BorderRadius.circular(10.0),
                                             boxShadow: [
                                               BoxShadow(
@@ -237,14 +220,14 @@ class _LoginPageState extends State<LoginPage> {
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
                                                     borderRadius: BorderRadius.circular(10.0),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.orange.withOpacity(0.5),
-                                                        spreadRadius: 2,
-                                                        blurRadius: 7,
-                                                        offset: Offset(0, 3),
-                                                      ),
-                                                    ],
+                                                    // boxShadow: [
+                                                    //   BoxShadow(
+                                                    //     color: Colors.orange.withOpacity(0.5),
+                                                    //     spreadRadius: 2,
+                                                    //     blurRadius: 7,
+                                                    //     offset: Offset(0, 3),
+                                                    //   ),
+                                                    // ],
                                                   ),
                                                 ),
                                               ),
@@ -260,14 +243,14 @@ class _LoginPageState extends State<LoginPage> {
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius: BorderRadius.circular(10.0),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey.withOpacity(0.5),
-                                                  spreadRadius: 2,
-                                                  blurRadius: 7,
-                                                  offset: Offset(0, 3),
-                                                ),
-                                              ],
+                                              // boxShadow: [
+                                              //   BoxShadow(
+                                              //     color: Colors.grey.withOpacity(0.5),
+                                              //     spreadRadius: 2,
+                                              //     blurRadius: 7,
+                                              //     offset: Offset(0, 3),
+                                              //   ),
+                                              // ],
                                             ),
                                             child: Row(
                                               children: [
@@ -359,7 +342,7 @@ class _LoginPageState extends State<LoginPage> {
                                           style: GoogleFonts.poppins(
                                             textStyle: TextStyle(fontSize: 15.sp,
                                                 fontWeight: FontWeight.bold,
-                                                color: Colors.black),
+                                                color: Colors.white),
                                           ),
                                         ),
                                         Text('')
@@ -372,16 +355,16 @@ class _LoginPageState extends State<LoginPage> {
                                           width: double.infinity,
                                           height: 50.sp,
                                           decoration: BoxDecoration(
-                                            color: primaryColor,
+                                            color: bgColor,
                                             borderRadius: BorderRadius.circular(10.0),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey.withOpacity(0.5),
-                                                spreadRadius: 2,
-                                                blurRadius: 7,
-                                                offset: Offset(0, 3),
-                                              ),
-                                            ],
+                                            // boxShadow: [
+                                            //   BoxShadow(
+                                            //     color: Colors.grey.withOpacity(0.5),
+                                            //     spreadRadius: 2,
+                                            //     blurRadius: 7,
+                                            //     offset: Offset(0, 3),
+                                            //   ),
+                                            // ],
                                           ),
                                           child: Stack(
                                             children: [
@@ -393,14 +376,14 @@ class _LoginPageState extends State<LoginPage> {
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
                                                     borderRadius: BorderRadius.circular(10.0),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.orange.withOpacity(0.5),
-                                                        spreadRadius: 2,
-                                                        blurRadius: 7,
-                                                        offset: Offset(0, 3),
-                                                      ),
-                                                    ],
+                                                    // boxShadow: [
+                                                    //   BoxShadow(
+                                                    //     color: Colors.orange.withOpacity(0.5),
+                                                    //     spreadRadius: 2,
+                                                    //     blurRadius: 7,
+                                                    //     offset: Offset(0, 3),
+                                                    //   ),
+                                                    // ],
                                                   ),
                                                 ),
                                               ),
@@ -526,13 +509,22 @@ class _LoginPageState extends State<LoginPage> {
                                               gradient: LinearGradient(
                                                 colors: [
                                                   primaryColor2,
-                                                  primaryColor,
+                                                  bgColor,
 
 
                                                 ],
                                                 begin: Alignment.topLeft,
                                                 end: Alignment.bottomRight,
                                               ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.5),
+                                                  spreadRadius: 2,
+                                                  blurRadius: 7,
+                                                  offset: Offset(0, 3),
+                                                ),
+                                              ],
+
                                               // borderRadius: BorderRadius.only(
                                               //   bottomLeft: Radius.circular(50.sp),
                                               //   bottomRight: Radius.circular(50.sp),
@@ -606,13 +598,13 @@ class _LoginPageState extends State<LoginPage> {
                         Text.rich(TextSpan(
                           text: "Don't have an account? ",
                           style: const TextStyle(
-                              color: Colors.black, fontSize: 14),
+                              color: Colors.white, fontSize: 14),
                           children: <TextSpan>[
                             TextSpan(
                                 text: "Register here",
                                 style: const TextStyle(
                                     fontSize: 20,
-                                    color: Colors.black,
+                                    color: Colors.white,
                                     decoration: TextDecoration.underline),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {

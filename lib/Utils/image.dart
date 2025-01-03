@@ -3,5 +3,5 @@ import 'package:flutter/material.dart';
 
 import '../HexColorCode/HexColor.dart';
 
-String logo='assets/kg_logo.png';
+String logo='assets/app_logo.png';
 
