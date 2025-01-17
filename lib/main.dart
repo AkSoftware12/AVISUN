@@ -1,5 +1,5 @@
-import 'package:avi/splash_sreen.dart';
 import 'package:flutter/material.dart';
+import '../splash_sreen.dart';
 import 'UI/Auth/login_screen.dart';
 
 

@@ -2,9 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'UI/Auth/login_screen.dart';
-import 'constants.dart';
+import '../constants.dart';
+import '../UI/Auth/login_screen.dart';
+import 'UI/bottom_navigation.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -33,14 +35,23 @@ class _SplashScreenState extends State<SplashScreen> {
       setState(() {
         _isConnected = true;
       });
-      // Navigate to LoginPage after 5 seconds if connected
+      // Save the token in shared preferences
+      await _setTokenInSharedPreferences();
+      // Navigate to BottomNavBarScreen after 5 seconds if connected
       Timer(Duration(seconds: 5), () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
+          MaterialPageRoute(builder: (context) => BottomNavBarScreen(token: "Uk4XOBsvcEowpSDI58toJhgCxh0ih4y07ACPLfHK1Otz06sZODIee7UWjrk6")),
         );
       });
     }
+  }
+
+  // Save token in shared preferences
+  Future<void> _setTokenInSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    const token = "r0E99P4ytCPXXKSUPJeU1Bf19gUR9hLu8DZLEUqUc1WFLMZy37k7CXF9TvyU";
+    await prefs.setString('token', token);
   }
 
   // Show Cupertino dialog when there's no internet
@@ -55,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: const Text('Reload'),
             onPressed: () {
               Navigator.of(ctx).pop();
-              _checkConnectivity();  // Retry connectivity check
+              _checkConnectivity(); // Retry connectivity check
             },
           ),
         ],
@@ -78,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ? Image.asset(
             AppAssets.logo,
             width: MediaQuery.of(context).size.width * 0.5, // Responsive width
-            height: MediaQuery.of(context).size.height * 0.3, // Responsive height
+            height: MediaQuery.of(context).size.height * 0.25, // Responsive height
             fit: BoxFit.contain,
           )
               : const CircularProgressIndicator(), // Show loading spinner if not connected
