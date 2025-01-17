@@ -3,18 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  audioplayers_windows
-  file_selector_windows
-  firebase_auth
-  firebase_core
-  flutter_secure_storage_windows
-  geolocator_windows
-  permission_handler_windows
-  printing
-  smart_auth
-  sqlite3_flutter_libs
-  syncfusion_pdfviewer_windows
-  url_launcher_windows
+  connectivity_plus
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
