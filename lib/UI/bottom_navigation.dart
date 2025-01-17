@@ -47,11 +47,13 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.secondary,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(_titles[_selectedIndex], style: const TextStyle(color: AppColors.textwhite)), // Use the corresponding title
-        backgroundColor: AppColors.primary,
-      ),
+      // appBar: AppBar(
+      //   centerTitle: true,
+      //   title:_buildWelcomeHeader(),
+      //
+      //   // title: Text(_titles[_selectedIndex], style: const TextStyle(color: AppColors.textwhite)), // Use the corresponding title
+      //   backgroundColor: AppColors.primary,
+      // ),
       body: _screens[_selectedIndex], // Display the selected screen
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,

@@ -8,6 +8,7 @@ class AppColors {
     static const Color textwhite = Color.fromARGB(255, 255, 255, 255); // Dark text color
   static const Color error = Color(0xFFDC3545); // Error color (red)
   static const Color success = Color(0xFF28A745); // Success color (green)
+  static const Color yellow = Color(0xFFCCAB21); // Success color (green)
 }
 
 class AppAssets {
