@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
       minDate: DateTime.now().subtract(const Duration(days: 30)),
       maxDate: DateTime.now().add(const Duration(days: 365)),
     );
-    fetchStudentData();
+    // fetchStudentData();
   }
 
   Future<void> fetchStudentData() async {
@@ -105,11 +105,13 @@ class _HomeScreenState extends State<HomeScreen> {
           // Container(child: Icon(Icons.ice_skating)),
         ],
       ),
-      body: isLoading
-          ? const Center(
-              child: CupertinoActivityIndicator(radius: 20),
-            )
-          : SingleChildScrollView(
+      body:
+      // isLoading
+      //     ? const Center(
+      //         child: CupertinoActivityIndicator(radius: 20),
+      //       )
+      //     :
+      SingleChildScrollView(
               padding: const EdgeInsets.all(0.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,6 +122,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   PromotionCard(),
                   // _buildWelcomeHeader(),
                   const SizedBox(height: 20),
+
+                  Container(
+                    height:200, // Give a fixed height to the GridView
+                    child: GridView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, // Number of columns
+                        crossAxisSpacing: 8.0,
+                        mainAxisSpacing: 8.0,
+                      ),
+                      itemCount: 20,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          color: Colors.teal,
+                          child: Center(
+                            child: Text(
+                              'Item $index',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                   SectionCard(
                     title: 'Promotions',
                     icon: Icons.local_offer,
@@ -210,10 +236,10 @@ class _HomeScreenState extends State<HomeScreen> {
         CircleAvatar(
           backgroundColor: Colors.white,
           radius: 20,
-          backgroundImage: studentData!['photo'] != null
+          backgroundImage: studentData?['photo'] != null
               ? NetworkImage(studentData!['photo'])
               : null,
-          child: studentData!['photo'] == null
+          child: studentData?['photo'] == null
               ? Image.asset(AppAssets.logo, fit: BoxFit.cover)
               : null,
         ),
@@ -232,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Text(
-              studentData!['student_name'] ?? 'Student',
+              studentData?['student_name'] ?? 'Student', // Fallback to 'Student' if null
               style: GoogleFonts.montserrat(
                 textStyle: Theme.of(context).textTheme.displayLarge,
                 fontSize: 16,

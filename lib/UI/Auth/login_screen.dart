@@ -237,13 +237,15 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       onPressed: () {
-                        var token = "123"; // Define the token
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BottomNavBarScreen(token: token), // Pass the token directly
-                          ),
-                        );
+
+                        _login();
+                        // var token = "123"; // Define the token
+                        // Navigator.pushReplacement(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => BottomNavBarScreen(token: token), // Pass the token directly
+                        //   ),
+                        // );
                       },
                       child: const Text(
                         AppStrings.login,

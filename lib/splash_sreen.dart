@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Timer(Duration(seconds: 5), () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomNavBarScreen(token: "hvANKOCUTcdukkE56LFfA4Nk8docXfyqIM3WTBvGdaibft6usYMUOO1QiLJx")),
+          MaterialPageRoute(builder: (context) => BottomNavBarScreen(token: "JXEvEcAgC3MUbjndPGXMlyZQt2lshInfD7s3vI1htvmjMcLAxyP9GEl45Z3z")),
         );
       });
     }
@@ -50,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> {
   // Save token in shared preferences
   Future<void> _setTokenInSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    const token = "hvANKOCUTcdukkE56LFfA4Nk8docXfyqIM3WTBvGdaibft6usYMUOO1QiLJx";
+    const token = "JXEvEcAgC3MUbjndPGXMlyZQt2lshInfD7s3vI1htvmjMcLAxyP9GEl45Z3z";
     await prefs.setString('token', token);
   }
 
