@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => BottomNavBarScreen(token: token!),
+              builder: (context) => BottomNavBarScreen(),
             ),
           );
         } else {
@@ -247,7 +247,7 @@ class _LoginPageState extends State<LoginPage> {
                         //   ),
                         // );
                       },
-                      child: const Text(
+                      child:  Text(
                         AppStrings.login,
                         style: TextStyle(fontSize: 16, color: AppColors.textwhite),
                       ),

@@ -87,6 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.secondary,
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.red,
         icon: const Icon(Icons.logout, color: Colors.white),
@@ -186,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textwhite),
+            style:  TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textwhite),
           ),
           const SizedBox(height: 10),
           Column(children: rows),
@@ -204,14 +205,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           children: [
             Text(
               "$label :",
-              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textwhite),
+              style:  TextStyle(fontWeight: FontWeight.bold, color: AppColors.textwhite),
             ),
             const SizedBox(width: 10),  // Add some space between label and value
             Expanded(
               child: Text(
                 value.isNotEmpty ? value : 'N/A',
                 overflow: TextOverflow.visible,
-                style: const TextStyle(color: AppColors.textwhite),
+                style:  TextStyle(color: AppColors.textwhite),
               ),
             ),
           ],

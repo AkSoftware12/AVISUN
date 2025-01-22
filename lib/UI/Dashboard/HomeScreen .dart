@@ -1,3 +1,4 @@
+import 'package:avi/HexColorCode/HexColor.dart';
 import 'package:carousel_slider_plus/carousel_slider_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../constants.dart';
+import '../Assignment/assignment.dart';
+import '../Auth/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +26,32 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? studentData;
   bool isLoading = true;
   late CleanCalendarController calendarController;
+  final List<Map<String, String>> items = [
+    {
+      'name': 'Assignments',
+      'image': 'assets/assignments.png',
+    },
+    {
+      'name': 'Time Table',
+      'image': 'assets/watch.png',
+    },
+    {
+      'name': 'News & Events',
+      'image': 'assets/event_planner.png',
+    },
+    {
+      'name': 'Notices',
+      'image': 'assets/document.png',
+    },
+    {
+      'name': 'Gallery',
+      'image': 'assets/gallery.png',
+    },
+    {
+      'name': 'Video Gallery',
+      'image': 'assets/gallery_video.png',
+    },
+  ];
 
   @override
   void initState() {
@@ -31,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
       minDate: DateTime.now().subtract(const Duration(days: 30)),
       maxDate: DateTime.now().add(const Duration(days: 365)),
     );
-    // fetchStudentData();
+    fetchStudentData();
   }
 
   Future<void> fetchStudentData() async {
@@ -54,6 +83,8 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         studentData = data['student'];
         isLoading = false;
+        print(studentData);
+
       });
     } else {
       _showLoginDialog();
@@ -71,8 +102,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text('OK'),
             onPressed: () {
               Navigator.of(ctx).pop();
-              Navigator.pushReplacementNamed(
-                  context, '/login'); // Navigate to Login Screen
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
             },
           ),
         ],
@@ -83,34 +116,36 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: Column(
-          children: [
-            _buildAppBar(),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: GestureDetector(
-                onTap: () {},
-                child: Icon(
-                  Icons.notification_add,
-                  size: 26,
-                  color: Colors.white,
-                )),
-          )
+      backgroundColor: AppColors.secondary,
 
-          // Container(child: Icon(Icons.ice_skating)),
-        ],
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: AppColors.secondary,
+      //   title: Column(
+      //     children: [
+      //       _buildAppBar(),
+      //     ],
+      //   ),
+      //   actions: [
+      //     Padding(
+      //       padding: const EdgeInsets.all(15.0),
+      //       child: GestureDetector(
+      //           onTap: () {},
+      //           child: Icon(
+      //             Icons.notification_add,
+      //             size: 26,
+      //             color: Colors.white,
+      //           )),
+      //     )
+      //
+      //     // Container(child: Icon(Icons.ice_skating)),
+      //   ],
+      // ),
       body:
-      // isLoading
-      //     ? const Center(
-      //         child: CupertinoActivityIndicator(radius: 20),
-      //       )
-      //     :
+      isLoading
+          ? const Center(
+              child: CupertinoActivityIndicator(radius: 20),
+            )
+          :
       SingleChildScrollView(
               padding: const EdgeInsets.all(0.0),
               child: Column(
@@ -122,56 +157,36 @@ class _HomeScreenState extends State<HomeScreen> {
                   PromotionCard(),
                   // _buildWelcomeHeader(),
                   const SizedBox(height: 20),
+                  // _buildsellAll('Promotions', 'See All'),
 
-                  Container(
-                    height:200, // Give a fixed height to the GridView
-                    child: GridView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // Number of columns
-                        crossAxisSpacing: 8.0,
-                        mainAxisSpacing: 8.0,
-                      ),
-                      itemCount: 20,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          color: Colors.teal,
-                          child: Center(
-                            child: Text(
-                              'Item $index',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  SectionCard(
-                    title: 'Promotions',
-                    icon: Icons.local_offer,
-                    content: 'Special promotions and offers for the students.',
-                    color: AppColors.secondary,
-                  ),
-                  SectionCard(
-                    title: 'Assignments',
-                    icon: Icons.assignment,
-                    content: 'Assignments due this week and upcoming tasks.',
-                    color: AppColors.secondary,
-                  ),
-                  SectionCard(
-                    title: 'Fees',
-                    icon: Icons.monetization_on,
-                    content: 'Your upcoming fee payments and history.',
-                    color: AppColors.secondary,
-                  ),
-                  SectionCard(
-                    title: 'Calendar',
-                    icon: Icons.calendar_today,
-                    content: 'View and manage your schedule.',
-                    isCalendar: true,
-                    calendarController: calendarController,
-                    color: AppColors.secondary,
-                  ),
+
+                  _buildGridview(),
+                  // SectionCard(
+                  //   title: 'Promotions',
+                  //   icon: Icons.local_offer,
+                  //   content: 'Special promotions and offers for the students.',
+                  //   color: AppColors.secondary,
+                  // ),
+                  // SectionCard(
+                  //   title: 'Assignments',
+                  //   icon: Icons.assignment,
+                  //   content: 'Assignments due this week and upcoming tasks.',
+                  //   color: AppColors.secondary,
+                  // ),
+                  // SectionCard(
+                  //   title: 'Fees',
+                  //   icon: Icons.monetization_on,
+                  //   content: 'Your upcoming fee payments and history.',
+                  //   color: AppColors.secondary,
+                  // ),
+                  // SectionCard(
+                  //   title: 'Calendar',
+                  //   icon: Icons.calendar_today,
+                  //   content: 'View and manage your schedule.',
+                  //   isCalendar: true,
+                  //   calendarController: calendarController,
+                  //   color: AppColors.secondary,
+                  // ),
                 ],
               ),
             ),
@@ -207,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+               Text(
                 'Welcome',
                 style: TextStyle(
                   fontSize: 18,
@@ -217,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Text(
                 studentData!['student_name'] ?? 'Student',
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textwhite,
@@ -272,10 +287,76 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
+  Widget _buildGridview() {
+    return Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 4.0,
+          mainAxisSpacing: 4.0,
+        ),
+        itemCount: items.length, // Kitne bhi items set kar sakte hain
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: (){
+              if(items[index]['name']=='Assignments'){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return AssignmentListScreen();
+                    },
+                  ),
+                );
+              }
+
+            },
+            child: Card(
+              elevation: 5,
+              color: AppColors.primary,
+              // decoration: BoxDecoration(
+              //     borderRadius: BorderRadius.circular(10)
+              // ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      items[index]['image']!,
+                      height: 80, // Adjust the size as needed
+                      width: 80,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(items[index]['name']!,
+                      style: GoogleFonts.montserrat(
+                        textStyle: Theme.of(context).textTheme.displayLarge,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        fontStyle: FontStyle.normal,
+                        color: AppColors.textwhite,
+                      ),
+
+
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+  }
 
   Widget _buildsellAll(String title, String see) {
     return Padding(
-      padding: const EdgeInsets.only(left: 5.0, right: 15, top: 10),
+      padding: const EdgeInsets.only(left: 5.0, right: 15, top: 10,bottom: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -286,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: 20,
               fontWeight: FontWeight.w800,
               fontStyle: FontStyle.normal,
-              color: AppColors.textblack,
+              color: AppColors.textwhite,
             ),
           ),
           Text(
@@ -296,7 +377,7 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: 15,
               fontWeight: FontWeight.w900,
               fontStyle: FontStyle.normal,
-              color: AppColors.secondary,
+              color: AppColors.textwhite,
             ),
           ),
         ],
@@ -343,7 +424,7 @@ class SectionCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style:  TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textwhite),
@@ -353,7 +434,7 @@ class SectionCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               content,
-              style: const TextStyle(fontSize: 16, color: AppColors.textwhite),
+              style:  TextStyle(fontSize: 16, color: AppColors.textwhite),
             ),
             if (isCalendar) const SizedBox(height: 16),
             if (isCalendar)
@@ -368,11 +449,11 @@ class SectionCard extends StatelessWidget {
                   calendarController: calendarController!,
                   layout: Layout.DEFAULT,
                   monthTextStyle:
-                      const TextStyle(fontSize: 18, color: AppColors.textwhite),
+                       TextStyle(fontSize: 18, color: AppColors.textwhite),
                   weekdayTextStyle:
-                      const TextStyle(fontSize: 16, color: AppColors.textwhite),
+                       TextStyle(fontSize: 16, color: AppColors.textwhite),
                   dayTextStyle:
-                      const TextStyle(fontSize: 14, color: AppColors.textwhite),
+                       TextStyle(fontSize: 14, color: AppColors.textwhite),
                   padding: const EdgeInsets.all(8.0),
                 ),
               ),
@@ -414,6 +495,8 @@ class CarouselExample extends StatelessWidget {
                       print('click');
                     },
                     child: Container(
+
+
                       child: Padding(
                         padding: const EdgeInsets.all(2.0),
                         child: ClipRRect(
@@ -442,56 +525,73 @@ class PromotionCard extends StatelessWidget {
       child: Container(
         height: 130,
         decoration: BoxDecoration(
-            color: AppColors.primary, borderRadius: BorderRadius.circular(10)),
+            color: AppColors.secondary,
+            borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: AppColors.textwhite, // You can change the color as needed
+            width: 1,
+          ),
+        ),
+
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Image.asset(AppAssets.logo,color: AppColors.textwhite,),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 18.0),
+              child: Image.asset(AppAssets.logo,color: AppColors.textwhite,),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 18.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
 
-                Text(
-                  '3D Design \nFundamentals',
-                  style: GoogleFonts.montserrat(
-                    textStyle: Theme.of(context).textTheme.displayLarge,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    fontStyle: FontStyle.normal,
-                    color: AppColors.textwhite,
+                  Text(
+                    '3D Design \nFundamentals',
+                    style: GoogleFonts.montserrat(
+                      textStyle: Theme.of(context).textTheme.displayLarge,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      fontStyle: FontStyle.normal,
+                      color: AppColors.textwhite,
+                    ),
                   ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
+                  SizedBox(
+                    height: 20,
+                  ),
 
-                Container(
-                  width: 100,
-                  decoration: BoxDecoration(
-                      color: AppColors.yellow,
-                      borderRadius: BorderRadius.circular(20)
-                  ),
-                  child:  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Text(
-                        'Click',
-                        style: GoogleFonts.montserrat(
-                          textStyle: Theme.of(context).textTheme.displayLarge,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          fontStyle: FontStyle.normal,
-                          color: AppColors.textwhite,
+                  Container(
+                    width: 100,
+                    decoration: BoxDecoration(
+                        color:AppColors.primary,
+                        borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                    color: HexColor('#e16a54'), // You can change the color as needed
+                      width: 1,
+                    ),
+                    ),
+                    child:  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Text(
+                          'Click',
+                          style: GoogleFonts.montserrat(
+                            textStyle: Theme.of(context).textTheme.displayLarge,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            fontStyle: FontStyle.normal,
+                            color: AppColors.textwhite,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                )
-                
-              ],
+                  )
+
+                ],
+              ),
             ),
-            Container()
+
             
           ],
         ),

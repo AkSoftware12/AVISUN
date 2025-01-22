@@ -43,6 +43,13 @@ dependencies:
   scrollable_clean_calendar: ^1.5.0
   google_fonts: ^6.2.1
   carousel_slider_plus: ^7.1.0
+  table_calendar: ^3.0.9
+  intl: ^0.18.0
+  html: ^0.15.0 # Check for the latest version
+  url_launcher: ^6.0.20 # Use the latest version
+
+
+
 
 
 

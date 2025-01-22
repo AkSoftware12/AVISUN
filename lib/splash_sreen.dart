@@ -24,6 +24,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   // Check internet connectivity
   Future<void> _checkConnectivity() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
     final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       setState(() {
@@ -36,22 +38,27 @@ class _SplashScreenState extends State<SplashScreen> {
         _isConnected = true;
       });
       // Save the token in shared preferences
-      await _setTokenInSharedPreferences();
+      // await _setTokenInSharedPreferences();
       // Navigate to BottomNavBarScreen after 5 seconds if connected
-      Timer(Duration(seconds: 5), () {
+      if (token != null && token.isNotEmpty) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomNavBarScreen(token: "JXEvEcAgC3MUbjndPGXMlyZQt2lshInfD7s3vI1htvmjMcLAxyP9GEl45Z3z")),
+          MaterialPageRoute(builder: (context) => BottomNavBarScreen()),
         );
-      });
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      }
     }
   }
 
   // Save token in shared preferences
   Future<void> _setTokenInSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    const token = "JXEvEcAgC3MUbjndPGXMlyZQt2lshInfD7s3vI1htvmjMcLAxyP9GEl45Z3z";
-    await prefs.setString('token', token);
+    // const token = "JXEvEcAgC3MUbjndPGXMlyZQt2lshInfD7s3vI1htvmjMcLAxyP9GEl45Z3z";
+    // await prefs.setString('token', token);
   }
 
   // Show Cupertino dialog when there's no internet
