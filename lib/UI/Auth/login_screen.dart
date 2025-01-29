@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '/UI/bottom_navigation.dart';
 import '/constants.dart';
 import '../../strings.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,6 +26,9 @@ class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
 
   Future<void> _login() async {
+    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+    String? deviceToken = await _firebaseMessaging.getToken();
+    print('Device id: $deviceToken');
     if (!_formKey.currentState!.validate()) return;
 
     print('${AppStrings.apiLoginUrl}${ApiRoutes.login}'); // Debug: Print the API URL
@@ -36,11 +42,14 @@ class _LoginPageState extends State<LoginPage> {
         data: {
           'email': _emailController.text,
           'password': _passwordController.text,
+          'fcm': deviceToken,
         },
         options: Options(
           headers: {'Content-Type': 'application/json'},
         ),
       );
+
+      print(' Device token : - $deviceToken');
 
       print('${AppStrings.responseStatusDebug}${response.statusCode}'); // Debug: Print status code
       print('${AppStrings.responseDataDebug}${response.data}'); // Debug: Print the response data
@@ -62,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => BottomNavBarScreen(),
+              builder: (context) => BottomNavBarScreen(initialIndex: 0,),
             ),
           );
         } else {
@@ -124,138 +133,168 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: AppColors.primary,
       body: Center(
         child: SingleChildScrollView(
-          child: Container(
-            width: 350,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Column(
-                    children: [
-                      Image.asset(
-                        AppAssets.logo,
-                        height: 150,
-                      ),
-                      const SizedBox(height: 5),
-                      const Text(
-                        AppStrings.studentLogin,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // Email Input
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(CupertinoIcons.mail_solid),
-                      hintText: AppStrings.email,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppStrings.invalidEmail;
-                      }
-                      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                        return AppStrings.invalidEmail;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  // Password Input
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(CupertinoIcons.lock_shield_fill),
-                      hintText: AppStrings.password,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible
-                              ? CupertinoIcons.eye_slash_fill
-                              : CupertinoIcons.eye_solid,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppStrings.passwordRequired;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      CupertinoSwitch (
-                        value: _rememberMe,
-                        onChanged: (value) {
-                          setState(() {
-                            _rememberMe = value!;
-                          });
-                        },
-                      ),
-                      const Text(AppStrings.rememberMe),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  if (_isLoading) const CircularProgressIndicator() else SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () {
+          child: Column(
+            children: [
 
-                        _login();
-                        // var token = "123"; // Define the token
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => BottomNavBarScreen(token: token), // Pass the token directly
-                        //   ),
-                        // );
-                      },
-                      child:  Text(
-                        AppStrings.login,
-                        style: TextStyle(fontSize: 16, color: AppColors.textwhite),
+              const SizedBox(height: 20),
+              Container(
+                width: 350,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: SizedBox(
+                              height: 150,
+                              child: Image.asset(
+                                AppAssets.cjm,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            AppStrings.studentLogin,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      // Email Input
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(CupertinoIcons.mail_solid),
+                          hintText: AppStrings.email,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppStrings.invalidEmail;
+                          }
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                            return AppStrings.invalidEmail;
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      // Password Input
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: !_isPasswordVisible,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(CupertinoIcons.lock_shield_fill),
+                          hintText: AppStrings.password,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? CupertinoIcons.eye_slash_fill
+                                  : CupertinoIcons.eye_solid,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppStrings.passwordRequired;
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          CupertinoSwitch (
+                            value: _rememberMe,
+                            onChanged: (value) {
+                              setState(() {
+                                _rememberMe = value!;
+                              });
+                            },
+                          ),
+                          const Text(AppStrings.rememberMe),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      if (_isLoading) const CircularProgressIndicator() else SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+
+                            _login();
+                            // var token = "123"; // Define the token
+                            // Navigator.pushReplacement(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => BottomNavBarScreen(token: token), // Pass the token directly
+                            //   ),
+                            // );
+                          },
+                          child:  Text(
+                            AppStrings.login,
+                            style: TextStyle(fontSize: 16, color: AppColors.textwhite),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+               Column(
+                children: [
+
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Provider by AVI-SUN',
+                      style: GoogleFonts.montserrat(
+                        textStyle: Theme.of(context).textTheme.displayLarge,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.normal,
+                        color: AppColors.textwhite,
                       ),
                     ),
-                  ),
+                  )
+
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),

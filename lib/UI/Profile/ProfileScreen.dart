@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -113,49 +114,141 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           duration: const Duration(seconds: 1),
           child: Column(
             children: [
-              Hero(
-                tag: 'profile-pic',
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundImage: studentData!['photo'] != null
-                      ? NetworkImage(studentData!['photo'])
-                      : null,
-                  child: studentData!['photo'] == null
-                      ? Image.asset(
-                    AppAssets.logo,  // Assuming AppAssets.logo is a string path to an asset
-                    fit: BoxFit.cover,  // Ensures the logo fills the avatar space
-                  )
-                      : null,
+              Container(
+                height: 150,
+                padding:  EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                decoration:  BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.secondary, AppColors.secondary],
+                  ),
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+                  // border: Border.all(
+                  //   color: Colors.black, // Change this to your desired border color
+                  //   width: 1,           // Border width
+                  // ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Profile Image
+                    SizedBox(
+                      height: 120,
+                      width: 120,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.network(
+                          studentData!['photo'] ?? '', // Use an empty string if the photo is null
+                          fit: BoxFit.fill,
+                          errorBuilder: (context, error, stackTrace) {
+                            // This widget will be displayed if the image fails to load
+                            return Container(
+                              height: 120,
+                              width: 120,
+                              color: Colors.white,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.asset(
+                                  AppAssets.logo,  // Assuming AppAssets.logo is a string path to an asset
+                                  fit: BoxFit.cover,  // Ensures the logo fills the avatar space
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                    ),
+                    const SizedBox(width: 16),
+                    // User Info
+                    Expanded(
+
+                      child: Container(
+                        height: 150,
+                        child: Center(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 10),
+
+                              Text(
+                                studentData!['student_name'],
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                studentData!['email'],
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 14,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                studentData!['contact_no'],
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 14,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+
+              // Hero(
+              //   tag: 'profile-pic',
+              //   child: CircleAvatar(
+              //     radius: 60,
+              //     backgroundImage: studentData!['photo'] != null
+              //         ? NetworkImage(studentData!['photo'])
+              //         : null,
+              //     child: studentData!['photo'] == null
+              //         ? Image.asset(
+              //       AppAssets.logo,  // Assuming AppAssets.logo is a string path to an asset
+              //       fit: BoxFit.cover,  // Ensures the logo fills the avatar space
+              //     )
+              //         : null,
+              //   ),
+              // ),
               const SizedBox(height: 20),
               _buildAnimatedSection('Personal Information', [
-                buildProfileRow('Name', studentData!['student_name']),
-                buildProfileRow('Date of Birth', studentData!['dob']),
+                buildProfileRow('Name', studentData!['student_name']??''),
+                buildProfileRow('Date of Birth', studentData!['dob']??''),
                 buildProfileRow(
                   'Gender',
                   studentData!['gender'] == '1' ? 'Male' : 'Female',
                 ),
-                buildProfileRow('Nationality', studentData!['nationality']),
-                buildProfileRow('Blood Group', studentData!['blood_group']),
+                buildProfileRow('Nationality', studentData!['nationality']?? ''),
+                buildProfileRow('Blood Group', studentData!['blood_group']??''),
               ]),
               const SizedBox(height: 20),
               _buildAnimatedSection('Academic Information', [
                 buildProfileRow('Class', studentData!['class_name']),
-                buildProfileRow('Section', studentData!['section']),
-                buildProfileRow('Roll Number', studentData!['roll_no']),
+                buildProfileRow('Section', studentData!['section']?? ''),
+                buildProfileRow('Roll Number', studentData!['roll_no']??''),
                 buildProfileRow(
                   'Registration Number',
-                  studentData!['registration_no'],
+                  studentData!['registration_no']??'',
                 ),
-                buildProfileRow('Admission Number', studentData!['adm_no']),
+                buildProfileRow('Admission Number', studentData!['adm_no']??''),
               ]),
               const SizedBox(height: 20),
               _buildAnimatedSection('Contact Information', [
-                buildProfileRow('Contact Person', studentData!['contact_person']),
-                buildProfileRow('Contact Number', studentData!['contact_no']),
-                buildProfileRow('Email', studentData!['email']),
-                buildProfileRow('Address', studentData!['address']),
+                buildProfileRow('Contact Person', studentData!['contact_person']??''),
+                buildProfileRow('Contact Number', studentData!['contact_no']??''),
+                buildProfileRow('Email', studentData!['email']??''),
+                buildProfileRow('Address', studentData!['address']??''),
               ]),
               const SizedBox(height: 50),
             ],
@@ -227,3 +320,4 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 }
+

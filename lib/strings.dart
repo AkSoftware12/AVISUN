@@ -12,6 +12,7 @@ class AppStrings {
   static const passwordRequired = 'Password is required';
   static const rememberMe = 'Remember Me';
   static const studentLogin = 'Student Login';
+  static const ambala = 'CJM AMBALA';
   static const tokenSaved = 'Token saved: ';
   static const tokenRetrieved = 'Retrieved Token: ';
   static const loginFailedDebug = 'Login Failed: ';

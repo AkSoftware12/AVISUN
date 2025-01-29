@@ -1,3 +1,4 @@
+import 'package:avi/UI/Notification/notification.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -6,20 +7,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../UI/Dashboard/HomeScreen%20.dart';
 import '../constants.dart';
 import '../strings.dart';
+import 'Assignment/assignment.dart';
 import 'Attendance/AttendanceScreen.dart';
-import 'Attendance/demo.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'Auth/login_screen.dart';
+import 'FAQ/faq.dart';
 import 'Fees/FeesScreen.dart';
+import 'Gallery/gallery_tab.dart';
+import 'Help/help.dart';
 import 'Library/LibraryScreen.dart';
+import 'Notice/notice.dart';
 import 'Profile/ProfileScreen.dart';
+import 'Report/report_card.dart';
+import 'TimeTable/time_table.dart';
+import 'WebView/webview.dart';
 
 class BottomNavBarScreen extends StatefulWidget {
   // final String token;
-
-  const BottomNavBarScreen({super.key});
+  final int initialIndex;
+  const BottomNavBarScreen({super.key, required this.initialIndex});
   @override
   _BottomNavBarScreenState createState() => _BottomNavBarScreenState();
 }
@@ -58,6 +66,8 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
     super.initState();
 
     fetchStudentData();
+    _selectedIndex = widget.initialIndex; // Set the initial tab index
+
   }
   Future<void> fetchStudentData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -182,7 +192,16 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
           Padding(
             padding: const EdgeInsets.all(15.0),
             child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return NotificationScreen();
+                      },
+                    ),
+                  );
+                },
                 child: Icon(
                   Icons.notification_add,
                   size: 26,
@@ -200,6 +219,9 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
         backgroundColor: AppColors.primary,
         selectedItemColor: AppColors.textwhite,
         unselectedItemColor: AppColors.grey,
+          showSelectedLabels: true,  // ✅ Ensures selected labels are always visible
+          showUnselectedLabels: true, // ✅ Ensures unselected labels are also visible
+          type: BottomNavigationBarType.fixed,
         items:  <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.home),
@@ -217,7 +239,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
             backgroundColor: AppColors.primary,
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.money_dollar),
+            icon: Icon(Icons.currency_rupee),
             label: AppStrings.feesLabel,
             backgroundColor: AppColors.primary,
           ),
@@ -243,14 +265,23 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                 height: 70,
               ),
 
-              CircleAvatar(
-                radius: 40,
-                backgroundImage: studentData != null && studentData?['photo'] != null
-                    ? NetworkImage(studentData?['photo'])
-                    : null,
-                child: studentData == null || studentData?['photo'] == null
-                    ? Image.asset(AppAssets.logo, fit: BoxFit.cover)
-                    : null,
+              GestureDetector(
+                onTap: (){
+                  Navigator.pop(context);
+                  setState(() {
+                    _selectedIndex = 4; // Profile screen index in _screens
+                  });
+                },
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage: studentData != null && studentData?['photo'] != null
+                      ? NetworkImage(studentData?['photo'])
+                      : null,
+                  child: studentData == null || studentData?['photo'] == null
+                      ? Image.asset(AppAssets.logo, fit: BoxFit.cover)
+                      : null,
+
+                ),
               ),
               const SizedBox(height: 16),
               Center(
@@ -296,7 +327,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
 
                           ListTile(
                             title: Text(
-                              'Video Gallery',
+                              'Dashboard',
                               style: GoogleFonts.cabin(
                                 textStyle: TextStyle(
                                     color: Colors.white,
@@ -308,14 +339,13 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                               height: 20,
                               width: 20,
                               color: AppColors.primary,
-                              child:  Image.asset(
-                                'assets/gallery_video.png',
-                                height: 80, // Adjust the size as needed
-                                width: 80,
-                              ),
+                              child:Icon(Icons.dashboard,color: Colors.white,),
 
-                            ),
+
+              ),
                             onTap: () {
+                              Navigator.pop(context);
+
                               // Navigator.push(
                               //   context,
                               //   MaterialPageRoute(
@@ -335,6 +365,233 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                               thickness: 1,
                             ),
                           ),
+
+                          ListTile(
+                            title: Text(
+                              'Attendance',
+                              style: GoogleFonts.cabin(
+                                textStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                            ),
+                            trailing: Container(
+                              height: 20,
+                              width: 20,
+                              color: AppColors.primary,
+                              child: Icon(CupertinoIcons.clock,color: Colors.white,),
+
+                          ),
+                            onTap: () {
+                              Navigator.pop(context);
+
+                              // Navigate to the Profile screen in the BottomNavigationBar
+                              setState(() {
+                                _selectedIndex = 1; // Index of the Profile screen in _screens
+                              });
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) {
+                              //       return DownloadPdf();
+                              //     },
+                              //   ),
+                              // );
+                            },
+                          ),
+                          Padding(
+                            padding:
+                            EdgeInsets.only(left: 8, right: 8),
+                            child: Divider(
+                              height: 1,
+                              color: Colors.grey.shade300,
+                              thickness: 1,
+                            ),
+                          ),
+
+
+                          ListTile(
+                            title: Text(
+                              'Assignments',
+                              style: GoogleFonts.cabin(
+                                textStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                            ),
+                            trailing: Container(
+                              height: 20,
+                              width: 20,
+                              color: AppColors.primary,
+                              child:  Image.asset(
+                                'assets/assignments.png',
+                                height: 80, // Adjust the size as needed
+                                width: 80,
+                              ),
+
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return AssignmentListScreen();
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                          Padding(
+                            padding:
+                            EdgeInsets.only(left: 8, right: 8),
+                            child: Divider(
+                              height: 1,
+                              color: Colors.grey.shade300,
+                              thickness: 1,
+                            ),
+                          ),
+
+                          ListTile(
+                            title: Text(
+                              'Fees',
+                              style: GoogleFonts.cabin(
+                                textStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                            ),
+                            trailing: Container(
+                              height: 20,
+                              width: 20,
+                              color: AppColors.primary,
+                              child: Icon(Icons.currency_rupee,color: Colors.white,)
+
+
+                              // Image.asset(
+                              //   'assets/assignments.png',
+                              //   height: 80, // Adjust the size as needed
+                              //   width: 80,
+                              // ),
+
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+
+                              // Navigate to the Profile screen in the BottomNavigationBar
+                              setState(() {
+                                _selectedIndex = 3; // Index of the Profile screen in _screens
+                              });
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) {
+                              //       return DownloadPdf();
+                              //     },
+                              //   ),
+                              // );
+                            },
+                          ),
+                          Padding(
+                            padding:
+                            EdgeInsets.only(left: 8, right: 8),
+                            child: Divider(
+                              height: 1,
+                              color: Colors.grey.shade300,
+                              thickness: 1,
+                            ),
+                          ),
+
+                          ListTile(
+                            title: Text(
+                              'Time Table',
+                              style: GoogleFonts.cabin(
+                                textStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                            ),
+                            trailing: Container(
+                              height: 20,
+                              width: 20,
+                              color: AppColors.primary,
+                              child:  Image.asset(
+                                'assets/watch.png',
+                                height: 80, // Adjust the size as needed
+                                width: 80,
+                              ),
+
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return TimeTableScreen();
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                          Padding(
+                            padding:
+                            EdgeInsets.only(left: 8, right: 8),
+                            child: Divider(
+                              height: 1,
+                              color: Colors.grey.shade300,
+                              thickness: 1,
+                            ),
+                          ),
+
+                          ListTile(
+                            title: Text(
+                              'Report Card',
+                              style: GoogleFonts.cabin(
+                                textStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                            ),
+                            trailing: Container(
+                              height: 20,
+                              width: 20,
+                              color: AppColors.primary,
+                              child: Icon(Icons.report,color: Colors.white,)
+
+                              // Image.asset(
+                              //   'assets/gallery.png',
+                              //   height: 80, // Adjust the size as needed
+                              //   width: 80,
+                              // ),
+
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return ReportCardScreen();
+                                  },
+                                ),
+                              );
+
+                            },
+                          ),
+                          Padding(
+                            padding:
+                            EdgeInsets.only(left: 8, right: 8),
+                            child: Divider(
+                              height: 1,
+                              color: Colors.grey.shade300,
+                              thickness: 1,
+                            ),
+                          ),
+
 
                           ListTile(
                             title: Text(
@@ -358,14 +615,14 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
 
                             ),
                             onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return DownloadPdf();
-                              //     },
-                              //   ),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return GalleryVideoTabScreen();
+                                  },
+                                ),
+                              );
                             },
                           ),
                           Padding(
@@ -401,183 +658,14 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
 
                             ),
                             onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return DownloadPdf();
-                              //     },
-                              //   ),
-                              // );
-                            },
-                          ),
-                          Padding(
-                            padding:
-                            EdgeInsets.only(left: 8, right: 8),
-                            child: Divider(
-                              height: 1,
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
-
-
-                          ListTile(
-                            title: Text(
-                              'News & Events',
-                              style: GoogleFonts.cabin(
-                                textStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
-                            trailing: Container(
-                              height: 20,
-                              width: 20,
-                              color: AppColors.primary,
-                              child:  Image.asset(
-                                'assets/event_planner.png',
-                                height: 80, // Adjust the size as needed
-                                width: 80,
-                              ),
-
-                            ),
-                            onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return DownloadPdf();
-                              //     },
-                              //   ),
-                              // );
-                            },
-                          ),
-                          Padding(
-                            padding:
-                            EdgeInsets.only(left: 8, right: 8),
-                            child: Divider(
-                              height: 1,
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
-
-
-                          ListTile(
-                            title: Text(
-                              'Time Table',
-                              style: GoogleFonts.cabin(
-                                textStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
-                            trailing: Container(
-                              height: 20,
-                              width: 20,
-                              color: AppColors.primary,
-                              child:  Image.asset(
-                                'assets/watch.png',
-                                height: 80, // Adjust the size as needed
-                                width: 80,
-                              ),
-
-                            ),
-                            onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return DownloadPdf();
-                              //     },
-                              //   ),
-                              // );
-                            },
-                          ),
-                          Padding(
-                            padding:
-                            EdgeInsets.only(left: 8, right: 8),
-                            child: Divider(
-                              height: 1,
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
-
-
-                          ListTile(
-                            title: Text(
-                              'Download',
-                              style: GoogleFonts.cabin(
-                                textStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
-                            trailing: Container(
-                                height: 20,
-                                width: 20,
-                                color: AppColors.primary,
-                                child: Icon(
-                                  Icons.download,
-                                  color: Colors.white,
-                                )),
-                            onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return DownloadPdf();
-                              //     },
-                              //   ),
-                              // );
-                            },
-                          ),
-                          Padding(
-                            padding:
-                            EdgeInsets.only(left: 8, right: 8),
-                            child: Divider(
-                              height: 1,
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
-
-
-                          ListTile(
-                            title: Text(
-                              'Assignments',
-                              style: GoogleFonts.cabin(
-                                textStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
-                            trailing: Container(
-                                height: 20,
-                                width: 20,
-                                color: AppColors.primary,
-                                child:  Image.asset(
-                                  'assets/assignments.png',
-                                  height: 80, // Adjust the size as needed
-                                  width: 80,
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return NewsAndEventsScreen();
+                                  },
                                 ),
-
-                            ),
-                            onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return DownloadPdf();
-                              //     },
-                              //   ),
-                              // );
+                              );
                             },
                           ),
                           Padding(
@@ -590,46 +678,10 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                             ),
                           ),
 
-                          Padding(
-                            padding:
-                            EdgeInsets.only(left: 8, right: 8),
-                            child: Divider(
-                              height: 1,
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
-                          ListTile(
-                            title: Text(
-                              'Share App',
-                              style: GoogleFonts.cabin(
-                                textStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
-                            trailing: Container(
-                                height: 20,
-                                width: 20,
-                                child: Icon(
-                                  Icons.share,
-                                  color: Colors.white,
-                                )),
-                            onTap: () {
 
-                              Navigator.pop(context);
-                            },
-                          ),
-                          Padding(
-                            padding:
-                            EdgeInsets.only(left: 8, right: 8),
-                            child: Divider(
-                              height: 1,
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
+
+
+
                           ListTile(
                             title: Text(
                               'Help',
@@ -647,14 +699,14 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                                   color: Colors.white,
                                 )),
                             onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return HelpScreen(appBar: 'Help',);
-                              //     },
-                              //   ),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return HelpScreen(appBar: 'Help',);
+                                  },
+                                ),
+                              );
 
                             },
                           ),
@@ -682,14 +734,14 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                                 width: 20,
                                 child: Image.asset('assets/faq.png')),
                             onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return FaqScreen(appBar: 'FAQ',);
-                              //     },
-                              //   ),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return FaqScreen(appBar: 'FAQ',);
+                                  },
+                                ),
+                              );
                             },
                           ),
                           Padding(
@@ -719,18 +771,18 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                                   color: Colors.white,
                                 )),
                             onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return WebViewExample(
-                              //         title: 'Privacy',
-                              //         url:
-                              //         'https://ksadmission.in/privacy-policy',
-                              //       );
-                              //     },
-                              //   ),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return WebViewExample(
+                                      title: 'Privacy',
+                                      url:
+                                      'https://ksadmission.in/privacy-policy',
+                                    );
+                                  },
+                                ),
+                              );
                             },
                           ),
                           Padding(
@@ -760,18 +812,18 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                                   color: Colors.white,
                                 )),
                             onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return WebViewExample(
-                              //         title: 'Terms & Condition',
-                              //         url:
-                              //         'https://ksadmission.in/privacy-policy',
-                              //       );
-                              //     },
-                              //   ),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return WebViewExample(
+                                      title: 'Terms & Condition',
+                                      url:
+                                      'https://ksadmission.in/privacy-policy',
+                                    );
+                                  },
+                                ),
+                              );
                             },
                           ),
 

@@ -24,22 +24,6 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
   bool isLoading = true;
   List assignments = []; // Declare a list to hold API data
 
-  // final List<Map<String, String>> assignments = [
-  //   {
-  //     'title': 'Math Assignment',
-  //     'subject': 'Mathematics',
-  //     'startDate': '2025-01-22',
-  //     'endDate': '2025-01-30',
-  //   },
-  //   {
-  //     'title': 'Science Assignment',
-  //     'subject': 'Science',
-  //     'startDate': '2025-01-25',
-  //     'endDate': '2025-02-02',
-  //   },
-  //   // Add more assignments here
-  // ];
-
 
   @override
   void initState() {
@@ -116,7 +100,10 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
         color: AppColors.textwhite,
       ),
           )),
-      body: ListView.builder(
+      body: assignments.isNotEmpty?
+
+
+      ListView.builder(
         itemCount: assignments.length,
         itemBuilder: (context, index) {
           final assignment = assignments[index];
@@ -246,11 +233,18 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          if (await canLaunchUrl(Uri.parse(assignment['attach'].toString()))) {
-                          await launchUrl(Uri.parse(assignment['attach'].toString()));
+                          final Uri pdfUri = Uri.parse(assignment['attach'].toString());
+                          if (await canLaunchUrl(pdfUri)) {
+                            await launchUrl(pdfUri, mode: LaunchMode.externalApplication);
                           } else {
-                          throw 'Could not launch ${assignment['attach']}';
+                            print("Could not launch $pdfUri");
                           }
+
+                          // if (await canLaunchUrl(Uri.parse(assignment['attach'].toString()))) {
+                          // await launchUrl(Uri.parse(assignment['attach'].toString()));
+                          // } else {
+                          // throw 'Could not launch ${assignment['attach']}';
+                          // }
                         },
                           child: Container(
                             width: 100,
@@ -266,7 +260,7 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
                               padding: const EdgeInsets.all(8.0),
                               child: Center(
                                 child: Text(
-                                  'Assignment'.toUpperCase(),
+                                  'View'.toUpperCase(),
                                   style: GoogleFonts.montserrat(
                                     textStyle: Theme.of(context).textTheme.displayLarge,
                                     fontSize: 13,
@@ -354,6 +348,30 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
             ),
           );
         },
+      ):Container(
+          height: MediaQuery.of(context).size.height * 0.7, // 90% of screen height
+
+          child: Center(
+              child:
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+
+                children: [
+                  Image.asset('assets/no_attendance.png',filterQuality: FilterQuality.high,),
+                  Text('Assignments  Not Available.',
+                    style: GoogleFonts.montserrat(
+                      textStyle: Theme.of(context).textTheme.displayLarge,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      fontStyle: FontStyle.normal,
+                      color: AppColors.textwhite,
+                    ),
+
+                  )
+                ],
+              )
+          )
       ),
     );
   }
