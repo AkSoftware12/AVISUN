@@ -23,7 +23,7 @@ class AppAssets {
 
 class ApiRoutes {
   // static const String baseUrl = "https://apicjm.aksoftsol.com/api";
-  static const String baseUrl = "http://192.168.1.8/CJM/api";
+  static const String baseUrl = "http://192.168.1.5/CJM/api";
   static const String login = "$baseUrl/login";
   static const String getProfile = "$baseUrl/student-get";
   static const String getDashboard = "$baseUrl/dashboard";
