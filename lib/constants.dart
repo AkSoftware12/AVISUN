@@ -32,5 +32,6 @@ class ApiRoutes {
   static const String getTimeTable = "$baseUrl/get-class-routine";
   static const String getSubject = "$baseUrl/get-subjects";
   static const String studentDashboard = "$baseUrl/dashboard";
+  static const String uploadAssignment = "$baseUrl/submit-assignments";
   static const String attendance = "$baseUrl/get-attendance-monthly";
 }

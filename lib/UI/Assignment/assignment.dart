@@ -1,3 +1,4 @@
+import 'package:avi/UI/Assignment/upload_assignments.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -59,6 +60,13 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
       _showLoginDialog();
     }
   }
+
+  void _refresh() {
+    setState(() {
+      fetchAssignmentsData();
+    });
+  }
+
 
   void _showLoginDialog() {
     showCupertinoDialog(
@@ -277,7 +285,10 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
 
                       GestureDetector(
                           onTap: (){
-
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) =>  AssignmentUploadScreen(onReturn: _refresh, id: assignment['id'].toString(),)),
+                            );
                           },
                           child:Container(
                             width: 100,

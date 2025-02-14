@@ -207,7 +207,7 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
                   );
                 } else {
                   final data = snapshot.data!;
-                  final processedData = processAttendanceData(data['data']['attendance'] ?? []);
+                  final processedData = processAttendanceData(data['data']['attendance']);
                   return _buildDataTable(processedData);
                 }
               },
@@ -219,22 +219,24 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
     );
   }
 
-  List<Map<String, dynamic>> processAttendanceData(List<dynamic> data) {
+  List<Map<String, dynamic>> processAttendanceData(Map<String, dynamic> attendanceData) {
     int daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day; // Get total days in month
     Set<String> uniqueDates = Set.from(
       List.generate(daysInMonth, (index) {
         DateTime date = DateTime(selectedYear, selectedMonth, index + 1);
-        return DateFormat('yyyy-MM-dd').format(date); // Format as "2025-01-08"
+        return DateFormat('yyyy-MM-dd').format(date); // Format as "YYYY-MM-DD"
       }),
     );
 
     Map<String, String> dailyAttendanceMap = {}; // Store daily attendance
 
-    for (var entry in data) {
-      String date = entry['date']; // Extract date
-      int status = entry['status']; // Extract status
-      dailyAttendanceMap[date] = getStatusSymbol(status); // Convert status to symbol
-    }
+    // Extract attendance records correctly
+    attendanceData.forEach((date, entry) {
+      if (date.startsWith('$selectedYear-${selectedMonth.toString().padLeft(2, '0')}')) {
+        int status = entry['status']; // Extract status
+        dailyAttendanceMap[date] = getStatusSymbol(status); // Convert status to symbol
+      }
+    });
 
     dates = uniqueDates.toList()..sort(); // Sort formatted dates
 
