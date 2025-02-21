@@ -420,7 +420,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return NewsAndEventsScreen();
+                      return CalendarScreen();
                     },
                   ),
                 );
@@ -618,83 +618,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class SectionCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final String content;
-  final bool isCalendar;
-  final CleanCalendarController? calendarController;
-  final color;
-
-  const SectionCard({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.content,
-    this.isCalendar = false,
-    this.calendarController,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: this.color,
-      margin: const EdgeInsets.only(bottom: 16.0),
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 30, color: Colors.blue),
-                const SizedBox(width: 10),
-                Text(
-                  title,
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textwhite),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              content,
-              style: TextStyle(fontSize: 16, color: AppColors.textwhite),
-            ),
-            if (isCalendar) const SizedBox(height: 16),
-            if (isCalendar)
-              Container(
-                height: 300,
-                child: ScrollableCleanCalendar(
-                  daySelectedBackgroundColor: AppColors.primary,
-                  dayBackgroundColor: AppColors.textwhite,
-                  daySelectedBackgroundColorBetween: AppColors.primary,
-                  dayDisableBackgroundColor: AppColors.textwhite,
-                  dayDisableColor: AppColors.textwhite,
-                  calendarController: calendarController!,
-                  layout: Layout.DEFAULT,
-                  monthTextStyle:
-                      TextStyle(fontSize: 18, color: AppColors.textwhite),
-                  weekdayTextStyle:
-                      TextStyle(fontSize: 16, color: AppColors.textwhite),
-                  dayTextStyle:
-                      TextStyle(fontSize: 14, color: AppColors.textwhite),
-                  padding: const EdgeInsets.all(8.0),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class CarouselExample extends StatefulWidget {
   @override

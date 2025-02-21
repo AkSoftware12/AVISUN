@@ -216,7 +216,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.secondary,
         selectedItemColor: AppColors.textwhite,
         unselectedItemColor: AppColors.grey,
           showSelectedLabels: true,  // ✅ Ensures selected labels are always visible
@@ -662,7 +662,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) {
-                                    return NewsAndEventsScreen();
+                                    return CalendarScreen();
                                   },
                                 ),
                               );

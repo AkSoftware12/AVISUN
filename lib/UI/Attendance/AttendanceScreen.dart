@@ -2,10 +2,14 @@ import 'dart:convert';
 import 'package:avi/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+
+import '../../CommonCalling/progressbarWhite.dart';
 
 class AttendanceScreen extends StatefulWidget {
   @override
@@ -17,20 +21,21 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
   List<String> dates = [];
   int selectedYear = DateTime.now().year;
   int selectedMonth = DateTime.now().month;
-
+  DateTime? startDate;
+  DateTime? endDate;
   @override
   void initState() {
     super.initState();
-    _attendanceFuture = fetchAttendance(selectedMonth, selectedYear);
+    _attendanceFuture = fetchAttendance(selectedMonth, selectedYear,"","");
   }
 
-  Future<Map<String, dynamic>> fetchAttendance(int month, int year) async {
+  Future<Map<String, dynamic>> fetchAttendance(int month, int year, String startDate, String endDate) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse('${ApiRoutes.attendance}?month=$month&year=$year'),
+        Uri.parse('${ApiRoutes.attendance}?month=$month&year=$year&start_date=$startDate&end_date=$endDate'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -38,8 +43,20 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        return responseData;
+        final decodedResponse = json.decode(response.body);
+
+        // If the response is a List, convert it to a Map
+        if (decodedResponse is List) {
+          return {
+            "data": {
+              "attendance": decodedResponse // Convert list to map key
+            }
+          };
+        } else if (decodedResponse is Map<String, dynamic>) {
+          return decodedResponse;
+        } else {
+          throw Exception("Unexpected response format");
+        }
       } else {
         throw Exception('Failed to load data');
       }
@@ -93,7 +110,7 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
                       onChanged: (int? newMonth) {
                         setState(() {
                           selectedMonth = newMonth!;
-                          _attendanceFuture = fetchAttendance(selectedMonth, selectedYear);
+                          _attendanceFuture = fetchAttendance(selectedMonth, selectedYear,'','');
                         });
                       },
                       items: List.generate(12, (index) {
@@ -139,7 +156,7 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
                       onChanged: (int? newYear) {
                         setState(() {
                           selectedYear = newYear!;
-                          _attendanceFuture = fetchAttendance(selectedMonth, selectedYear);
+                          _attendanceFuture = fetchAttendance(selectedMonth, selectedYear,'','');
                         });
                       },
                       items: List.generate(10, (index) {
@@ -179,12 +196,21 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Date Selection Row
+            DateRangeSelector(
+              startDate: startDate,
+              endDate: endDate,
+              onSelectDateRange: _selectDateRange,
+            ),
+            SizedBox(height: 10,),
             // _buildAppBar('Attendance $selectedYear $selectedMonth'),
             FutureBuilder<Map<String, dynamic>>(
               future: _attendanceFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return Container(
+                    height: MediaQuery.of(context).size.height * 0.4,
+                      child: Center(child: WhiteCircularProgressWidget()));
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!['data'] == null || snapshot.data!['data']['attendance'] == null) {
@@ -248,7 +274,9 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
     ];
   }
 
-  Widget _buildDataTable(List<Map<String, dynamic>> attendanceData) {
+  Widget
+
+  _buildDataTable(List<Map<String, dynamic>> attendanceData) {
     int totalPresent = 0;
     int totalAbsent = 0;
     int totalLeave = 0;
@@ -355,11 +383,167 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
     }
   }
 
+  Future<void> _selectDateRange(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Select Date Range",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              SizedBox(
+                height: 300,
+                child: SfDateRangePicker(
+                  selectionMode: DateRangePickerSelectionMode.range,
+                  onSelectionChanged:
+                      (DateRangePickerSelectionChangedArgs args) {
+                    if (args.value is PickerDateRange) {
+                      setState(() {
+                        startDate = args.value.startDate;
+                        endDate = args.value.endDate;
+                        print('Start date :- $startDate' );
+                        print('End  date :- $endDate' );
+                      });
+                    }
+                  },
+                ),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton.icon(
+                onPressed: () {
+                  if (startDate == null || endDate == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text("Please select a valid date range")),
+                    );
+                    return;
+                  }
+                  Navigator.pop(context);
+                  _attendanceFuture = fetchAttendance(selectedMonth, selectedYear,DateFormat('yyyy-MM-dd').format(startDate!).toString(),DateFormat('yyyy-MM-dd').format(endDate!).toString());
+
+                  // _attendanceFuture = fetchAttendance2();
+
+                },
+                icon: Icon(Icons.check),
+                label: Text("Apply Date Range"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
 
 }
 
 
 
+class DateRangeSelector extends StatelessWidget {
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final Function(BuildContext) onSelectDateRange;
+
+  const DateRangeSelector({
+    Key? key,
+    required this.startDate,
+    required this.endDate,
+    required this.onSelectDateRange,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color:Colors.blue.withOpacity(0.2),
+            blurRadius: 8,
+            spreadRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          OutlinedButton.icon(
+            onPressed: () => onSelectDateRange(context),
+            icon: const Icon(Icons.calendar_today, color: Colors.blueAccent),
+            label: const Text(
+              "Select Date Range",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              side: const BorderSide(color: Colors.blueAccent),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16), // Spacing between button and container
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDateRow("From:", startDate),
+                  const Divider(height: 10, color: Colors.blueAccent),
+                  _buildDateRow("To:", endDate),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateRow(String label, DateTime? date) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.blueGrey,
+          ),
+        ),
+        Text(
+          date != null ? DateFormat('dd-MM-yyyy').format(date) : "Select Date",
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 

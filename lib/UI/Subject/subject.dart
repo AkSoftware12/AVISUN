@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import '../../CommonCalling/data_not_found.dart';
+import '../../CommonCalling/progressbarWhite.dart';
 import '../Auth/login_screen.dart';
 
 class SubjectScreen extends StatefulWidget {
@@ -18,7 +20,7 @@ class SubjectScreen extends StatefulWidget {
 
 class _TimeTableScreenState extends State<SubjectScreen> {
 
-  bool isLoading = true;
+  bool isLoading = false;
   List subject = []; // Declare a list to hold API data
 
 
@@ -33,6 +35,9 @@ class _TimeTableScreenState extends State<SubjectScreen> {
 
 
   Future<void> fetchSubjectData() async {
+    setState(() {
+      isLoading = true; // Show progress bar
+    });
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     print("Token: $token");
@@ -50,10 +55,15 @@ class _TimeTableScreenState extends State<SubjectScreen> {
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       setState(() {
-        subject = jsonResponse['data']; // Update state with fetched data
+        subject = jsonResponse['data'];
+        isLoading = false; // Stop progress bar
+// Update state with fetched data
       });
     } else {
       _showLoginDialog();
+      setState(() {
+        isLoading = true; // Show progress bar
+      });
     }
   }
 
@@ -78,18 +88,7 @@ class _TimeTableScreenState extends State<SubjectScreen> {
       ),
     );
   }
-  // Sample timetable data
-  // final List<Map<String, dynamic>> timeTable = [
-  //   {"day": "Monday", "subject": "Mathematics", "time": "9:00 AM - 10:00 AM"},
-  //   {"day": "Monday", "subject": "Science", "time": "10:15 AM - 11:15 AM"},
-  //   {"day": "Monday", "subject": "English", "time": "11:30 AM - 12:30 PM"},
-  //   {"day": "Tuesday", "subject": "History", "time": "9:00 AM - 10:00 AM"},
-  //   {"day": "Tuesday", "subject": "Geography", "time": "10:15 AM - 11:15 AM"},
-  //   {"day": "Tuesday", "subject": "Physics", "time": "11:30 AM - 12:30 PM"},
-  //   {"day": "Wednesday", "subject": "Chemistry", "time": "9:00 AM - 10:00 AM"},
-  //   {"day": "Wednesday", "subject": "Biology", "time": "10:15 AM - 11:15 AM"},
-  //   {"day": "Wednesday", "subject": "Physical Education", "time": "11:30 AM - 12:30 PM"},
-  // ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -108,96 +107,64 @@ class _TimeTableScreenState extends State<SubjectScreen> {
         ),
         backgroundColor: AppColors.primary,
       ),
-      body: subject.isNotEmpty?
-
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child:
-
-        Column(
-          children: [
-            // Time Table List
-            Expanded(
-              child: ListView.builder(
-                itemCount: subject.length,
-                itemBuilder: (context, index) {
-                  final schedule = subject[index];
-                  return Card(
-                    elevation: 3,
-                    color:HexColor('#f2888c'),
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15), // Rounded corners
-                      side: BorderSide(
-                        color: Colors.black54, // Border color
-                        width: 1, // Border width
-                      ),
-                    ),
-                    child: ListTile(
-                      title: Text(
-                        schedule['subject_name'],
-                        style: GoogleFonts.montserrat(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      subtitle: Row(
-                        children: [
-
-                          // SizedBox(
-                          //     height: 18,
-                          //     width: 18,
-                          //     child: Image.asset('assets/teacher.png',color: Colors.black,)),
-                          Text(
-                            " ${schedule['teacher_name']}",
-                            style: GoogleFonts.montserrat(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade200,
-                            ),
-                          ),
-
-                        ],
-                      ),
-
-                      leading: SizedBox(
-                           width: 50,
-                             child: Padding(
-                               padding: const EdgeInsets.all(5.0),
-                               child: Image.asset('assets/physics.png',),
-                             )),
-
-                    ),
-                  );
-                },
+      body:isLoading
+          ? WhiteCircularProgressWidget()
+          : subject.isEmpty
+          ? Center(child: DataNotFoundWidget(title: 'Subject  Not Available.',))
+          : Expanded(
+        child: ListView.builder(
+          itemCount: subject.length,
+          itemBuilder: (context, index) {
+            final schedule = subject[index];
+            return Card(
+              elevation: 3,
+              color:HexColor('#f2888c'),
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15), // Rounded corners
+                side: BorderSide(
+                  color: Colors.black54, // Border color
+                  width: 1, // Border width
+                ),
               ),
-            ),
-          ],
-        ),
-      ): Container(
-          height: MediaQuery.of(context).size.height * 0.7, // 90% of screen height
+              child: ListTile(
+                title: Text(
+                  schedule['subject_name'],
+                  style: GoogleFonts.montserrat(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                subtitle: Row(
+                  children: [
 
-          child: Center(
-              child:
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-
-                children: [
-                  Image.asset('assets/no_attendance.png',filterQuality: FilterQuality.high,),
-                  Text('Subject  Not Available.',
-                    style: GoogleFonts.montserrat(
-                      textStyle: Theme.of(context).textTheme.displayLarge,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      fontStyle: FontStyle.normal,
-                      color: AppColors.textwhite,
+                    // SizedBox(
+                    //     height: 18,
+                    //     width: 18,
+                    //     child: Image.asset('assets/teacher.png',color: Colors.black,)),
+                    Text(
+                      " ${schedule['teacher_name']}",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade200,
+                      ),
                     ),
 
-                  )
-                ],
-              )
-          )
+                  ],
+                ),
+
+                leading: SizedBox(
+                    width: 50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: Image.asset('assets/physics.png',),
+                    )),
+
+              ),
+            );
+          },
+        ),
       ),
     );
   }
