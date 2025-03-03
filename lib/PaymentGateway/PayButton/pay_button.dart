@@ -61,6 +61,28 @@ class CommonNdpsButton extends StatelessWidget {
   //     "https://payment.atomtech.in/mobilesdk/param"; ////return url production
 
   final String payDetails = '';
+
+  void showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User manually dialog close na kar sake
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text("Please wait...")
+            ],
+          ),
+        );
+      },
+    );
+  }
+  void hideLoadingDialog(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).pop();
+  }
   @override
   Widget build(BuildContext context) {
     Color statusColor;
@@ -79,6 +101,11 @@ class CommonNdpsButton extends StatelessWidget {
         statusColor = Colors.green;
         statusIcon = Icons.check_circle;
         break;
+
+      case 'due':
+        statusColor = Colors.white;
+        statusIcon = Icons.check_circle;
+        break;
       case 'inactive':
       default:
         statusColor = Colors.red;
@@ -88,9 +115,9 @@ class CommonNdpsButton extends StatelessWidget {
 
 
     return ElevatedButton(
-      onPressed: () => status.toLowerCase() == 'active' || status.toLowerCase() == 'inactive'||status.toLowerCase() == 'pending' ? _initNdpsPayment(context, responseHashKey, responseDecryptionKey):null,
+      onPressed: () => status.toLowerCase()=='due'|| status.toLowerCase() == 'active' || status.toLowerCase() == 'inactive'||status.toLowerCase() == 'pending' ? _initNdpsPayment(context, responseHashKey, responseDecryptionKey):null,
       style: ElevatedButton.styleFrom(
-        backgroundColor: status.toLowerCase() == 'active' || status.toLowerCase() == 'inactive'||status.toLowerCase() == 'pending'
+        backgroundColor:status.toLowerCase()=='due'|| status.toLowerCase() == 'active' || status.toLowerCase() == 'inactive'||status.toLowerCase() == 'pending'
             ? statusColor
             : Colors.grey,
         padding: EdgeInsets.symmetric(vertical: 12),
@@ -103,13 +130,14 @@ class CommonNdpsButton extends StatelessWidget {
         style: GoogleFonts.montserrat(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: Colors.white,
+          color:status.toLowerCase()=='due'? Colors.redAccent: Colors.white,
         ),
       ),
     );
   }
 
   void _initNdpsPayment(BuildContext context, String responseHashKey, String responseDecryptionKey) {
+    showLoadingDialog(context);
     _getEncryptedPayUrl(context, responseHashKey, responseDecryptionKey);
   }
 
@@ -156,6 +184,7 @@ class CommonNdpsButton extends StatelessWidget {
           debugPrint(result.toString()); // to read full response
           var respJsonStr = result.toString();
           Map<String, dynamic> jsonInput = jsonDecode(respJsonStr);
+          hideLoadingDialog(context);
           if (jsonInput["responseDetails"]["txnStatusCode"] == 'OTS0000') {
             final atomTokenId = jsonInput["atomTokenId"].toString();
             debugPrint("atomTokenId: $atomTokenId");

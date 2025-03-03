@@ -26,10 +26,10 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
   @override
   void initState() {
     super.initState();
-    _attendanceFuture = fetchAttendance(selectedMonth, selectedYear,"","");
+    _attendanceFuture = fetchAttendance(selectedMonth.toString(),selectedYear.toString(),"","");
   }
 
-  Future<Map<String, dynamic>> fetchAttendance(int month, int year, String startDate, String endDate) async {
+  Future<Map<String, dynamic>> fetchAttendance(String month, String year, String startDate, String endDate) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
@@ -45,15 +45,20 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
       if (response.statusCode == 200) {
         final decodedResponse = json.decode(response.body);
 
+
         // If the response is a List, convert it to a Map
         if (decodedResponse is List) {
           return {
             "data": {
               "attendance": decodedResponse // Convert list to map key
             }
-          };
+        };
+
         } else if (decodedResponse is Map<String, dynamic>) {
+          print(decodedResponse.toString());
+
           return decodedResponse;
+
         } else {
           throw Exception("Unexpected response format");
         }
@@ -109,8 +114,10 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
                       value: selectedMonth,
                       onChanged: (int? newMonth) {
                         setState(() {
+                          startDate=null;
+                          endDate=null;
                           selectedMonth = newMonth!;
-                          _attendanceFuture = fetchAttendance(selectedMonth, selectedYear,'','');
+                          _attendanceFuture = fetchAttendance(selectedMonth.toString(), selectedYear.toString(),'','');
                         });
                       },
                       items: List.generate(12, (index) {
@@ -155,8 +162,11 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
                       value: selectedYear,
                       onChanged: (int? newYear) {
                         setState(() {
+                          startDate=null;
+                          endDate=null;
+
                           selectedYear = newYear!;
-                          _attendanceFuture = fetchAttendance(selectedMonth, selectedYear,'','');
+                          _attendanceFuture = fetchAttendance(selectedMonth.toString(), selectedYear.toString(),'','');
                         });
                       },
                       items: List.generate(10, (index) {
@@ -213,7 +223,7 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
                       child: Center(child: WhiteCircularProgressWidget()));
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!['data'] == null || snapshot.data!['data']['attendance'] == null) {
+                } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!['data'] == null || snapshot.data!['data']['attendance']==null) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -244,27 +254,33 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
       ),
     );
   }
-
   List<Map<String, dynamic>> processAttendanceData(Map<String, dynamic> attendanceData) {
-    int daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day; // Get total days in month
-    Set<String> uniqueDates = Set.from(
-      List.generate(daysInMonth, (index) {
+    List<String> formattedDates;
+    if (startDate != null && endDate != null) {
+      // Generate dates only within the selected range
+      final days = generateDateRange(startDate!, endDate!);
+      formattedDates = days.map((date) => DateFormat('yyyy-MM-dd').format(date)).toList();
+    } else {
+      // Fallback: all dates in the selected month
+      int daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day;
+      formattedDates = List.generate(daysInMonth, (index) {
         DateTime date = DateTime(selectedYear, selectedMonth, index + 1);
-        return DateFormat('yyyy-MM-dd').format(date); // Format as "YYYY-MM-DD"
-      }),
-    );
+        return DateFormat('yyyy-MM-dd').format(date);
+      });
+    }
 
-    Map<String, String> dailyAttendanceMap = {}; // Store daily attendance
-
-    // Extract attendance records correctly
+    // Filter attendance data for the generated dates
+    Map<String, String> dailyAttendanceMap = {};
     attendanceData.forEach((date, entry) {
-      if (date.startsWith('$selectedYear-${selectedMonth.toString().padLeft(2, '0')}')) {
-        int status = entry['status']; // Extract status
-        dailyAttendanceMap[date] = getStatusSymbol(status); // Convert status to symbol
+      if (formattedDates.contains(date)) {
+        int status = entry['status'];
+        dailyAttendanceMap[date] = getStatusSymbol(status);
       }
     });
 
-    dates = uniqueDates.toList()..sort(); // Sort formatted dates
+    // Optionally sort the dates
+    formattedDates.sort();
+    dates = formattedDates;
 
     return [
       {
@@ -274,9 +290,47 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
     ];
   }
 
-  Widget
+  // List<Map<String, dynamic>> processAttendanceData(Map<String, dynamic> attendanceData) {
+  //   int daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day; // Get total days in month
+  //   Set<String> uniqueDates = Set.from(
+  //     List.generate(daysInMonth, (index) {
+  //       DateTime date = DateTime(selectedYear, selectedMonth, index + 1);
+  //       return DateFormat('yyyy-MM-dd').format(date); // Format as "YYYY-MM-DD"
+  //     }),
+  //   );
+  //
+  //   Map<String, String> dailyAttendanceMap = {}; // Store daily attendance
+  //
+  //   // Extract attendance records correctly
+  //   attendanceData.forEach((date, entry) {
+  //     if (date.startsWith('$selectedYear-${selectedMonth.toString().padLeft(2, '0')}')) {
+  //       int status = entry['status']; // Extract status
+  //       dailyAttendanceMap[date] = getStatusSymbol(status); // Convert status to symbol
+  //     }
+  //   });
+  //
+  //   dates = uniqueDates.toList()..sort(); // Sort formatted dates
+  //
+  //   return [
+  //     {
+  //       'subject': 'Attendance',
+  //       'dailyRecords': dailyAttendanceMap,
+  //     }
+  //   ];
+  // }
 
-  _buildDataTable(List<Map<String, dynamic>> attendanceData) {
+  List<DateTime> generateDateRange(DateTime start, DateTime end) {
+    List<DateTime> range = [];
+    for (DateTime date = start;
+    date.isBefore(end.add(Duration(days: 1)));
+    date = date.add(Duration(days: 1))) {
+      range.add(date);
+    }
+    return range;
+  }
+
+
+  Widget _buildDataTable(List<Map<String, dynamic>> attendanceData) {
     int totalPresent = 0;
     int totalAbsent = 0;
     int totalLeave = 0;
@@ -420,16 +474,17 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
                 onPressed: () {
                   if (startDate == null || endDate == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text("Please select a valid date range")),
+                      SnackBar(content: Text("Please select a valid date range")),
                     );
                     return;
                   }
+                  // Update the future with the new date range
+                  setState(() {
+                    _attendanceFuture = fetchAttendance('', '',
+                        DateFormat('yyyy-MM-dd').format(startDate!),
+                        DateFormat('yyyy-MM-dd').format(endDate!));
+                  });
                   Navigator.pop(context);
-                  _attendanceFuture = fetchAttendance(selectedMonth, selectedYear,DateFormat('yyyy-MM-dd').format(startDate!).toString(),DateFormat('yyyy-MM-dd').format(endDate!).toString());
-
-                  // _attendanceFuture = fetchAttendance2();
-
                 },
                 icon: Icon(Icons.check),
                 label: Text("Apply Date Range"),
@@ -439,6 +494,31 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
               ),
+
+              // ElevatedButton.icon(
+              //   onPressed: () {
+              //     if (startDate == null || endDate == null) {
+              //       ScaffoldMessenger.of(context).showSnackBar(
+              //         SnackBar(
+              //             content: Text("Please select a valid date range")),
+              //       );
+              //       return;
+              //     }
+              //     fetchAttendance('', '',DateFormat('yyyy-MM-dd').format(startDate!).toString(),DateFormat('yyyy-MM-dd').format(endDate!).toString());
+              //
+              //     Navigator.pop(context);
+              //
+              //     // _attendanceFuture = fetchAttendance2();
+              //
+              //   },
+              //   icon: Icon(Icons.check),
+              //   label: Text("Apply Date Range"),
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.blueAccent,
+              //     foregroundColor: Colors.white,
+              //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              //   ),
+              // ),
             ],
           ),
         );
@@ -480,7 +560,7 @@ class DateRangeSelector extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           OutlinedButton.icon(
             onPressed: () => onSelectDateRange(context),

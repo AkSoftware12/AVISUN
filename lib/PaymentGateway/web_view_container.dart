@@ -97,6 +97,8 @@ class _WebViewContainerState extends State<WebViewContainer> {
                   source: "document.getElementsByTagName('h5')[0].innerHTML");
               debugPrint("HTML response : $response");
               var transactionResult = "";
+              var data='';
+
               if (response.trim().contains("cancelTransaction")) {
                 transactionResult = "Transaction Cancelled!";
               } else {
@@ -118,6 +120,8 @@ class _WebViewContainerState extends State<WebViewContainer> {
                   var respJsonStr = result.toString();
                   Map<String, dynamic> jsonInput = jsonDecode(respJsonStr);
                   debugPrint("read full respone : $jsonInput");
+                  data=jsonInput.toString();
+
 
                   //calling validateSignature function from atom_pay_helper file
                   var checkFinalTransaction =
@@ -145,7 +149,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
                   debugPrint("Failed to decrypt: '${e.message}'.");
                 }
               }
-              _closeWebView(context, transactionResult);
+              _closeWebView(context, transactionResult,data.toString());
             }
           },
         )),
@@ -163,10 +167,12 @@ class _WebViewContainerState extends State<WebViewContainer> {
                 mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))));
   }
 
-  _closeWebView(context, transactionResult) {
+  _closeWebView(context, transactionResult,data) {
     // ignore: use_build_context_synchronously
     Navigator.pop(context); // Close current window
     // ignore: use_build_context_synchronously
+
+    _showPaymentSuccessDialog(context,data);
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Transaction Status = $transactionResult")));
   }
@@ -200,4 +206,52 @@ class _WebViewContainerState extends State<WebViewContainer> {
             ));
     return Future.value(true);
   }
+
+  void _showPaymentSuccessDialog(BuildContext context,String data) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          title: const Text(
+            'Payment Successful',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children:  [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 60,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Your payment has been processed successfully!',
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  '${data.toString()}',
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

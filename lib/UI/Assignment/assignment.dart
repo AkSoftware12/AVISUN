@@ -115,149 +115,143 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
                   child: DataNotFoundWidget(
                   title: 'Assignments  Not Available.',
                 ))
-              : Expanded(
-                  child: ListView.builder(
-                    itemCount: assignments.length,
-                    itemBuilder: (context, index) {
-                      final assignment = assignments[index];
-                      String description = html_parser
-                              .parse(assignment['description'])
-                              .body
-                              ?.text ??
-                          '';
-                      String startDate = DateFormat('dd-MM-yyyy')
-                          .format(DateTime.parse(assignment['start_date']));
-                      String endDate = DateFormat('dd-MM-yyyy')
-                          .format(DateTime.parse(assignment['due_date']));
+              : ListView.builder(
+        itemCount: assignments.length,
+        itemBuilder: (context, index) {
+          final assignment = assignments[index];
+          String description = html_parser.parse(assignment['description']).body?.text ?? '';
+          String startDate = DateFormat('dd-MM-yyyy')
+              .format(DateTime.parse(assignment['start_date']));
+          String endDate = DateFormat('dd-MM-yyyy')
+              .format(DateTime.parse(assignment['due_date']));
 
-                      return Card(
-                        margin: EdgeInsets.symmetric(
-                            vertical: 5.sp, horizontal: 5.sp),
-                        elevation: 6,
-                        color: Colors.grey.shade200,
-                        // Light background
-                        shadowColor: Colors.black26,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+          return Card(
+            margin: EdgeInsets.symmetric(
+                vertical: 5.sp, horizontal: 5.sp),
+            elevation: 6,
+            color: Colors.grey.shade200,
+            // Light background
+            shadowColor: Colors.black26,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// **Title & Index**
+                  Row(
+                    children: [
+                      Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent,
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              /// **Title & Index**
-                              Row(
-                                children: [
-                                  Container(
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      color: Colors.blueAccent,
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 15),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          assignment['title']
-                                              .toString()
-                                              .toUpperCase(),
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                        SizedBox(height: 5),
-                                        Text(
-                                          description.toUpperCase(),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 13,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              SizedBox(height: 10),
-
-                              /// **Dates**
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  _buildDateInfo('Start', startDate),
-                                  _buildDateInfo('Due', endDate),
-                                ],
-                              ),
-
-                              SizedBox(height: 10.sp),
-
-                              Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  _buildButton(
-                                    text: 'View',
-                                    color: Colors.blueAccent,
-                                    onTap: () async {
-                                      final Uri pdfUri = Uri.parse(
-                                          assignment['attach'].toString());
-                                      if (await canLaunchUrl(pdfUri)) {
-                                        await launchUrl(pdfUri,
-                                            mode: LaunchMode
-                                                .externalApplication);
-                                      } else {
-                                        print("Could not launch $pdfUri");
-                                      }
-                                    },
-                                  ),
-                                  _buildButton(
-                                    text: 'Upload',
-                                    color: Colors.orange,
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              AssignmentUploadScreen(
-                                                onReturn: () {},
-                                                id: assignment['id'].toString(),
-                                              ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  _buildStatusBox(
-                                      assignment['attendance_status']),
-                                ],
-                              ),
-                            ],
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      );
-                    },
+                      ),
+                      SizedBox(width: 15),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              assignment['title']
+                                  .toString()
+                                  .toUpperCase(),
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              description.toUpperCase(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+
+                  SizedBox(height: 10),
+
+                  /// **Dates**
+                  Row(
+                    mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildDateInfo('Start', startDate),
+                      _buildDateInfo('Due', endDate),
+                    ],
+                  ),
+
+                  SizedBox(height: 10.sp),
+
+                  Row(
+                    mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildButton(
+                        text: 'View',
+                        color: Colors.blueAccent,
+                        onTap: () async {
+                          final Uri pdfUri = Uri.parse(
+                              assignment['attach'].toString());
+                          if (await canLaunchUrl(pdfUri)) {
+                            await launchUrl(pdfUri,
+                                mode: LaunchMode
+                                    .externalApplication);
+                          } else {
+                            print("Could not launch $pdfUri");
+                          }
+                        },
+                      ),
+                      _buildButton(
+                        text: 'Upload',
+                        color: Colors.orange,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  AssignmentUploadScreen(
+                                    onReturn: () {},
+                                    id: assignment['id'].toString(),
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildStatusBox(
+                          assignment['attendance_status']),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

@@ -148,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
                                 child: Image.asset(
-                                  AppAssets.logo,  // Assuming AppAssets.logo is a string path to an asset
+                                  AppAssets.cjmlogo,  // Assuming AppAssets.logo is a string path to an asset
                                   fit: BoxFit.cover,  // Ensures the logo fills the avatar space
                                 ),
                               ),

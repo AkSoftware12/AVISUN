@@ -111,8 +111,7 @@ class _TimeTableScreenState extends State<SubjectScreen> {
           ? WhiteCircularProgressWidget()
           : subject.isEmpty
           ? Center(child: DataNotFoundWidget(title: 'Subject  Not Available.',))
-          : Expanded(
-        child: ListView.builder(
+          :  ListView.builder(
           itemCount: subject.length,
           itemBuilder: (context, index) {
             final schedule = subject[index];
@@ -143,7 +142,7 @@ class _TimeTableScreenState extends State<SubjectScreen> {
                     //     width: 18,
                     //     child: Image.asset('assets/teacher.png',color: Colors.black,)),
                     Text(
-                      " ${schedule['teacher_name']}",
+                      " ${schedule['teacher_name']??'N/A'}",
                       style: GoogleFonts.montserrat(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -165,7 +164,7 @@ class _TimeTableScreenState extends State<SubjectScreen> {
             );
           },
         ),
-      ),
+
     );
   }
 }

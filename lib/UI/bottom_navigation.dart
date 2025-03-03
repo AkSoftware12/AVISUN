@@ -256,7 +256,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
         ),
         width: MediaQuery.sizeOf(context).width * .65,
         // backgroundColor: Theme.of(context).colorScheme.background,
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.secondary,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -278,7 +278,8 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                       ? NetworkImage(studentData?['photo'])
                       : null,
                   child: studentData == null || studentData?['photo'] == null
-                      ? Image.asset(AppAssets.logo, fit: BoxFit.cover)
+                      ? Image.asset(AppAssets.cjmlogo,
+                       fit: BoxFit.cover)
                       : null,
 
                 ),
@@ -778,7 +779,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                                     return WebViewExample(
                                       title: 'Privacy',
                                       url:
-                                      'https://ksadmission.in/privacy-policy',
+                                      'https://www.freeprivacypolicy.com/live/79492741-6341-4ea2-a3b1-87ffc1154bda',
                                     );
                                   },
                                 ),
@@ -819,7 +820,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                                     return WebViewExample(
                                       title: 'Terms & Condition',
                                       url:
-                                      'https://ksadmission.in/privacy-policy',
+                                      'https://www.freeprivacypolicy.com/live/79492741-6341-4ea2-a3b1-87ffc1154bda',
                                     );
                                   },
                                 ),

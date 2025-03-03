@@ -288,7 +288,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       margin: EdgeInsets.all(4),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isHighlighted ? Colors.red : null, // Highlight event duration
+                        color: isHighlighted ? Colors.red.shade300 : null, // Highlight event duration
                         shape: BoxShape.circle,
                       ),
                       child: Text(

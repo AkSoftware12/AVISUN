@@ -3,6 +3,7 @@ import 'package:avi/PaymentGateway/home_getway.dart';
 import 'package:avi/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -123,35 +124,33 @@ class _PaymentScreenState extends State<FeesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.secondary,
       body:  isLoading
           ? WhiteCircularProgressWidget()
           : fess.isEmpty
           ? Center(child: DataNotFoundWidget(title: 'Fees  Not Available.',))
-          : Expanded(
-        child: ListView.builder(
-          itemCount: fess.length,
-          itemBuilder: (context, index) {
-            return PaymentCard(
-              amount: fess[index]['to_pay_amount'].toString(),
-              status: fess[index]['pay_status'],
-              dueDate: fess[index]['due_date'].toString(),
-              onPayNow: () {
-                print("Processing payment for ₹${fess[index]['to_pay_amount']}");
+          : ListView.builder(
+        itemCount: fess.length,
+        itemBuilder: (context, index) {
+          return PaymentCard(
+            amount: fess[index]['to_pay_amount'].toString(),
+            status: fess[index]['pay_status'],
+            dueDate: fess[index]['due_date'].toString(),
+            onPayNow: () {
+              print("Processing payment for ₹${fess[index]['to_pay_amount']}");
 
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => HomeGateway()),
-                // );
-              },
-              custFirstName: studentData?['student_name']?? '',
-              custLastName: 'N/A',
-              mobile: studentData?['contact_no']??'', email:studentData?['contact_mail']??'',
-              address: studentData?['address']??'',
-              payDate: fess[index]['pay_date'].toString(),
-            );
-          },
-        ),
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => HomeGateway()),
+              // );
+            },
+            custFirstName: studentData?['student_name']?? '',
+            custLastName: 'N/A',
+            mobile: studentData?['contact_no']??'', email:studentData?['contact_mail']??'',
+            address: studentData?['address']??'',
+            payDate: fess[index]['pay_date'].toString(),
+          );
+        },
       ),
 
     );
@@ -205,9 +204,9 @@ class PaymentCard extends StatelessWidget {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(8),
       ),
-      margin: EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.all(3.sp),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -233,6 +232,7 @@ class PaymentCard extends StatelessWidget {
 
 
             SizedBox(height: 20),
+            if(status=='active')
             CommonNdpsButton(buttonText: "Pay Now",
               status: status, amount: amount,
               custFirstName: custFirstName,
@@ -241,31 +241,34 @@ class PaymentCard extends StatelessWidget {
               address: address,
             ),
 
-            // Pay Now Button
+            if(status=='paid')
 
-            // SizedBox(
-            //   width: double.infinity,
-            //   child: ElevatedButton(
-            //     onPressed: status.toLowerCase() == 'active' || status.toLowerCase() == 'inactive'||status.toLowerCase() == 'pending' ? onPayNow : null,
-            //     style: ElevatedButton.styleFrom(
-            //       backgroundColor: status.toLowerCase() == 'active' || status.toLowerCase() == 'inactive'||status.toLowerCase() == 'pending'
-            //           ? statusColor
-            //           : Colors.grey,
-            //       padding: EdgeInsets.symmetric(vertical: 12),
-            //       shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(10),
-            //       ),
-            //     ),
-            //     child: Text(
-            //       "Pay Now",
-            //       style: GoogleFonts.montserrat(
-            //         fontSize: 16,
-            //         fontWeight: FontWeight.w600,
-            //         color: Colors.white,
-            //       ),
-            //     ),
-            //   ),
-            // ),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: (){
+
+
+
+    },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  "Download Receipt ",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

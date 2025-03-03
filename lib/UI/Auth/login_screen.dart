@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '/UI/bottom_navigation.dart';
@@ -158,12 +159,24 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Column(
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: SizedBox(
-                              height: 150,
-                              child: Image.asset(
-                                AppAssets.cjm,
+                          Container(
+                            height: 110.sp,
+                            width: 180.sp,
+                            decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(10.sp)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: SizedBox(
+                                  height: 90.sp,
+                                  width: 90.sp,
+                                  child: Image.asset(
+                                    AppAssets.cjmlogo,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -280,15 +293,23 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
 
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Provider by AVI-SUN',
-                      style: GoogleFonts.montserrat(
-                        textStyle: Theme.of(context).textTheme.displayLarge,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.normal,
-                        color: AppColors.textwhite,
-                      ),
+                    padding:  EdgeInsets.only(top: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(0.0),
+                          child: Text('Provider by AVI-SUN',
+                            style: GoogleFonts.montserrat(
+                              textStyle: Theme.of(context).textTheme.displayLarge,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              fontStyle: FontStyle.normal,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   )
 

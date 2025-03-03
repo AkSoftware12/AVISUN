@@ -1,4 +1,5 @@
 import 'package:avi/HexColorCode/HexColor.dart';
+import 'package:avi/PaymentGateway/PayButton/pay_button.dart';
 import 'package:carousel_slider_plus/carousel_slider_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -193,7 +194,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   CarouselExample(),
                   SizedBox(height: 10),
 
-                  CarouselFees(),
+                  CarouselFees(
+                    status: 'due',
+                    dueDate: '',
+                    onPayNow: () {
+                      // print("Processing payment for ₹${fess[index]['to_pay_amount']}");
+
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (context) => HomeGateway()),
+                      // );
+                    },
+                    custFirstName: studentData?['student_name']?? '',
+                    custLastName: 'N/A',
+                    mobile: studentData?['contact_no']??'',
+                    email:studentData?['contact_mail']??'',
+                    address: studentData?['address']??'',
+                    payDate: '',
+                    dueAmount: '1250',
+
+                  ),
 
                   // _buildsellAll('Promotions', 'See All'),
 
@@ -235,32 +255,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // SectionCard(
-                  //   title: 'Promotions',
-                  //   icon: Icons.local_offer,
-                  //   content: 'Special promotions and offers for the students.',
-                  //   color: AppColors.secondary,
-                  // ),
-                  // SectionCard(
-                  //   title: 'Assignments',
-                  //   icon: Icons.assignment,
-                  //   content: 'Assignments due this week and upcoming tasks.',
-                  //   color: AppColors.secondary,
-                  // ),
-                  // SectionCard(
-                  //   title: 'Fees',
-                  //   icon: Icons.monetization_on,
-                  //   content: 'Your upcoming fee payments and history.',
-                  //   color: AppColors.secondary,
-                  // ),
-                  // SectionCard(
-                  //   title: 'Calendar',
-                  //   icon: Icons.calendar_today,
-                  //   content: 'View and manage your schedule.',
-                  //   isCalendar: true,
-                  //   calendarController: calendarController,
-                  //   color: AppColors.secondary,
-                  // ),
                 ],
               ),
             ),
@@ -714,6 +708,17 @@ class _CarouselExampleState extends State<CarouselExample> {
 }
 
 class CarouselFees extends StatelessWidget {
+  final String dueAmount;
+  final VoidCallback onPayNow;
+  final String status;
+  final String dueDate;
+  final String payDate;
+  final String custFirstName; //optional
+  final String custLastName; //optional
+  final String mobile; //optional
+  final String email; //optional
+  final String address;
+
   final List<Map<String, String>> imgList = [
     {
       'image': 'https://cjmambala.in/images/building.png',
@@ -733,6 +738,8 @@ class CarouselFees extends StatelessWidget {
     },
   ];
 
+   CarouselFees({super.key, required this.dueAmount, required this.onPayNow, required this.status, required this.dueDate, required this.payDate, required this.custFirstName, required this.custLastName, required this.mobile, required this.email, required this.address});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -742,25 +749,33 @@ class CarouselFees extends StatelessWidget {
         child: CarouselSlider(
           options: CarouselOptions(
             height: 180,
-            autoPlay: true,
+            autoPlay: false,
             viewportFraction: 1,
             enableInfiniteScroll: true,
-            autoPlayInterval: Duration(seconds: 10),
+            autoPlayInterval: Duration(seconds: 1),
             autoPlayAnimationDuration: Duration(milliseconds: 800),
             autoPlayCurve: Curves.fastOutSlowIn,
             scrollDirection: Axis.horizontal,
           ),
           items: imgList.map((item) {
             return DueAmountCard(
-              dueAmount: 1250.75, // Example due amount
+              dueAmount: dueAmount,
+              status: status,
+              dueDate: dueDate,
               onPayNow: () {
-                print("Redirecting to payment...");
+                // print("Processing payment for ₹${fess[index]['to_pay_amount']}");
 
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => BottomNavBarScreen(initialIndex: 3,)),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => HomeGateway()),
+                // );
               },
+              custFirstName: custLastName,
+              custLastName: 'N/A',
+              mobile: mobile,
+              email:email,
+              address: address,
+              payDate: payDate,
             );
 
             //   GestureDetector(
@@ -796,10 +811,18 @@ class CarouselFees extends StatelessWidget {
 }
 
 class DueAmountCard extends StatelessWidget {
-  final double dueAmount;
+  final String dueAmount;
   final VoidCallback onPayNow;
+  final String status;
+  final String dueDate;
+  final String payDate;
+  final String custFirstName; //optional
+  final String custLastName; //optional
+  final String mobile; //optional
+  final String email; //optional
+  final String address;
 
-  DueAmountCard({required this.dueAmount, required this.onPayNow});
+  DueAmountCard({required this.dueAmount, required this.onPayNow, required this.status, required this.dueDate, required this.payDate, required this.custFirstName, required this.custLastName, required this.mobile, required this.email, required this.address});
 
   @override
   Widget build(BuildContext context) {
@@ -834,7 +857,7 @@ class DueAmountCard extends StatelessWidget {
 
             // Amount
             Text(
-              "₹${dueAmount.toStringAsFixed(2)}",
+              "₹ ${dueAmount}",
               style: GoogleFonts.montserrat(
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
@@ -846,24 +869,36 @@ class DueAmountCard extends StatelessWidget {
             // Pay Now Button
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onPayNow,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white, // White button for contrast
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  "Pay Now",
-                  style: GoogleFonts.montserrat(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.redAccent, // Matching gradient color
-                  ),
-                ),
+              child:CommonNdpsButton(buttonText: "Pay Now",
+                status: status,
+                amount: '1',
+                // amount: dueAmount,
+                custFirstName: custFirstName,
+                custLastName: custLastName,
+                mobile: mobile, email: email,
+                address: address,
               ),
+
+
+
+              // ElevatedButton(
+              //   onPressed: onPayNow,
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.white, // White button for contrast
+              //     padding: EdgeInsets.symmetric(vertical: 12),
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(10),
+              //     ),
+              //   ),
+              //   child: Text(
+              //     "Pay Now",
+              //     style: GoogleFonts.montserrat(
+              //       fontSize: 16,
+              //       fontWeight: FontWeight.w600,
+              //       color: Colors.redAccent, // Matching gradient color
+              //     ),
+              //   ),
+              // ),
             ),
           ],
         ),

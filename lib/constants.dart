@@ -19,6 +19,7 @@ class AppColors {
 class AppAssets {
   static const String logo = 'assets/images/logo.png'; 
   static const String cjm = 'assets/cjm.png';
+  static const String cjmlogo = 'assets/playstore.png';
 }
 
 class ApiRoutes {
@@ -26,6 +27,7 @@ class ApiRoutes {
   static const String baseUrl2 = "https://webcjm.cjmambala.co.in/api";
   // static const String baseUrl = "http://192.168.1.2/CJM/api";
   static const String login = "$baseUrl/login";
+  static const String clear = "$baseUrl/clear";
   static const String getProfile = "$baseUrl/student-get";
   static const String getPhotos = "$baseUrl2/getPhotos";
   static const String getVideos = "$baseUrl2/getVideos";
@@ -38,4 +40,10 @@ class ApiRoutes {
   static const String uploadAssignment = "$baseUrl/submit-assignments";
   static const String attendance = "$baseUrl/get-attendance-monthly";
   static const String events = "$baseUrl/events";
+  static const String getlibrary = "$baseUrl/library-get";
+  static const String notifications = "$baseUrl/notifications";
+  static const String getBookTypes = "$baseUrl/book-types";
+  static const String getBookCategories = "$baseUrl/book-categories";
+  static const String getBookPublishers = "$baseUrl/book-publishers";
+  static const String getBookSupplier= "$baseUrl/book-supplier";
 }

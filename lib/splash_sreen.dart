@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 import '../constants.dart';
 import '../UI/Auth/login_screen.dart';
@@ -19,8 +21,38 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    postRequestWithToken();
     _checkConnectivity();
   }
+
+  Future<void> postRequestWithToken() async {
+    try {
+
+
+      // Make the POST request
+      final response = await http.get(
+        Uri.parse(ApiRoutes.clear),
+      );
+
+      // Check the status code and handle the response
+      if (response.statusCode == 200) {
+        setState(() {
+
+          print('Api Hit ');
+
+        });
+        // Handle success response
+      } else {
+
+        // Handle error response
+        print('Failed: ${response.statusCode}, ${response.body}');
+      }
+    } catch (e) {
+      // Handle any exceptions
+      print('Error: $e');
+    }
+  }
+
 
   // Check internet connectivity
   Future<void> _checkConnectivity() async {

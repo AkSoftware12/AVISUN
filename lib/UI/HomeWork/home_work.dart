@@ -114,8 +114,7 @@ class _AssignmentListScreenState extends State<HomeWorkScreen> {
           ? WhiteCircularProgressWidget()
           : assignments.isEmpty
           ? Center(child: DataNotFoundWidget(title: 'Home Work  Not Available.',))
-          : Expanded(
-        child: ListView.builder(
+          :  ListView.builder(
           itemCount: assignments.length,
           itemBuilder: (context, index) {
             final assignment = assignments[index];
@@ -364,7 +363,7 @@ class _AssignmentListScreenState extends State<HomeWorkScreen> {
             );
           },
         ),
-      ),
+
 
     );
   }
