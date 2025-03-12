@@ -20,10 +20,12 @@ class AppAssets {
   static const String logo = 'assets/images/logo.png'; 
   static const String cjm = 'assets/cjm.png';
   static const String cjmlogo = 'assets/playstore.png';
+  // static const String cjmlogo2 = 'assets/playstore2.png';
 }
 
 class ApiRoutes {
-  static const String baseUrl = "https://apicjm.cjmambala.co.in/api";
+  // static const String baseUrl = "https://apicjm.cjmambala.co.in/api";
+  static const String baseUrl = "https://apicjm.cjmshimla.in/api";
   static const String baseUrl2 = "https://webcjm.cjmambala.co.in/api";
   // static const String baseUrl = "http://192.168.1.2/CJM/api";
   static const String login = "$baseUrl/login";

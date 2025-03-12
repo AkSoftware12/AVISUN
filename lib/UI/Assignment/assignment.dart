@@ -1,4 +1,5 @@
 import 'package:avi/UI/Assignment/upload_assignments.dart';
+import 'package:avi/UI/Assignment/view_assignments.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -215,16 +216,27 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
                         text: 'View',
                         color: Colors.blueAccent,
                         onTap: () async {
-                          final Uri pdfUri = Uri.parse(
-                              assignment['attach'].toString());
-                          if (await canLaunchUrl(pdfUri)) {
-                            await launchUrl(pdfUri,
-                                mode: LaunchMode
-                                    .externalApplication);
+
+                          if (await canLaunchUrl(Uri.parse(assignment['attach'].toString()))) {
+                            await launchUrl(Uri.parse(assignment['attach'].toString()), mode: LaunchMode.externalApplication);
                           } else {
-                            print("Could not launch $pdfUri");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Could not download file')),
+                            );
                           }
+                          // final Uri pdfUri = Uri.parse(assignment['attach'].toString());
+                          // FileOpener.openFile(assignment['attach'].toString());
                         },
+                        // onTap: () async {
+                        //   final Uri pdfUri = Uri.parse(assignment['attach'].toString());
+                        //   if (await canLaunchUrl(pdfUri)) {
+                        //     await launchUrl(pdfUri,
+                        //         mode: LaunchMode
+                        //             .externalApplication);
+                        //   } else {
+                        //     print("Could not launch $pdfUri");
+                        //   }
+                        // },
                       ),
                       _buildButton(
                         text: 'Upload',

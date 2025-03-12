@@ -206,12 +206,39 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Date Selection Row
+
+        Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color:Colors.blue.withOpacity(0.2),
+              blurRadius: 8,
+              spreadRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
             DateRangeSelector(
               startDate: startDate,
               endDate: endDate,
               onSelectDateRange: _selectDateRange,
             ),
+
+          ],
+        ),
+      ),
+            // Date Selection Row
+            // DateRangeSelector(
+            //   startDate: startDate,
+            //   endDate: endDate,
+            //   onSelectDateRange: _selectDateRange,
+            // ),
             SizedBox(height: 10,),
             // _buildAppBar('Attendance $selectedYear $selectedMonth'),
             FutureBuilder<Map<String, dynamic>>(
@@ -224,21 +251,24 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!['data'] == null || snapshot.data!['data']['attendance']==null) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset('assets/no_attendance.png', filterQuality: FilterQuality.high),
-                        SizedBox(height: 10),
-                        Text(
-                          'Attendance Not Available.',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textblack,
+                  return Container(
+                    height: MediaQuery.of(context).size.height * 0.4,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset('assets/no_attendance.png', filterQuality: FilterQuality.high,height: 150.sp,width: 200.sp,),
+                          SizedBox(height: 10),
+                          Text(
+                            'Attendance Not Available.',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textwhite,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 } else {
@@ -391,7 +421,7 @@ class _AttendanceTableScreenState extends State<AttendanceScreen> {
             _buildSummaryRow("Total Absent", totalAbsent.toString(), Colors.red),
             _buildSummaryRow("Total Leave", totalLeave.toString(), Colors.blue),
             _buildSummaryRow("Total Holiday", totalHoliday.toString(), Colors.orange),
-            _buildSummaryRow("Total Attendance %", "${attendancePercentage.toStringAsFixed(2)}%", Colors.purple),
+            _buildSummaryRow("Total Attendance %", "${attendancePercentage.toStringAsFixed(2)}%", Colors.white),
           ],
         ),
       ),
@@ -562,20 +592,25 @@ class DateRangeSelector extends StatelessWidget {
       child: Row(
         // mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          OutlinedButton.icon(
-            onPressed: () => onSelectDateRange(context),
-            icon: const Icon(Icons.calendar_today, color: Colors.blueAccent),
-            label: const Text(
-              "Select Date Range",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              side: const BorderSide(color: Colors.blueAccent),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Column(
+            children: [
+
+              OutlinedButton.icon(
+                onPressed: () => onSelectDateRange(context),
+                icon: const Icon(Icons.calendar_today, color: Colors.blueAccent),
+                label: const Text(
+                  "Select Date Range",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  side: const BorderSide(color: Colors.blueAccent),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
           const SizedBox(width: 16), // Spacing between button and container
           Expanded(
@@ -624,6 +659,7 @@ class DateRangeSelector extends StatelessWidget {
       ],
     );
   }
+
 }
 
 

@@ -4,6 +4,7 @@ import 'package:carousel_slider_plus/carousel_slider_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scrollable_clean_calendar/controllers/clean_calendar_controller.dart';
 import 'package:scrollable_clean_calendar/scrollable_clean_calendar.dart';
@@ -234,27 +235,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 220,
                     width: double.infinity,
                     child: Image.network(
-                      'https://api-ap-south-mum-1.openstack.acecloudhosting.com:8080/franciscan/SchImg/CJMAMB/PhotoAlbum/Full/Photo_528587.jpg',
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                  Container(
-                    height: 220,
-                    width: double.infinity,
-                    child: Image.network(
-                      'https://api-ap-south-mum-1.openstack.acecloudhosting.com:8080/franciscan/SchImg/CJMAMB/PhotoAlbum/Full/Photo_524101.jpg',
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                  Container(
-                    height: 220,
-                    width: double.infinity,
-                    child: Image.network(
-                      'https://api-ap-south-mum-1.openstack.acecloudhosting.com:8080/franciscan/SchImg/CJMAMB/PhotoAlbum/Full/Photo_542310.jpg',
+                      'https://cjmambala.in/images/building.png',
                       fit: BoxFit.fill,
                     ),
                   ),
 
+                  Divider(
+                    thickness: 1.sp,
+                    color: Colors.grey,
+                  ),
                 ],
               ),
             ),
@@ -625,6 +614,14 @@ class _CarouselExampleState extends State<CarouselExample> {
     'https://api-ap-south-mum-1.openstack.acecloudhosting.com:8080/franciscan/SchImg/CJMAMB/PhotoAlbum/Full/Photo_522725.jpg',
     'https://cjmambala.in/images/building.png',
   ];
+
+  // final List<String> imgList = [
+  //   'https://www.cjmshimla.org/Images/sld1.jpg',
+  //   'https://www.cjmshimla.org/Images/sld3.jpg',
+  //   'https://www.cjmshimla.org/Images/sld4.jpg',
+  //   'https://www.cjmshimla.org/Images/sld5.jpg',
+  //
+  // ];
 
   int _currentIndex = 0;
   final CarouselSliderController _controller = CarouselSliderController();
