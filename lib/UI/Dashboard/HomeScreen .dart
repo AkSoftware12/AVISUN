@@ -18,6 +18,7 @@ import '../Assignment/assignment.dart';
 import '../Auth/login_screen.dart';
 import '../Gallery/gallery_tab.dart';
 import '../HomeWork/home_work.dart';
+import '../Leaves/leaves_tab.dart';
 import '../Notice/notice.dart';
 import '../Report/report_card.dart';
 import '../Subject/subject.dart';
@@ -56,6 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
       'image': 'assets/physics.png',
     },
     {
+      'name': 'Leaves',
+      'image': 'assets/deadline.png',
+    },
+    {
       'name': 'News & Events',
       'image': 'assets/event_planner.png',
     },
@@ -67,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'name': 'Report Card',
       'image': 'assets/report.png',
     },
+
   ];
 
   @override
@@ -389,7 +395,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 );
-              } else if (items[index]['name'] == 'Report Card') {
+              } else if (items[index]['name'] == 'Leaves') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return LeavesTabScreen();
+                    },
+                  ),
+                );
+              }
+
+
+
+              else if (items[index]['name'] == 'Report Card') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(

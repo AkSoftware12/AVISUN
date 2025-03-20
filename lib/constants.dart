@@ -27,8 +27,12 @@ class ApiRoutes {
   // static const String baseUrl = "https://apicjm.cjmambala.co.in/api";
   static const String baseUrl = "https://apicjm.cjmshimla.in/api";
   static const String baseUrl2 = "https://webcjm.cjmambala.co.in/api";
-  // static const String baseUrl = "http://192.168.1.2/CJM/api";
+  // static const String baseUrl = "http://192.168.1.4/CJM/api";
+
+
+
   static const String login = "$baseUrl/login";
+  static const String loginstudent = "$baseUrl/loginstudent";
   static const String clear = "$baseUrl/clear";
   static const String getProfile = "$baseUrl/student-get";
   static const String getPhotos = "$baseUrl2/getPhotos";

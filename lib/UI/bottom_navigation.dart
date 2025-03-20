@@ -2,6 +2,7 @@ import 'package:avi/UI/Notification/notification.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../UI/Dashboard/HomeScreen%20.dart';
@@ -13,6 +14,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'Auth/login_screen.dart';
+import 'Auth/login_student.dart';
 import 'FAQ/faq.dart';
 import 'Fees/FeesScreen.dart';
 import 'Gallery/gallery_tab.dart';
@@ -153,16 +155,60 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                 color: AppColors.textwhite,
               ),
             ),
-            Text(
-              studentData?['student_name'] ?? 'Student', // Fallback to 'Student' if null
-              style: GoogleFonts.montserrat(
-                textStyle: Theme.of(context).textTheme.displayLarge,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontStyle: FontStyle.normal,
-                color: AppColors.textwhite,
+            GestureDetector(
+
+              // onTap: () {
+              //   showModalBottomSheet(
+              //     context: context,
+              //     isScrollControlled: true,
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              //     ),
+              //     builder: (BuildContext context) {
+              //       return WillPopScope(
+              //         onWillPop: () async {
+              //           Navigator.pop(context); // Close bottom sheet on back press
+              //           return false; // Prevent app from closing
+              //         },
+              //         child: Container(
+              //           color: Colors.transparent,
+              //           height: MediaQuery.of(context).size.height * 0.6, // Set height to 60% of screen
+              //           padding: EdgeInsets.all(16),
+              //           child: LoginStudentPage(),
+              //         ),
+              //       );
+              //     },
+              //   );
+              //
+              // },
+
+
+
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginStudentPage(),
+                  ),
+                );
+              },
+              child: Row(
+                children: [
+                  Text(
+                    '${studentData?['student_name'].toString()??' Student'}',
+                    style: GoogleFonts.montserrat(
+                      textStyle: Theme.of(context).textTheme.displayLarge,
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      fontStyle: FontStyle.normal,
+                      color: AppColors.textwhite,
+                    ),
+                  ),
+                  Icon(Icons.arrow_drop_down, color: Colors.white),
+                ],
               ),
             ),
+
           ],
         ),
       ],

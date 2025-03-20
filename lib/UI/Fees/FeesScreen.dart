@@ -15,6 +15,7 @@ import '../../CommonCalling/data_not_found.dart';
 import '../../CommonCalling/progressbarWhite.dart';
 import '../../PaymentGateway/PayButton/pay_button.dart';
 import '../Auth/login_screen.dart';
+import '../WebView/webview.dart';
 
 class FeesScreen extends StatefulWidget {
   const FeesScreen({super.key,});
@@ -149,6 +150,8 @@ class _PaymentScreenState extends State<FeesScreen> {
             mobile: studentData?['contact_no']??'', email:studentData?['contact_mail']??'',
             address: studentData?['address']??'',
             payDate: fess[index]['pay_date'].toString(),
+            id: fess[index]['id'],
+
           );
         },
       ),
@@ -168,12 +171,14 @@ class PaymentCard extends StatelessWidget {
   final String mobile; //optional
   final String email; //optional
   final String address;
+  final int id;
+
 
   PaymentCard({
     required this.amount,
     required this.status,
     required this.dueDate,
-    required this.onPayNow, required this.custFirstName, required this.custLastName, required this.mobile, required this.email, required this.address, required this.payDate,
+    required this.onPayNow, required this.custFirstName, required this.custLastName, required this.mobile, required this.email, required this.address, required this.payDate, required this.id,
   });
 
   @override
@@ -219,7 +224,7 @@ class PaymentCard extends StatelessWidget {
             SizedBox(height: 12),
 
             // Payment Status
-            _buildRow("Status", status.toUpperCase(), statusIcon, statusColor),
+            _buildRow("Status", status=='active'?'Due':'Paid', statusIcon, status=='active'?Colors.blueGrey:Colors.green),
 
             SizedBox(height: 12),
 
@@ -249,7 +254,17 @@ class PaymentCard extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: (){
 
-
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return WebViewExample(
+                          title: '',
+                          url: 'https://softcjm.cjmshimla.in/student/fee-receipt/$id',
+                        );
+                      },
+                    ),
+                  );
 
     },
                 style: ElevatedButton.styleFrom(
@@ -290,7 +305,7 @@ class PaymentCard extends StatelessWidget {
         ),
         Row(
           children: [
-            Icon(icon, color: color, size: 20),
+            // Icon(icon, color: color, size: 20),
             SizedBox(width: 5),
             Text(
               value,

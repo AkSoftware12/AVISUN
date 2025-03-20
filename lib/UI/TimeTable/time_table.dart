@@ -49,6 +49,8 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
     selectedIndex = (todayWeekday - 0) % 7; // Shift to Monday-based index
     DateTime.now().subtract(const Duration(days: 30));
     fetchAssignmentsData(selectedIndex);
+
+    print(timeTable);
   }
 
 
@@ -78,7 +80,7 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
 // Update state with fetched data
       });
     } else {
-      _showLoginDialog();
+      // _showLoginDialog();
       setState(() {
         isLoading = false;
       });
