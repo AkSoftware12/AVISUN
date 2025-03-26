@@ -237,9 +237,9 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
                                         // Time Indicator
                                         Column(
                                           children: [
-                                            Text(
-                                              schedule['start_time'].split(" - ")[0],
-                                              style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
+                                            Text('${index+1}',
+                                              // schedule['period'].toString(),
+                                              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
                                             ),
                                             Container(
                                               height: 3.sp,
@@ -251,10 +251,10 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
                                               ),
                                             ),
                                             // SizedBox(height: 80.sp),
-                                            Text(
-                                              schedule['end_time'].split(" - ")[0],
-                                              style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
-                                            ),
+                                            // Text(
+                                            //   schedule['end_time'].split(" - ")[0],
+                                            //   style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
+                                            // ),
                                           ],
                                         ),
                                         SizedBox(width: 15),
@@ -306,20 +306,20 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                       SizedBox(height: 6),
-                                                      Row(
-                                                        children: [
-                                                          Icon(Icons.watch_later_outlined, size: 18, color: Colors.grey.shade700),
-                                                          SizedBox(width: 6),
-                                                          Text(
-                                                            "${schedule['start_time']} - ${schedule['end_time']}",
-                                                            style: GoogleFonts.montserrat(
-                                                              fontSize: 14,
-                                                              fontWeight: FontWeight.w600,
-                                                              color: Colors.grey.shade800,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
+                                                      // Row(
+                                                      //   children: [
+                                                      //     Icon(Icons.watch_later_outlined, size: 18, color: Colors.grey.shade700),
+                                                      //     SizedBox(width: 6),
+                                                      //     Text(
+                                                      //       "${schedule['start_time']} - ${schedule['end_time']}",
+                                                      //       style: GoogleFonts.montserrat(
+                                                      //         fontSize: 14,
+                                                      //         fontWeight: FontWeight.w600,
+                                                      //         color: Colors.grey.shade800,
+                                                      //       ),
+                                                      //     ),
+                                                      //   ],
+                                                      // ),
                                                       SizedBox(height: 5),
                                                       Row(
                                                         children: [

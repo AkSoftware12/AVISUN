@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
         print(studentData);
       });
     } else {
-      _showLoginDialog();
+      // _showLoginDialog();
     }
   }
 
@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
         print(assignments);
       });
     } else {
-      _showLoginDialog();
+      // _showLoginDialog();
     }
   }
 
