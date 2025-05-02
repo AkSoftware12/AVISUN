@@ -135,11 +135,11 @@ class HomeGateway extends StatelessWidget {
   }
 
   _openNdpsPG(payDetails, context, responseHashKey, responseDecryptionKey) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => WebViewContainer(
-                mode, payDetails, responseHashKey, responseDecryptionKey)));
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => WebViewContainer(
+    //             mode, payDetails, responseHashKey, responseDecryptionKey)));
   }
 
   _getJsonPayloadData() {

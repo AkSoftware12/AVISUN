@@ -16,6 +16,9 @@ import '../Auth/login_screen.dart';
 import 'package:html/parser.dart' as html_parser;
 
 class HomeWorkScreen extends StatefulWidget {
+  final String title;
+  const HomeWorkScreen({super.key, required this.title});
+
   @override
   State<HomeWorkScreen> createState() => _AssignmentListScreenState();
 }
@@ -101,7 +104,7 @@ class _AssignmentListScreenState extends State<HomeWorkScreen> {
           iconTheme: IconThemeData(color: AppColors.textwhite),
           backgroundColor: AppColors.secondary,
           title: Text(
-            'Home Work',
+            widget.title,
             style: GoogleFonts.montserrat(
               textStyle: Theme.of(context).textTheme.displayLarge,
               fontSize: 20,

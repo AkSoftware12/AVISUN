@@ -17,6 +17,9 @@ import '../Auth/login_screen.dart';
 
 
 class CalendarScreen extends StatefulWidget {
+  final String title;
+  const CalendarScreen({super.key, required this.title});
+
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
 }
@@ -142,7 +145,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            "Event Details",
+            widget.title,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           content: Container(
@@ -236,7 +239,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(
-          'Event Calendar',
+          widget.title,
           style: GoogleFonts.montserrat(
             fontSize: 15.sp,
             fontWeight: FontWeight.bold,

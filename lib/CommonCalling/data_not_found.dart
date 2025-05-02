@@ -39,7 +39,7 @@ class DataNotFoundWidget extends StatelessWidget {
                                       textStyle: TextStyle(
                                         fontSize: 12.sp,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.black,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ),

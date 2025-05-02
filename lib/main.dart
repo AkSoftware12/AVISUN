@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:upgrader/upgrader.dart';
 import '../splash_sreen.dart';
 import 'UI/Auth/login_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -21,6 +22,8 @@ class MyHttpOverrides extends HttpOverrides{
 Future<void> main() async {
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
+  await Upgrader.clearSavedSettings();
+
   Platform.isAndroid ? await Firebase.initializeApp(
     options: kIsWeb || Platform.isAndroid
         ? const FirebaseOptions(
@@ -33,6 +36,9 @@ Future<void> main() async {
         : null,
   ) : await Firebase.initializeApp();
   NotificationService.initNotifications();
+  FirebaseMessaging.instance.getToken().then((token) {
+    print("🔥 FCM Token: $token");
+  });
 
   runApp(const MyApp());
 }

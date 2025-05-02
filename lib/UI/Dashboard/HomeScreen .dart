@@ -1,5 +1,6 @@
 import 'package:avi/HexColorCode/HexColor.dart';
 import 'package:avi/PaymentGateway/PayButton/pay_button.dart';
+import 'package:avi/UI/Attendance/AttendanceScreen.dart';
 import 'package:carousel_slider_plus/carousel_slider_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -49,29 +50,33 @@ class _HomeScreenState extends State<HomeScreen> {
       'image': 'assets/watch.png',
     },
     {
-      'name': 'Home Work',
+      'name': 'Messages',
       'image': 'assets/home_work.png',
     },
     {
-      'name': 'Subject',
-      'image': 'assets/physics.png',
+      'name': 'Attendance',
+      'image': 'assets/calendar_attendance.png',
     },
+    // {
+    //   'name': 'Subject',
+    //   'image': 'assets/physics.png',
+    // },
+    // {
+    //   'name': 'Leaves',
+    //   'image': 'assets/deadline.png',
+    // },
     {
-      'name': 'Leaves',
-      'image': 'assets/deadline.png',
-    },
-    {
-      'name': 'News & Events',
-      'image': 'assets/event_planner.png',
+      'name': 'Activity Calendar',
+      'image': 'assets/calendar_activity.png',
     },
     {
       'name': 'Gallery',
       'image': 'assets/gallery.png',
     },
-    {
-      'name': 'Report Card',
-      'image': 'assets/report.png',
-    },
+    // {
+    //   'name': 'Report Card',
+    //   'image': 'assets/report.png',
+    // },
 
   ];
 
@@ -218,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     email:studentData?['contact_mail']??'',
                     address: studentData?['address']??'',
                     payDate: '',
-                    dueAmount: '1250',
+                    dueAmount: '0',
 
                   ),
 
@@ -404,6 +409,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 );
+              } else if (items[index]['name'] == 'Attendance') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return AttendanceCalendarScreen(title: 'Attendance',);
+                    },
+                  ),
+                );
               }
 
 
@@ -417,12 +431,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 );
-              } else if (items[index]['name'] == 'News & Events') {
+              } else if (items[index]['name'] == 'Activity Calendar') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return CalendarScreen();
+                      return CalendarScreen(title: 'Activity Calendar',);
                     },
                   ),
                 );
@@ -435,12 +449,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 );
-              } else if (items[index]['name'] == 'Home Work') {
+              } else if (items[index]['name'] == 'Messages') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return HomeWorkScreen();
+                      return HomeWorkScreen(title: 'Messages',);
                     },
                   ),
                 );
@@ -628,9 +642,9 @@ class CarouselExample extends StatefulWidget {
 
 class _CarouselExampleState extends State<CarouselExample> {
   final List<String> imgList = [
-    'https://api-ap-south-mum-1.openstack.acecloudhosting.com:8080/franciscan/SchImg/CJMAMB/PhotoAlbum/Full/Photo_542310.jpg',
-    'https://api-ap-south-mum-1.openstack.acecloudhosting.com:8080/franciscan/SchImg/CJMAMB/PhotoAlbum/Full/Photo_532542.jpg',
-    'https://api-ap-south-mum-1.openstack.acecloudhosting.com:8080/franciscan/SchImg/CJMAMB/PhotoAlbum/Full/Photo_522725.jpg',
+    'https://cjmambala.in/slider/Slider2025_2.png',
+    'https://cjmambala.in/slider/Slider2025_5.png',
+    'https://cjmambala.in/slider/Slider2025_7.png',
     'https://cjmambala.in/images/building.png',
   ];
 
@@ -687,7 +701,7 @@ class _CarouselExampleState extends State<CarouselExample> {
                         if (loadingProgress == null) return child;
                         return Center(
                             child:
-                                CircularProgressIndicator()); // Show loader while loading
+                                CircularProgressIndicator( color: Colors.white,)); // Show loader while loading
                       },
                       errorBuilder: (context, error, stackTrace) {
                         return Center(

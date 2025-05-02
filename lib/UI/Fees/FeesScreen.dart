@@ -260,7 +260,7 @@ class PaymentCard extends StatelessWidget {
                       builder: (context) {
                         return WebViewExample(
                           title: '',
-                          url: 'https://softcjm.cjmshimla.in/student/fee-receipt/$id',
+                          url: 'https://testapi.cjmambala.co.in/student/fee-receipt/$id',
                         );
                       },
                     ),

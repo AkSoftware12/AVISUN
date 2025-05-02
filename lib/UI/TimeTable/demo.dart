@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:avi/HexColorCode/HexColor.dart';
 import 'package:avi/constants.dart';
 import 'package:day_picker/day_picker.dart';
@@ -124,10 +123,10 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
 
     return Scaffold(
       // backgroundColor: HexColor('#c0d4f2'),
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.secondary,
       appBar: AppBar(
           iconTheme: IconThemeData(color: AppColors.textwhite),
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.secondary,
           // backgroundColor: HexColor('#c0d4f2'),
           title: Text(
             'Time Table',

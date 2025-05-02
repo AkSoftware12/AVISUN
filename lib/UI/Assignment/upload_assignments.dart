@@ -168,7 +168,7 @@ class _AssignmentUploadScreenState extends State<AssignmentUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.secondary,
 
       appBar: AppBar(
         title: Text("Upload Assignment",
@@ -177,11 +177,11 @@ class _AssignmentUploadScreenState extends State<AssignmentUploadScreen> {
               fontSize: 18,
               fontWeight: FontWeight.w500,
               fontStyle: FontStyle.normal,
-              color: AppColors.textblack,
+              color: AppColors.textwhite,
             ),
         ),
-        backgroundColor: AppColors.primary,
-        iconTheme: IconThemeData(color: AppColors.textblack,),
+        backgroundColor: AppColors.secondary,
+        iconTheme: IconThemeData(color: AppColors.textwhite,),
       ),
 
       body: Padding(

@@ -32,8 +32,11 @@ class ApiRoutes {
 
   // Main App Url
   static const String baseUrl = "https://testapi.cjmambala.co.in/api";
+  // static const String baseUrl = "https://softcjm.cjmshimla.in/api";
+
   // static const String baseUrl = "https://apicjm.cjmambala.co.in/api";
 
+  static const String downloadUrl = "https://softcjm.cjmambala.in/student/fee-receipt/";
 
 // Local  App Url
 
@@ -63,4 +66,12 @@ class ApiRoutes {
   static const String getBookCategories = "$baseUrl/book-categories";
   static const String getBookPublishers = "$baseUrl/book-publishers";
   static const String getBookSupplier= "$baseUrl/book-supplier";
+  static const String getAtomSettings= "$baseUrl/atom-settings";
+  static const String orderCreate= "$baseUrl/bulkpay";
+  static const String atompay= "$baseUrl/atompay";
+  static const String passwordChange= "$baseUrl/change-password";
+  static const String updateApk= "$baseUrl/update-apk";
+  static const String forgotPassword= "$baseUrl/forgot-password";
+  static const String verifyOtp= "$baseUrl/verifyOtp";
+  static const String applyleave= "$baseUrl/applyleave";
 }

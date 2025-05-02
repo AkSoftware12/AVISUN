@@ -14,7 +14,7 @@ class WebViewContainer extends StatefulWidget {
   final responseDecryptionKey;
 
   WebViewContainer(this.mode, this.payDetails, this.responsehashKey,
-      this.responseDecryptionKey);
+      this.responseDecryptionKey, List<String> selectedFees1, String createOrderId, {super.key, required void Function() onReturn});
 
   @override
   createState() => _WebViewContainerState(this.mode, this.payDetails,

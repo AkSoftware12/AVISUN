@@ -31,9 +31,9 @@ class _GalleryVideoTabScreenState extends State<GalleryVideoTabScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.secondary,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.secondary,
         iconTheme: IconThemeData(color: Colors.white),
         title: Text("Gallery & Video Gallery",
           style: GoogleFonts.montserrat(
@@ -51,7 +51,7 @@ class _GalleryVideoTabScreenState extends State<GalleryVideoTabScreen>
             controller: _tabController,
             indicatorColor: Colors.white, // Customize the indicator color
             labelColor: Colors.white, // Customize the selected tab label color
-            unselectedLabelColor: Colors.grey.shade800, // Customize the unselected tab label color
+            unselectedLabelColor: Colors.grey, // Customize the unselected tab label color
             indicatorWeight: 3.0, // Thickness of the indicator
             tabs: const [
               Tab(

@@ -126,10 +126,10 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
 
     return Scaffold(
      // backgroundColor: HexColor('#c0d4f2'),
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.secondary,
       appBar: AppBar(
           iconTheme: IconThemeData(color: AppColors.textwhite),
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.secondary,
           // backgroundColor: HexColor('#c0d4f2'),
           title: Text(
             'Time Table',

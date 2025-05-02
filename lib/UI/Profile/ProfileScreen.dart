@@ -237,10 +237,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 buildProfileRow('Class', studentData!['class_name']),
                 buildProfileRow('Section', studentData!['section']?? ''),
                 buildProfileRow('Roll Number', studentData!['roll_no']??''),
-                buildProfileRow(
-                  'Registration Number',
-                  studentData!['registration_no']??'',
-                ),
+                // buildProfileRow(
+                //   'Registration Number',
+                //   studentData!['registration_no']??'',
+                // ),
                 buildProfileRow('Admission Number', studentData!['adm_no']??''),
               ]),
               const SizedBox(height: 20),
