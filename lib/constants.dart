@@ -31,12 +31,12 @@ class ApiRoutes {
 
 
   // Main App Url
-  static const String baseUrl = "https://testapi.cjmambala.co.in/api";
-  // static const String baseUrl = "https://softcjm.cjmshimla.in/api";
+  // static const String baseUrl = "https://testapi.cjmambala.co.in/api";
+  static const String baseUrl = "https://softcjm.cjmambala.co.in/api";
 
   // static const String baseUrl = "https://apicjm.cjmambala.co.in/api";
 
-  static const String downloadUrl = "https://softcjm.cjmambala.in/student/fee-receipt/";
+  static const String downloadUrl = "https://softcjm.cjmambala.co.in/student/fee-receipt/";
 
 // Local  App Url
 
