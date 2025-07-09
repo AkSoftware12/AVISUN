@@ -207,15 +207,15 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12), // बेहतर padding
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return AppStrings.invalidEmail;
-                              }
-                              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                                return AppStrings.invalidEmail;
-                              }
-                              return null;
-                            },
+                            // validator: (value) {
+                            //   if (value == null || value.isEmpty) {
+                            //     return AppStrings.invalidEmail;
+                            //   }
+                            //   if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                            //     return AppStrings.invalidEmail;
+                            //   }
+                            //   return null;
+                            // },
 
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                           ),

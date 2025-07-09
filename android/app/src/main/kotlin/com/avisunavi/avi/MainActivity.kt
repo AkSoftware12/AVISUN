@@ -71,7 +71,7 @@ class MainActivity: FlutterActivity() {
             }
             sb.append(Integer.toHexString(v))
         }
-        return sb.toString().toUpperCase()
+        return sb.toString().uppercase()
     }
 
     private fun getAtomDecryption(encryptedText: String, key: String): String {

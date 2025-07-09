@@ -1,5 +1,4 @@
 
-import 'package:avi/PaymentGateway/home_getway.dart';
 import 'package:avi/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/platform_interface.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+
 import '../../CommonCalling/data_not_found.dart';
 import '../../CommonCalling/progressbarWhite.dart';
 import '../../PaymentGateway/PayButton/pay_button.dart';

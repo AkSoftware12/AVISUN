@@ -99,9 +99,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     final response = await http.get(
       // Uri.parse(ApiRoutes.getlibrary),
       Uri.parse(
-          '${ApiRoutes
-              .getlibrary}?type=$type&publisher=$publishers&supplier=$supplier&title=${textController
-              .text}'),
+          '${ApiRoutes.getlibrary}?type=$type&publisher=$publishers&supplier=$supplier&title=${textController.text}'),
 
       headers: {'Authorization': 'Bearer $token'},
     );

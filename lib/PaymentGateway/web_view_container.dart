@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'atom_pay_helper.dart';
 
 class WebViewContainer extends StatefulWidget {
@@ -31,7 +32,8 @@ class _WebViewContainerState extends State<WebViewContainer> {
 
   final Completer<InAppWebViewController> _controllerCompleter =
   Completer<InAppWebViewController>();
-
+  WebViewController controller = WebViewController()
+    ..setJavaScriptMode(JavaScriptMode.unrestricted);
   @override
   void initState() {
     super.initState();
@@ -65,7 +67,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
                 _controllerCompleter.complete(inAppWebViewController);
 
                 debugPrint("payDetails from webview $payDetails");
-                _loadHtmlFromAssets(mode);
+                loadHtmlFromAssets(mode,controller);
               },
               shouldOverrideUrlLoading: (controller, navigationAction) async {
                 debugPrint("shouldOverrideUrlLoading called");
@@ -157,14 +159,29 @@ class _WebViewContainerState extends State<WebViewContainer> {
     );
   }
 
-  _loadHtmlFromAssets(mode) async {
-    final localUrl =
-    mode == 'uat' ? "assets/aipay_uat.html" : "assets/aipay_prod.html";
-    String fileText = await rootBundle.loadString(localUrl);
-    _controller.loadUrl(
-        urlRequest: URLRequest(
-            url: Uri.dataFromString(fileText,
-                mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))));
+
+
+  Future<void> loadHtmlFromAssets(String mode, WebViewController controller) async {
+    try {
+      // Determine the asset path based on mode
+      final localUrl = mode == 'uat' ? 'assets/aipay_uat.html' : 'assets/aipay_prod.html';
+
+      // Load HTML content from assets
+      final fileText = await rootBundle.loadString(localUrl);
+
+      // Load HTML content into WebView
+      await controller.loadRequest(
+        Uri.dataFromString(
+          fileText,
+          mimeType: 'text/html',
+          encoding: utf8,
+        ),
+      );
+    } catch (e) {
+      // Handle errors (e.g., file not found, WebView not initialized)
+      print('Error loading HTML: $e');
+      // Optionally, inform the user or take fallback action
+    }
   }
 
   _closeWebView(context, transactionResult,data) {

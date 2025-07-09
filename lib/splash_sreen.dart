@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
 import '../constants.dart';
-import '../UI/Auth/login_screen.dart';
+import 'UI/Auth/login_screen_demo.dart';
 import 'UI/bottom_navigation.dart';
+
+
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -80,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen> {
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
+          MaterialPageRoute(builder: (context) => LoginPageDemo()),
         );
       }
     }
