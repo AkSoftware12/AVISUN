@@ -31,18 +31,30 @@ class ApiRoutes {
 
 
   // Main App Url
-  // static const String baseUrl = "https://testapi.cjmambala.co.in/api";
   static const String baseUrl = "https://softcjm.cjmambala.co.in/api";
+  static const String baseUrlNewUser = "https://webcjm.akdesire.com/api";
 
-  // static const String baseUrl = "https://apicjm.cjmambala.co.in/api";
 
   static const String downloadUrl = "https://softcjm.cjmambala.co.in/student/fee-receipt/";
+  static const String newUserdownloadUrl = "https://webcjm.akdesire.com/api/fees/";
 
 // Local  App Url
 
 
-  // static const String baseUrl = "http://192.168.1.4/CJM/api";
+  // static const String baseUrlNewUser = "http://192.168.1.7/cjmweb/api";
 
+
+  // New Admission Api
+  static const String loginNewUser = "$baseUrlNewUser/login";
+  static const String getProfileNewUser = "$baseUrlNewUser/student-get";
+  static const String orderCreateNewUser  = "$baseUrlNewUser/initiatepayment";
+  static const String payFeesNewUser  = "$baseUrlNewUser/payfees";
+
+
+
+
+
+// Student Api
 
 
   static const String login = "$baseUrl/login";

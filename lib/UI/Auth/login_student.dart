@@ -347,3 +347,76 @@ class _LoginPageState extends State<LoginStudentPage> {
     );
   }
 }
+
+class CustomLoginButton extends StatefulWidget {
+  final VoidCallback onPressed;
+  final String title;
+
+  const CustomLoginButton({
+    super.key,
+    required this.onPressed,
+    required this.title,
+  });
+
+  @override
+  _CustomLoginButtonState createState() => _CustomLoginButtonState();
+}
+
+class _CustomLoginButtonState extends State<CustomLoginButton> {
+  bool isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => isPressed = true),
+      onTapUp: (_) async {
+        setState(() => isPressed = true);
+
+        // Let the ripple animation happen first (optional)
+        await Future.delayed(Duration(milliseconds: 100));
+
+        if (mounted) {
+          setState(() => isPressed = false);
+        }
+
+        // Navigate or perform login after animation is done
+        widget.onPressed();
+      },
+
+
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 150),
+        curve: Curves.easeInOut,
+        width: double.infinity,
+        height: 55,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          gradient: LinearGradient(
+            colors: isPressed
+                ? [AppColors.secondary, AppColors.primary]
+                : [AppColors.secondary, AppColors.primary],
+          ),
+          boxShadow: isPressed
+              ? []
+              : [
+            BoxShadow(
+              color: Colors.blue.withOpacity(0.5),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            '${widget.title}',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

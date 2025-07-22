@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'package:avi/NewUserBottombarPage/new_user_bottombar_page.dart';
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
+import 'UI/Auth/login_screen.dart';
 import 'UI/Auth/login_screen_demo.dart';
 import 'UI/bottom_navigation.dart';
 
@@ -58,6 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkConnectivity() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
+    String? newUsertoken = prefs.getString('newusertoken');
     final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       setState(() {
@@ -77,10 +80,17 @@ class _SplashScreenState extends State<SplashScreen> {
           context,
           MaterialPageRoute(builder: (context) => BottomNavBarScreen(initialIndex: 0,)),
         );
-      } else {
+      } else  if (newUsertoken != null && newUsertoken.isNotEmpty) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginPageDemo()),
+          MaterialPageRoute(builder: (context) => NewUserBottombarPage()),
+        );
+      }
+
+      else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
         );
       }
     }
@@ -126,7 +136,7 @@ class _SplashScreenState extends State<SplashScreen> {
           padding: EdgeInsets.all(10), // Optional: Add some padding inside the container
           child: _isConnected
               ? Image.asset(
-            AppAssets.logo,
+            AppAssets.cjmlogo,
             width: MediaQuery.of(context).size.width * 0.5, // Responsive width
             height: MediaQuery.of(context).size.height * 0.25, // Responsive height
             fit: BoxFit.contain,

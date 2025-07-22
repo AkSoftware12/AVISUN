@@ -50,6 +50,8 @@ dependencies:
   flutter_animate: ^4.5.2
   upgrader: ^10.3.0
   package_info_plus: ^8.0.2
+  cryptography: ^2.7.0
+
 
 
 
