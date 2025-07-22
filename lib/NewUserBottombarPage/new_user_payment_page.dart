@@ -824,7 +824,7 @@ class _NewUserPaymentScreenState extends State<NewUserPaymentScreen> {
       backgroundColor: AppColors.secondary,
       appBar: AppBar(
         title: Text(
-          "Admission Fees",
+          " Fees",
           style: TextStyle(
             color: Colors.white,
             fontSize: 20.sp,
@@ -1028,50 +1028,144 @@ class _NewUserPaymentScreenState extends State<NewUserPaymentScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 4,
-                  child: ListTile(
-                      leading: Icon(Icons.receipt_long, color: AppColors.secondary),
-                      title: Text(fee['order_id']??'',style: TextStyle(color: Colors.black,fontSize: 14.sp,fontWeight: FontWeight.bold),),
-                      subtitle: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+
+                  Padding(
+                  padding: EdgeInsets.all(0.sp),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+
+                        borderRadius: BorderRadius.circular(10)
+                    ),
+
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 5.h, horizontal: 0.w),
+                      child: Row(
                         children: [
-                          Text(' ${fee['txn_date']??''}'),
-                          Text(
-                            '₹${fee['amount']}',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          SizedBox(width: 5.w),
+
+                          CircleAvatar(
+                            backgroundColor: Colors.green.shade50,
+                            child: Icon(
+                              Icons.payment,
+                              color: Colors.green,
+                            ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            fee['status'],
-                            style: TextStyle(
-                              color: fee['status'] == 'SUCCESS'
-                                  ? Colors.green
-                                  : Colors.red,
-                              fontWeight: FontWeight.w600,
+                          SizedBox(width: 16.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+
+                                Text(
+                                  double.parse(fee['amount']) < 1500
+                                      ? 'Registration'
+                                      : 'Admission',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.green,
+                                  ),
+                                ),
+
+                                Text(
+                                  '${fee['txn_date']??''}',
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding:  EdgeInsets.all(5.sp),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade100,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                '₹ ${fee['amount'].toString()}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green[700],
+                                  fontSize: 15.sp
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                ),
+                      
+                      ListTile(
+                          title: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
-                      trailing:  IconButton(
-                          onPressed: () async {
-                            final Uri uri = Uri.parse('${ApiRoutes.newUserdownloadUrl}${fee['id']}');
-                            try {
-                              if (!await launchUrl(uri,
-                                  mode: LaunchMode.externalApplication)) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Could not open URL')),
-                                );
-                              }
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error: $e')),
-                              );
-                            }
-                          },
-
-                          icon:Icon(Icons.print))
-
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.account_circle,size: 15.sp,),
+                                  SizedBox(width: 3.sp,),
+                                  Text(studentData!['name']??'',style: TextStyle(color: Colors.black,fontSize: 14.sp,fontWeight: FontWeight.bold),),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Icon(Icons.shopping_cart,size: 15.sp,),
+                                  SizedBox(width: 3.sp,),
+                                  Text(fee['order_id']??'',style: TextStyle(color: Colors.grey,fontSize: 14.sp,fontWeight: FontWeight.bold),),
+                                ],
+                              ),
+                            ],
+                          ),
+                          subtitle: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                fee['status'],
+                                style: TextStyle(
+                                  color: fee['status'] == 'SUCCESS'
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                      
+                          trailing:  IconButton(
+                              onPressed: () async {
+                                final Uri uri = Uri.parse('${ApiRoutes.newUserdownloadUrl}${fee['id']}');
+                                try {
+                                  if (!await launchUrl(uri,
+                                      mode: LaunchMode.externalApplication)) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Could not open URL')),
+                                    );
+                                  }
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error: $e')),
+                                  );
+                                }
+                              },
+                      
+                              icon:Icon(Icons.print))
+                      
+                      ),
+                    ],
                   ),
                 );
               },

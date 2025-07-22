@@ -242,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
                               CupertinoIcons.mail_solid,
                               color: Colors.black,
                             ),
-                            hintText: 'Enter Email, Phone, or Admission Number', // Clear hint
+                            hintText: 'Enter User Id, or Adm. no', // Clear hint
                             hintStyle: TextStyle(
                               color: Colors.grey.shade600,
                               fontSize: 16,
