@@ -1117,7 +1117,7 @@ class _NewUserPaymentScreenState extends State<NewUserPaymentScreen> {
                                 children: [
                                   Icon(Icons.account_circle,size: 15.sp,),
                                   SizedBox(width: 3.sp,),
-                                  Text(studentData!['name']??'',style: TextStyle(color: Colors.black,fontSize: 14.sp,fontWeight: FontWeight.bold),),
+                                  Text('${studentData!['name']??''} / ${studentData!['class_name']??''}',style: TextStyle(color: Colors.black,fontSize: 14.sp,fontWeight: FontWeight.bold),),
                                 ],
                               ),
                               Row(

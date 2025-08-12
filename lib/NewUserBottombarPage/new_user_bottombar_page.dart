@@ -1,20 +1,18 @@
 import 'package:avi/NewUserBottombarPage/new_user_profile_page.dart';
 import 'package:avi/NewUserBottombarPage/new_user_payment_page.dart';
-import 'package:avi/UI/Notification/notification.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upgrader/upgrader.dart';
-import '../UI/Dashboard/HomeScreen%20.dart';
+import '../utils/upgrader_config.dart';
+import '../UI/Gallery/Album/album.dart';
 import '../constants.dart';
 import '../strings.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'message_main.dart';
 import 'message_psge.dart';
 
 
@@ -34,9 +32,10 @@ class _BottomNavBarScreenState extends State<NewUserBottombarPage> {
   // List of screens
   final List<Widget> _screens = [
 
-    MessageListScreen(),
+    MessageMainScreen(),
     // PayPage(),
     NewUserPaymentScreen(),
+    GalleryScreen(type: 'NewUser',),
     NewUserProfileScreen(),
   ];
 
@@ -86,6 +85,7 @@ class _BottomNavBarScreenState extends State<NewUserBottombarPage> {
   @override
   Widget build(BuildContext context) {
     return UpgradeAlert(
+      upgrader: UpgraderConfig.getUpgrader(),
       showIgnore: true,
       showLater: true,
       showReleaseNotes: false,
@@ -106,8 +106,8 @@ class _BottomNavBarScreenState extends State<NewUserBottombarPage> {
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,
-            backgroundColor: AppColors.secondary,
-            selectedItemColor: AppColors.textwhite,
+            backgroundColor: Colors.red.shade900,
+            selectedItemColor: Colors.white,
             unselectedItemColor: AppColors.grey,
             showSelectedLabels: true,  // ✅ Ensures selected labels are always visible
             showUnselectedLabels: true, // ✅ Ensures unselected labels are also visible
@@ -122,6 +122,11 @@ class _BottomNavBarScreenState extends State<NewUserBottombarPage> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.currency_rupee),
                 label: AppStrings.feesLabel,
+                backgroundColor: AppColors.primary,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.photo),
+                label: 'Gallery',
                 backgroundColor: AppColors.primary,
               ),
               BottomNavigationBarItem(

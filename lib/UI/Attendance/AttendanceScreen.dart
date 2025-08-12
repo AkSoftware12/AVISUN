@@ -893,7 +893,7 @@ class _AttendanceCalendarScreenState extends State<AttendanceCalendarScreen> {
 
   Widget _buildSummaryItem(String title, int count, Color color) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5.sp, horizontal: 5.sp),
+      padding: EdgeInsets.symmetric(vertical: 10.sp, horizontal: 10.sp),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -1067,39 +1067,41 @@ class _AttendanceCalendarScreenState extends State<AttendanceCalendarScreen> {
                     ),
                   ),
                   SizedBox(height: 5.sp),
-                  Card(
-                    color: HexColor('#FFE5E7'),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 4,
-                    child: Padding(
-                      padding: EdgeInsets.all(16.sp),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "📊 Attendance Summary",
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red[800],
+                  SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      color: HexColor('#FFE5E7'),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 4,
+                      child: Padding(
+                        padding: EdgeInsets.all(10.sp),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "📊 Attendance Summary",
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red[800],
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 8.sp),
-                          SizedBox(height: 16.sp),
-                          Wrap(
-                            alignment: WrapAlignment.spaceBetween,
-                            runSpacing: 12.sp,
-                            spacing: 12.sp,
-                            children: [
-                              _buildSummaryItem("✅ Present", totalPresent, Colors.green),
-                              _buildSummaryItem("❌ Absent", totalAbsent, Colors.red),
-                              _buildSummaryItem("📝 Leave", totalLeave, Colors.blue),
-                              _buildSummaryItem("🎉 Holiday", totalHoliday, Colors.orange),
-                            ],
-                          ),
-                        ],
+                            SizedBox(height: 16.sp),
+                            Wrap(
+                              alignment: WrapAlignment.spaceBetween,
+                              runSpacing: 15.sp,
+                              spacing: 15.sp,
+                              children: [
+                                _buildSummaryItem("✅ Present", totalPresent, Colors.green),
+                                _buildSummaryItem("❌ Absent", totalAbsent, Colors.red),
+                                _buildSummaryItem("📝 Leave", totalLeave, Colors.blue),
+                                _buildSummaryItem("🎉 Holiday", totalHoliday, Colors.orange),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -1125,27 +1127,5 @@ class _AttendanceCalendarScreenState extends State<AttendanceCalendarScreen> {
     );
   }
 
-  // Widget _buildSummaryItem(String label, int count, Color color) {
-  //   return Column(
-  //     children: [
-  //       Text(
-  //         label,
-  //         style: GoogleFonts.montserrat(
-  //           fontSize: 12.sp,
-  //           fontWeight: FontWeight.w600,
-  //           color: Colors.red[800],
-  //         ),
-  //       ),
-  //       SizedBox(height: 4.sp),
-  //       Text(
-  //         count.toString(),
-  //         style: TextStyle(
-  //           fontSize: 16.sp,
-  //           fontWeight: FontWeight.bold,
-  //           color: color,
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
+
 }

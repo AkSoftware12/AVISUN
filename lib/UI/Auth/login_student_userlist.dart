@@ -14,21 +14,20 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'login_screen.dart';
 
-class LoginStudentPage extends StatefulWidget {
+class LoginUserLIst extends StatefulWidget {
 
-  const LoginStudentPage({super.key,});
+  const LoginUserLIst({super.key,});
 
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginStudentPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+class _LoginPageState extends State<LoginUserLIst> {
+
   final Dio _dio = Dio(); // Initialize Dio
   bool _isLoading = false;
-  List<dynamic> studentList = []; // ✅ Dropdown ke liye data list
+  // List<dynamic> studentList = []; // ✅ Dropdown ke liye data list
+  List<Map<String, dynamic>> studentList = [];
 
   // Radio Button List Data
   String? selectedOption;
@@ -36,7 +35,7 @@ class _LoginPageState extends State<LoginStudentPage> {
   @override
   void initState() {
     super.initState();
-    _loadStudents();
+    _loadLoginHistory();
 
   }
 
@@ -146,20 +145,28 @@ class _LoginPageState extends State<LoginStudentPage> {
   }
 
 
-
-  Future<void> _loadStudents() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedData = prefs.getString('studentList');
-
-    if (savedData != null) {
+  Future<void> _loadLoginHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? data = prefs.getString('loginHistory');
+    if (data != null) {
       setState(() {
-        studentList = jsonDecode(savedData);
-        print('Student List $studentList');
-
-        // selectedStudent = studentList.isNotEmpty ? studentList[0]['name'] : null;
+        studentList = List<Map<String, dynamic>>.from(jsonDecode(data));
       });
     }
   }
+  // Future<void> _loadStudents() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? savedData = prefs.getString('studentList');
+  //
+  //   if (savedData != null) {
+  //     setState(() {
+  //       studentList = jsonDecode(savedData);
+  //       print('Student List $studentList');
+  //
+  //       // selectedStudent = studentList.isNotEmpty ? studentList[0]['name'] : null;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -171,86 +178,126 @@ class _LoginPageState extends State<LoginStudentPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: MediaQuery.of(context).size.width* 0.9,
-              padding:  EdgeInsets.all(10.sp),
+              width: MediaQuery.of(context).size.width * 0.9,
+              padding: EdgeInsets.all(10.sp),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(15),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
                     blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
-              child:  Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          height: 110.sp,
-                          width: 180.sp,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(10.sp),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: SizedBox(
-                                height: 90.sp,
-                                width: 90.sp,
-                                child: Image.asset(
-                                  AppAssets.cjmlogo,
-                                ),
-                              ),
-                            ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Logo Section
+                  Container(
+                    height: 90.sp,
+                    width: 180.sp,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(10.sp),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: SizedBox(
+                          height: 90.sp,
+                          width: 90.sp,
+                          child: Image.asset(
+                            AppAssets.cjmlogo,
+                            fit: BoxFit.contain, // Ensure image fits properly
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.error); // Fallback for image loading failure
+                            },
                           ),
                         ),
-                        const SizedBox(height: 5),
-                      ],
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Select Student",
-                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14.sp),
                       ),
                     ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                  ),
+                  const SizedBox(height: 5),
+                  // Select Student Text
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Select Student",
+                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                    ),
+                  ),
+                   Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '(${studentList.length.toString()})',
+                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                    ),
+                  ),
+                  // Constrain ListView height
+                  SizedBox(
+                    height: 250.sp, // Set a fixed height for the ListView
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true, // Ensure ListView takes only the space it needs
+                      physics: const ClampingScrollPhysics(), // Smooth scrolling
                       itemCount: studentList.length,
                       itemBuilder: (context, index) {
-                        var student = studentList[index];
+                        final student = studentList[index];
+                        // Check for null or missing keys
+                        if (student == null ||
+                            student['name'] == null ||
+                            student['student_id'] == null ||
+                            student['adm_no'] == null) {
+                          return const ListTile(
+                            title: Text('Invalid Student Data'),
+                          );
+                        }
                         return Container(
                           margin: const EdgeInsets.symmetric(vertical: 5),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(color: AppColors.secondary, blurRadius: 10, offset: Offset(2, 2)),
-                            ],
+                            // boxShadow: [
+                            //   BoxShadow(
+                            //     color: Colors.black,
+                            //     blurRadius: 10,
+                            //     offset: const Offset(2, 2),
+                            //   ),
+                            // ],
                           ),
                           child: RadioListTile<String>(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                            contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                             title: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(student['name'].toString(), style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14.sp)),
-                                Text("${student['student_id'].toString()}", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp)),
+                                Text(
+                                  student['name'].toString(),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Text(
+                                  student['student_id'].toString(),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ],
                             ),
-                            subtitle: Text("${student['adm_no'].toString()}", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp)),
-
+                            subtitle: Text(
+                              student['adm_no'].toString(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
                             value: student['student_id'].toString(),
                             groupValue: selectedOption,
                             onChanged: (value) {
@@ -258,95 +305,58 @@ class _LoginPageState extends State<LoginStudentPage> {
                                 selectedOption = value;
                               });
                               _saveSelectedStudent(value!);
-
                             },
                             activeColor: AppColors.secondary,
                           ),
                         );
                       },
                     ),
-                    SizedBox(height: 50.sp),
-                    if (_isLoading)
-                      const Center(child: CircularProgressIndicator())
-                    else Padding(
-                      padding:  EdgeInsets.only(left: 18.sp,right: 18.sp),
-                      child: CustomLoginButton(onPressed: () {
+                  ),
+                  SizedBox(height: 50.sp),
+                  // Loading Indicator or Button
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : Padding(
+                    padding: EdgeInsets.only(left: 18.sp, right: 18.sp),
+                    child: CustomLoginButton(
+                      onPressed: () {
                         if (selectedOption != null) {
                           _login();
                           print("Selected Option: $selectedOption");
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                               content: Text("Please select a student!"),
                               backgroundColor: Colors.red,
                             ),
                           );
                         }
-                      }, title: 'Go',),
+                      },
+                      title: 'Go',
                     ),
-                      // SizedBox(
-                      //   width: double.infinity,
-                      //   child: ElevatedButton(
-                      //     style: ElevatedButton.styleFrom(
-                      //       backgroundColor: CupertinoColors.systemGreen,
-                      //       padding: const EdgeInsets.symmetric(vertical: 14),
-                      //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      //     ),
-                      //     onPressed: () {
-                      //       if (selectedOption != null) {
-                      //         _login();
-                      //         print("Selected Option: $selectedOption");
-                      //       } else {
-                      //         ScaffoldMessenger.of(context).showSnackBar(
-                      //           SnackBar(
-                      //             content: Text("Please select a student!"),
-                      //             backgroundColor: Colors.red,
-                      //           ),
-                      //         );
-                      //       }
-                      //     },
-                      //     child: Text("Go", style: TextStyle(fontSize: 16.sp, color: Colors.white)),
-                      //   ),
-                      // ),
-                  ],
-                )
-
-              )
-            ),
-            Column(
-              children: [
-
-                Padding(
-                  padding:  EdgeInsets.only(top: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(0.0),
-                        child: Text('Provider by AVI-SUN',
-                          style: GoogleFonts.montserrat(
-                            textStyle: Theme.of(context).textTheme.displayLarge,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            fontStyle: FontStyle.normal,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
-                )
-
-              ],
+                ],
+              ),
             ),
-
+            // Footer Text
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                'Provider by AVI-SUN',
+                style: GoogleFonts.montserrat(
+                  textStyle: Theme.of(context).textTheme.displayLarge,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  fontStyle: FontStyle.normal,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ],
         ),
-
       ),
     );
-  }
-}
+  }}
 
 class CustomLoginButton extends StatefulWidget {
   final VoidCallback onPressed;

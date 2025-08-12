@@ -2,15 +2,15 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:upgrader/upgrader.dart';
 import '../splash_sreen.dart';
-import 'UI/Auth/login_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/foundation.dart';
 
-import 'UI/Notification/notification.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 
 class MyHttpOverrides extends HttpOverrides{
   @override
@@ -22,7 +22,6 @@ class MyHttpOverrides extends HttpOverrides{
 Future<void> main() async {
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
-  await Upgrader.clearSavedSettings();
 
   Platform.isAndroid ? await Firebase.initializeApp(
     options: kIsWeb || Platform.isAndroid
@@ -37,14 +36,17 @@ Future<void> main() async {
   ) : await Firebase.initializeApp();
   NotificationService.initNotifications();
   FirebaseMessaging.instance.getToken().then((token) {
-    print("🔥 FCM Token: $token");
   });
+  runApp( ProviderScope(child: MyApp(navigatorKey: navigatorKey)));
 
-  runApp(const MyApp());
+  // runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final GlobalKey<NavigatorState> navigatorKey;
+
+  const MyApp({super.key, required this.navigatorKey});
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +58,7 @@ class MyApp extends StatelessWidget {
       builder: (_ , child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
+          navigatorKey: navigatorKey, // ⬅️ Add this
           home:  SplashScreen(),
         );
       },
@@ -63,6 +66,7 @@ class MyApp extends StatelessWidget {
 
   }
 }
+
 
 
 
@@ -82,11 +86,15 @@ class NotificationService {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print("✅ Push Notifications Enabled");
+      if (kDebugMode) {
+        print("✅ Push Notifications Enabled");
+      }
 
       // **Get FCM Token**
       String? token = await _firebaseMessaging.getToken();
-      print("FCM Token: $token"); // Send this to your server
+      if (kDebugMode) {
+        print("FCM Token: $token");
+      } // Send this to your server
 
       // **Handle Incoming Notifications**
       FirebaseMessaging.onMessage.listen(_onMessage);
@@ -96,19 +104,16 @@ class NotificationService {
       // **Initialize Local Notifications**
       _initLocalNotifications();
     } else {
-      print("❌ Push Notifications Denied");
     }
   }
 
   /// **🔹 Handle Foreground Notifications**
   static void _onMessage(RemoteMessage message) {
-    print("📩 Foreground Notification: ${message.notification?.title}");
     _showLocalNotification(message);
   }
 
   /// **🔹 Handle Notification Click**
   static void _onMessageOpenedApp(RemoteMessage message) {
-    print("📩 Notification Clicked: ${message.notification?.title}");
 
     // **Navigate to a Specific Screen**
     // Navigator.push(
@@ -120,7 +125,6 @@ class NotificationService {
 
   /// **🔹 Handle Background Notifications**
   static Future<void> _onBackgroundMessage(RemoteMessage message) async {
-    print("📩 Background Notification: ${message.notification?.title}");
   }
 
   /// **🔹 Initialize Local Notifications**

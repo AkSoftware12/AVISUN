@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import '../../constants.dart';
+import '../Auth/login_student_userlist.dart';
 import '/UI/Auth/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -250,6 +251,75 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 buildProfileRow('Email', studentData!['email']??''),
                 buildProfileRow('Address', studentData!['address']??''),
               ]),
+              const SizedBox(height: 20),
+              
+              GestureDetector(
+                onTap: (){
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginUserLIst(),
+                    ),
+                  );
+
+                },
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.account_circle,size: 20,color: Colors.black,),
+                              SizedBox(width: 5.sp,),
+                              Text('Users List',style: TextStyle(color: Colors.black,fontSize: 12.sp,fontWeight: FontWeight.bold),)
+
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              GestureDetector(
+                onTap: (){
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+
+                },
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.add_circle_outline,size: 20,color: Colors.black,),
+                              SizedBox(width: 5.sp,),
+                              Text('Add Account',style: TextStyle(color: Colors.black,fontSize: 12.sp,fontWeight: FontWeight.bold),)
+
+                            ],
+                          ),
+                          Text('Add another account',style: TextStyle(color: Colors.grey,fontSize: 10.sp),)
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 50),
             ],
           ),
@@ -265,7 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       curve: Curves.easeInOut,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
+        color:Colors.black54,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -291,7 +361,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   Widget buildProfileRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding:  EdgeInsets.symmetric(vertical: 3.sp),
       child: SingleChildScrollView(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start, // Align the row to start

@@ -70,7 +70,7 @@ class _GalleryVideoTabScreenState extends State<GalleryVideoTabScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          GalleryScreen(),
+          GalleryScreen(type: '',),
           VideoAlbumListScreen(),
         ],
       ),

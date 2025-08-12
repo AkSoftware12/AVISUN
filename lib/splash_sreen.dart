@@ -96,12 +96,6 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  // Save token in shared preferences
-  Future<void> _setTokenInSharedPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    // const token = "JXEvEcAgC3MUbjndPGXMlyZQt2lshInfD7s3vI1htvmjMcLAxyP9GEl45Z3z";
-    // await prefs.setString('token', token);
-  }
 
   // Show Cupertino dialog when there's no internet
   void _showNoInternetDialog() {

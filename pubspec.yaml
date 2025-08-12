@@ -2,7 +2,7 @@ name: avi
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.5+5
+version: 1.0.7+7
 
 environment:
   sdk: ^3.8.1
@@ -51,6 +51,11 @@ dependencies:
   upgrader: ^10.3.0
   package_info_plus: ^8.0.2
   cryptography: ^2.7.0
+  flutter_secure_storage: ^9.0.0
+  shimmer: ^3.0.0
+  flutter_html: ^3.0.0
+  new_version_plus: ^0.1.1
+  flutter_riverpod: ^2.6.1
 
 
 

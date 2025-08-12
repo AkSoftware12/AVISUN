@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upgrader/upgrader.dart';
+import '../utils/upgrader_config.dart';
 import '../UI/Dashboard/HomeScreen%20.dart';
 import '../constants.dart';
 import '../strings.dart';
@@ -14,25 +15,24 @@ import 'Assignment/assignment.dart';
 import 'Attendance/AttendanceScreen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'Auth/login_screen.dart';
 import 'Auth/login_student.dart';
-import 'FAQ/faq.dart';
-import 'Fees/FeesScreen.dart';
+import 'Auth/login_student_userlist.dart';
+import 'Documents/documents.dart';
 import 'Fees/fee_demo.dart';
 import 'Gallery/gallery_tab.dart';
 import 'Help/help.dart';
 import 'Library/LibraryScreen.dart';
 import 'Notice/notice.dart';
 import 'Profile/ProfileScreen.dart';
-import 'Report/report_card.dart';
 import 'TimeTable/time_table.dart';
-import 'WebView/webview.dart';
 
 class BottomNavBarScreen extends StatefulWidget {
   // final String token;
   final int initialIndex;
+
   const BottomNavBarScreen({super.key, required this.initialIndex});
+
   @override
   _BottomNavBarScreenState createState() => _BottomNavBarScreenState();
 }
@@ -41,12 +41,12 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
   int _selectedIndex = 0;
   Map<String, dynamic>? studentData;
   bool isLoading = true;
-  String currentVersion ='';
+  String currentVersion = '';
 
   // List of screens
   final List<Widget> _screens = [
     HomeScreen(),
-    AttendanceCalendarScreen(title: 'Attendance',),
+    AttendanceCalendarScreen(title: 'Attendance'),
     // AttendanceCalendar(),
     LibraryScreen(),
     // FeesScreen(),
@@ -68,22 +68,21 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
       _selectedIndex = index;
     });
   }
+
   @override
   void initState() {
     super.initState();
     checkForVersion(context);
 
-
     fetchStudentData();
     _selectedIndex = widget.initialIndex; // Set the initial tab index
-
   }
-
 
   Future<void> checkForVersion(BuildContext context) async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     currentVersion = packageInfo.version;
   }
+
   Future<void> fetchStudentData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -101,11 +100,19 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      setState(() {
-        studentData = data['student'];
-        isLoading = false;
-        print(studentData);
+      var photoUrl = data['student']?['photo'];
 
+      // Check if image actually exists
+      if (photoUrl != null && photoUrl.toString().isNotEmpty) {
+        final imgCheck = await http.head(Uri.parse(photoUrl));
+        if (imgCheck.statusCode != 200) {
+          photoUrl = null; // Use null if file not found
+        }
+      }
+
+      setState(() {
+        studentData = {...data['student'], 'photo': photoUrl};
+        isLoading = false;
       });
     } else {
       _showLoginDialog();
@@ -133,17 +140,17 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
       ),
     );
   }
+
   Widget _buildAppBar() {
     return Row(
       children: [
-
         Builder(
           builder: (context) => Padding(
             padding: EdgeInsets.all(0),
             child: GestureDetector(
-                onTap: () {
-                  Scaffold.of(context).openDrawer();
-                },
+              onTap: () {
+                Scaffold.of(context).openDrawer();
+              },
               child: SizedBox(
                 height: 30,
                 width: 30,
@@ -153,8 +160,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
           ), // Ensure Scaffold is in context
         ),
 
-
-         SizedBox(width: 16),
+        SizedBox(width: 16),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -169,7 +175,6 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
               ),
             ),
             GestureDetector(
-
               // onTap: () {
               //   showModalBottomSheet(
               //     context: context,
@@ -194,21 +199,17 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
               //   );
               //
               // },
-
-
-
               onTap: () {
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginStudentPage(),
-                  ),
+                  // MaterialPageRoute(builder: (context) => LoginStudentPage()),
+                  MaterialPageRoute(builder: (context) => LoginUserLIst()),
                 );
               },
               child: Row(
                 children: [
                   Text(
-                    '${studentData?['student_name'].toString()??' Student'}',
+                    '${studentData?['student_name'].toString() ?? ' Student'}',
                     style: GoogleFonts.montserrat(
                       textStyle: Theme.of(context).textTheme.displayLarge,
                       fontSize: 11.sp,
@@ -221,7 +222,6 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                 ],
               ),
             ),
-
           ],
         ),
       ],
@@ -230,38 +230,32 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return UpgradeAlert(
-      showIgnore: true,
-      showLater: true,
-      showReleaseNotes: false,
-      shouldPopScope: () => false,
-      cupertinoButtonTextStyle: TextStyle(
-          color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13.sp),
-      barrierDismissible: true,
-      dialogStyle: UpgradeDialogStyle.cupertino,
-      child: WillPopScope(
-        onWillPop: () async => false,
-        child:       Scaffold(
-
-          backgroundColor: AppColors.secondary,
-          drawerEnableOpenDragGesture: false,
-
-
-          appBar: AppBar(
+    return Material(
+      child:  UpgradeAlert(
+        upgrader: UpgraderConfig.getUpgrader(),
+        showIgnore: true,
+        showLater: true,
+        showReleaseNotes: false,
+        shouldPopScope: () => false,
+        cupertinoButtonTextStyle: TextStyle(
+            color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13.sp),
+        barrierDismissible: true,
+        dialogStyle: UpgradeDialogStyle.cupertino,
+        child: WillPopScope(
+          onWillPop: () async => false,
+          child: Scaffold(
             backgroundColor: AppColors.secondary,
-            automaticallyImplyLeading: false,
-            iconTheme: IconThemeData(
-                color: AppColors.textwhite
-            ),
-            title: Column(
-              children: [
-                _buildAppBar(),
-              ],
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: GestureDetector(
+            drawerEnableOpenDragGesture: false,
+
+            appBar: AppBar(
+              backgroundColor: AppColors.secondary,
+              automaticallyImplyLeading: false,
+              iconTheme: IconThemeData(color: AppColors.textwhite),
+              title: Column(children: [_buildAppBar()]),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -276,700 +270,763 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                       Icons.notification_add,
                       size: 26,
                       color: Colors.white,
-                    )),
-              )
-
-              // Container(child: Icon(Icons.ice_skating)),
-            ],
-          ),
-          body: _screens[_selectedIndex], // Display the selected screen
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            backgroundColor: AppColors.secondary,
-            selectedItemColor: AppColors.textwhite,
-            unselectedItemColor: AppColors.grey,
-            showSelectedLabels: true,  // ✅ Ensures selected labels are always visible
-            showUnselectedLabels: true, // ✅ Ensures unselected labels are also visible
-            type: BottomNavigationBarType.fixed,
-            items:  <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.home),
-                label: AppStrings.homeLabel,
-                backgroundColor: AppColors.primary,
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.clock),
-                label: AppStrings.attendanceLabel,
-                backgroundColor: AppColors.primary,
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.book_fill),
-                label: AppStrings.libraryLabel,
-                backgroundColor: AppColors.primary,
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.currency_rupee),
-                label: AppStrings.feesLabel,
-                backgroundColor: AppColors.primary,
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.person_alt_circle_fill),
-                label: AppStrings.profileLabel,
-                backgroundColor: AppColors.primary,
-              ),
-            ],
-          ),
-          drawer: Drawer(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-            ),
-            width: MediaQuery.sizeOf(context).width * .65,
-            // backgroundColor: Theme.of(context).colorScheme.background,
-            backgroundColor: AppColors.secondary,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  SizedBox(
-                    height: 70,
-                  ),
-
-                  GestureDetector(
-                    onTap: (){
-                      Navigator.pop(context);
-                      setState(() {
-                        _selectedIndex = 4; // Profile screen index in _screens
-                      });
-                    },
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundImage: studentData != null && studentData?['photo'] != null
-                          ? NetworkImage(studentData?['photo'])
-                          : null,
-                      child: studentData == null || studentData?['photo'] == null
-                          ? Image.asset(AppAssets.cjmlogo,
-                          fit: BoxFit.cover)
-                          : null,
-
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Container(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 0, bottom: 20),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            studentData?['student_name'] ?? 'Student', // Fallback to 'Student' if null
-                            style: GoogleFonts.montserrat(
-                              textStyle: Theme.of(context).textTheme.displayLarge,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              fontStyle: FontStyle.normal,
-                              color: AppColors.textwhite,
+                ),
+
+                // Container(child: Icon(Icons.ice_skating)),
+              ],
+            ),
+            body: _screens[_selectedIndex],
+            // Display the selected screen
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              backgroundColor: Colors.red.shade900,
+              selectedItemColor: AppColors.textwhite,
+              unselectedItemColor: AppColors.grey,
+              showSelectedLabels: true,
+              // ✅ Ensures selected labels are always visible
+              showUnselectedLabels: true,
+              // ✅ Ensures unselected labels are also visible
+              type: BottomNavigationBarType.fixed,
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.home),
+                  label: AppStrings.homeLabel,
+                  backgroundColor: AppColors.primary,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.clock),
+                  label: AppStrings.attendanceLabel,
+                  backgroundColor: AppColors.primary,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.book_fill),
+                  label: AppStrings.libraryLabel,
+                  backgroundColor: AppColors.primary,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.currency_rupee),
+                  label: AppStrings.feesLabel,
+                  backgroundColor: AppColors.primary,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.person_alt_circle_fill),
+                  label: AppStrings.profileLabel,
+                  backgroundColor: AppColors.primary,
+                ),
+              ],
+            ),
+            drawer: Drawer(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              width: MediaQuery.sizeOf(context).width * .65,
+              // backgroundColor: Theme.of(context).colorScheme.background,
+              backgroundColor: AppColors.secondary,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    SizedBox(height: 70),
+
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        setState(() {
+                          _selectedIndex =
+                              4; // Profile screen index in _screens
+                        });
+                      },
+                      child: CircleAvatar(
+                        radius: 40,
+                        backgroundImage:
+                            (studentData != null &&
+                                studentData?['photo'] != null &&
+                                studentData!['photo'].toString().isNotEmpty &&
+                                !studentData!['photo'].toString().endsWith(
+                                  "null",
+                                ))
+                            ? NetworkImage(studentData!['photo'])
+                            : null,
+                        child:
+                            (studentData == null ||
+                                studentData?['photo'] == null ||
+                                studentData!['photo'].toString().isEmpty)
+                            ? const Icon(Icons.account_circle, size: 40)
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: Container(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 0, bottom: 0),
+                          child: Container(
+                            decoration: BoxDecoration(shape: BoxShape.circle),
+                            child: Text(
+                              studentData?['student_name'] ?? 'Student',
+                              // Fallback to 'Student' if null
+                              style: GoogleFonts.montserrat(
+                                textStyle: Theme.of(
+                                  context,
+                                ).textTheme.displayLarge,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.normal,
+                                color: AppColors.textwhite,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Divider(
-                    color: Colors.grey.shade300,
-                    // Set the color of the divider
-                    thickness: 2.0,
-                    // Set the thickness of the divider
-                    height: 1, // Set the height of the divider
-                  ),
+                    Center(
+                      child: Container(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 0, bottom: 20),
+                          child: Container(
+                            decoration: BoxDecoration(shape: BoxShape.circle),
+                            child: Text(
+                              studentData?['email'] ?? '',
+                              // Fallback to 'Student' if null
+                              style: GoogleFonts.montserrat(
+                                textStyle: Theme.of(
+                                  context,
+                                ).textTheme.displayLarge,
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                fontStyle: FontStyle.normal,
+                                color: AppColors.textwhite,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Divider(
+                      color: Colors.grey.shade300,
+                      // Set the color of the divider
+                      thickness: 2.0,
+                      // Set the thickness of the divider
+                      height: 1, // Set the height of the divider
+                    ),
 
-                  Expanded(
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-
-                              ListTile(
-                                title: Text(
-                                  'Dashboard',
-                                  style: GoogleFonts.cabin(
-                                    textStyle: TextStyle(
+                    Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ListTile(
+                                  title: Text(
+                                    'Dashboard',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
                                         color: Colors.white,
                                         fontSize: 15,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                ),
-                                trailing: Container(
-                                  height: 20,
-                                  width: 20,
-                                  color: AppColors.primary,
-                                  child:Icon(Icons.dashboard,color: Colors.white,),
-
-
-                                ),
-                                onTap: () {
-                                  Navigator.pop(context);
-
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) {
-                                  //       return DownloadPdf();
-                                  //     },
-                                  //   ),
-                                  // );
-                                },
-                              ),
-                              Padding(
-                                padding:
-                                EdgeInsets.only(left: 8, right: 8),
-                                child: Divider(
-                                  height: 1,
-                                  color: Colors.grey.shade300,
-                                  thickness: 1,
-                                ),
-                              ),
-
-                              ListTile(
-                                title: Text(
-                                  'Attendance',
-                                  style: GoogleFonts.cabin(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                ),
-                                trailing: Container(
-                                  height: 20,
-                                  width: 20,
-                                  color: AppColors.primary,
-                                  child: Icon(CupertinoIcons.clock,color: Colors.white,),
-
-                                ),
-                                onTap: () {
-                                  Navigator.pop(context);
-
-                                  // Navigate to the Profile screen in the BottomNavigationBar
-                                  setState(() {
-                                    _selectedIndex = 1; // Index of the Profile screen in _screens
-                                  });
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) {
-                                  //       return DownloadPdf();
-                                  //     },
-                                  //   ),
-                                  // );
-                                },
-                              ),
-                              Padding(
-                                padding:
-                                EdgeInsets.only(left: 8, right: 8),
-                                child: Divider(
-                                  height: 1,
-                                  color: Colors.grey.shade300,
-                                  thickness: 1,
-                                ),
-                              ),
-
-
-                              ListTile(
-                                title: Text(
-                                  'Assignments',
-                                  style: GoogleFonts.cabin(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                ),
-                                trailing: Container(
-                                  height: 20,
-                                  width: 20,
-                                  color: AppColors.primary,
-                                  child:  Image.asset(
-                                    'assets/assignments.png',
-                                    height: 80, // Adjust the size as needed
-                                    width: 80,
-                                  ),
-
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return AssignmentListScreen();
-                                      },
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  );
-                                },
-                              ),
-                              Padding(
-                                padding:
-                                EdgeInsets.only(left: 8, right: 8),
-                                child: Divider(
-                                  height: 1,
-                                  color: Colors.grey.shade300,
-                                  thickness: 1,
-                                ),
-                              ),
-
-                              ListTile(
-                                title: Text(
-                                  'Fees',
-                                  style: GoogleFonts.cabin(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal),
                                   ),
-                                ),
-                                trailing: Container(
+                                  trailing: Container(
                                     height: 20,
                                     width: 20,
                                     color: AppColors.primary,
-                                    child: Icon(Icons.currency_rupee,color: Colors.white,)
-
-
-                                  // Image.asset(
-                                  //   'assets/assignments.png',
-                                  //   height: 80, // Adjust the size as needed
-                                  //   width: 80,
-                                  // ),
-
-                                ),
-                                onTap: () {
-                                  Navigator.pop(context);
-
-                                  // Navigate to the Profile screen in the BottomNavigationBar
-                                  setState(() {
-                                    _selectedIndex = 3; // Index of the Profile screen in _screens
-                                  });
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) {
-                                  //       return DownloadPdf();
-                                  //     },
-                                  //   ),
-                                  // );
-                                },
-                              ),
-                              Padding(
-                                padding:
-                                EdgeInsets.only(left: 8, right: 8),
-                                child: Divider(
-                                  height: 1,
-                                  color: Colors.grey.shade300,
-                                  thickness: 1,
-                                ),
-                              ),
-
-                              ListTile(
-                                title: Text(
-                                  'Time Table',
-                                  style: GoogleFonts.cabin(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                ),
-                                trailing: Container(
-                                  height: 20,
-                                  width: 20,
-                                  color: AppColors.primary,
-                                  child:  Image.asset(
-                                    'assets/watch.png',
-                                    height: 80, // Adjust the size as needed
-                                    width: 80,
-                                  ),
-
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return TimeTableScreen();
-                                      },
+                                    child: Icon(
+                                      Icons.dashboard,
+                                      color: Colors.white,
                                     ),
-                                  );
-                                },
-                              ),
-                              Padding(
-                                padding:
-                                EdgeInsets.only(left: 8, right: 8),
-                                child: Divider(
-                                  height: 1,
-                                  color: Colors.grey.shade300,
-                                  thickness: 1,
+                                  ),
+                                  onTap: () {
+                                    Navigator.pop(context);
+
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) {
+                                    //       return DownloadPdf();
+                                    //     },
+                                    //   ),
+                                    // );
+                                  },
                                 ),
-                              ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
 
-                              // ListTile(
-                              //   title: Text(
-                              //     'Report Card',
-                              //     style: GoogleFonts.cabin(
-                              //       textStyle: TextStyle(
-                              //           color: Colors.white,
-                              //           fontSize: 15,
-                              //           fontWeight: FontWeight.normal),
-                              //     ),
-                              //   ),
-                              //   trailing: Container(
-                              //     height: 20,
-                              //     width: 20,
-                              //     color: AppColors.primary,
-                              //     child: Icon(Icons.report,color: Colors.white,)
-                              //
-                              //     // Image.asset(
-                              //     //   'assets/gallery.png',
-                              //     //   height: 80, // Adjust the size as needed
-                              //     //   width: 80,
-                              //     // ),
-                              //
-                              //   ),
-                              //   onTap: () {
-                              //     Navigator.pop(context);
-                              //     Navigator.push(
-                              //       context,
-                              //       MaterialPageRoute(
-                              //         builder: (context) {
-                              //           return ReportCardScreen();
-                              //         },
-                              //       ),
-                              //     );
-                              //
-                              //   },
-                              // ),
-                              // Padding(
-                              //   padding:
-                              //   EdgeInsets.only(left: 8, right: 8),
-                              //   child: Divider(
-                              //     height: 1,
-                              //     color: Colors.grey.shade300,
-                              //     thickness: 1,
-                              //   ),
-                              // ),
-
-
-                              ListTile(
-                                title: Text(
-                                  'Gallery',
-                                  style: GoogleFonts.cabin(
-                                    textStyle: TextStyle(
+                                ListTile(
+                                  title: Text(
+                                    'Documents',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
                                         color: Colors.white,
                                         fontSize: 15,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                ),
-                                trailing: Container(
-                                  height: 20,
-                                  width: 20,
-                                  color: AppColors.primary,
-                                  child:  Image.asset(
-                                    'assets/gallery.png',
-                                    height: 80, // Adjust the size as needed
-                                    width: 80,
-                                  ),
-
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return GalleryVideoTabScreen();
-                                      },
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  );
-                                },
-                              ),
-                              Padding(
-                                padding:
-                                EdgeInsets.only(left: 8, right: 8),
-                                child: Divider(
-                                  height: 1,
-                                  color: Colors.grey.shade300,
-                                  thickness: 1,
-                                ),
-                              ),
-
-
-                              ListTile(
-                                title: Text(
-                                  'Activity Calendar',
-                                  style: GoogleFonts.cabin(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal),
                                   ),
-                                ),
-                                trailing: Container(
-                                  height: 20,
-                                  width: 20,
-                                  color: AppColors.primary,
-                                  child:  Image.asset(
-                                    'assets/document.png',
-                                    height: 80, // Adjust the size as needed
-                                    width: 80,
-                                  ),
-
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return CalendarScreen(title: 'Activity Calendar',);
-                                      },
+                                  trailing: Container(
+                                    height: 20,
+                                    width: 20,
+                                    color: AppColors.primary,
+                                    child: Icon(
+                                      CupertinoIcons.book,
+                                      color: Colors.white,
                                     ),
-                                  );
-                                },
-                              ),
-                              Padding(
-                                padding:
-                                EdgeInsets.only(left: 8, right: 8),
-                                child: Divider(
-                                  height: 1,
-                                  color: Colors.grey.shade300,
-                                  thickness: 1,
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return WorkInProgressScreen();
+                                        },
+                                      ),
+                                    );
+                                  },
                                 ),
-                              ),
-
-
-
-
-
-                              ListTile(
-                                title: Text(
-                                  'Help',
-                                  style: GoogleFonts.cabin(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
                                   ),
                                 ),
-                                trailing: Container(
+
+                                ListTile(
+                                  title: Text(
+                                    'Attendance',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: Container(
+                                    height: 20,
+                                    width: 20,
+                                    color: AppColors.primary,
+                                    child: Icon(
+                                      CupertinoIcons.clock,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.pop(context);
+
+                                    // Navigate to the Profile screen in the BottomNavigationBar
+                                    setState(() {
+                                      _selectedIndex =
+                                          1; // Index of the Profile screen in _screens
+                                    });
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) {
+                                    //       return DownloadPdf();
+                                    //     },
+                                    //   ),
+                                    // );
+                                  },
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
+
+                                ListTile(
+                                  title: Text(
+                                    'Assignments',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: Container(
+                                    height: 20,
+                                    width: 20,
+                                    color: AppColors.primary,
+                                    child: Image.asset(
+                                      'assets/assignments.png',
+                                      height: 80, // Adjust the size as needed
+                                      width: 80,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return AssignmentListScreen();
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
+
+                                ListTile(
+                                  title: Text(
+                                    'Fees',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: Container(
+                                    height: 20,
+                                    width: 20,
+                                    color: AppColors.primary,
+                                    child: Icon(
+                                      Icons.currency_rupee,
+                                      color: Colors.white,
+                                    ),
+
+                                    // Image.asset(
+                                    //   'assets/assignments.png',
+                                    //   height: 80, // Adjust the size as needed
+                                    //   width: 80,
+                                    // ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.pop(context);
+
+                                    // Navigate to the Profile screen in the BottomNavigationBar
+                                    setState(() {
+                                      _selectedIndex =
+                                          3; // Index of the Profile screen in _screens
+                                    });
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) {
+                                    //       return DownloadPdf();
+                                    //     },
+                                    //   ),
+                                    // );
+                                  },
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
+
+                                ListTile(
+                                  title: Text(
+                                    'Time Table',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: Container(
+                                    height: 20,
+                                    width: 20,
+                                    color: AppColors.primary,
+                                    child: Image.asset(
+                                      'assets/watch.png',
+                                      height: 80, // Adjust the size as needed
+                                      width: 80,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return TimeTableScreen();
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
+
+                                // ListTile(
+                                //   title: Text(
+                                //     'Report Card',
+                                //     style: GoogleFonts.cabin(
+                                //       textStyle: TextStyle(
+                                //           color: Colors.white,
+                                //           fontSize: 15,
+                                //           fontWeight: FontWeight.normal),
+                                //     ),
+                                //   ),
+                                //   trailing: Container(
+                                //     height: 20,
+                                //     width: 20,
+                                //     color: AppColors.primary,
+                                //     child: Icon(Icons.report,color: Colors.white,)
+                                //
+                                //     // Image.asset(
+                                //     //   'assets/gallery.png',
+                                //     //   height: 80, // Adjust the size as needed
+                                //     //   width: 80,
+                                //     // ),
+                                //
+                                //   ),
+                                //   onTap: () {
+                                //     Navigator.pop(context);
+                                //     Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) {
+                                //           return ReportCardScreen();
+                                //         },
+                                //       ),
+                                //     );
+                                //
+                                //   },
+                                // ),
+                                // Padding(
+                                //   padding:
+                                //   EdgeInsets.only(left: 8, right: 8),
+                                //   child: Divider(
+                                //     height: 1,
+                                //     color: Colors.grey.shade300,
+                                //     thickness: 1,
+                                //   ),
+                                // ),
+                                ListTile(
+                                  title: Text(
+                                    'Gallery',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: Container(
+                                    height: 20,
+                                    width: 20,
+                                    color: AppColors.primary,
+                                    child: Image.asset(
+                                      'assets/gallery.png',
+                                      height: 80, // Adjust the size as needed
+                                      width: 80,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return GalleryVideoTabScreen();
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
+
+                                ListTile(
+                                  title: Text(
+                                    'Activity Calendar',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: Container(
+                                    height: 20,
+                                    width: 20,
+                                    color: AppColors.primary,
+                                    child: Image.asset(
+                                      'assets/document.png',
+                                      height: 80, // Adjust the size as needed
+                                      width: 80,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return CalendarScreen(
+                                            title: 'Activity Calendar',
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
+
+                                ListTile(
+                                  title: Text(
+                                    'Help',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: Container(
                                     height: 25,
                                     width: 25,
-                                    child: Image.asset('assets/help.png',
+                                    child: Image.asset(
+                                      'assets/help.png',
                                       color: Colors.white,
-                                    )),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return HelpScreen(appBar: 'Help',);
-                                      },
                                     ),
-                                  );
-
-                                },
-                              ),
-                              Padding(
-                                padding:
-                                EdgeInsets.only(left: 8, right: 8),
-                                child: Divider(
-                                  height: 1,
-                                  color: Colors.grey.shade300,
-                                  thickness: 1,
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return HelpScreen(appBar: 'Help');
+                                        },
+                                      ),
+                                    );
+                                  },
                                 ),
-                              ),
-                              // ListTile(
-                              //   title: Text(
-                              //     'FAQs',
-                              //     style: GoogleFonts.cabin(
-                              //       textStyle: TextStyle(
-                              //           color: Colors.white,
-                              //           fontSize: 15,
-                              //           fontWeight: FontWeight.normal),
-                              //     ),
-                              //   ),
-                              //   trailing: Container(
-                              //       height: 20,
-                              //       width: 20,
-                              //       child: Image.asset('assets/faq.png')),
-                              //   onTap: () {
-                              //     Navigator.push(
-                              //       context,
-                              //       MaterialPageRoute(
-                              //         builder: (context) {
-                              //           return FaqScreen(appBar: 'FAQ',);
-                              //         },
-                              //       ),
-                              //     );
-                              //   },
-                              // ),
-                              // Padding(
-                              //   padding:
-                              //   EdgeInsets.only(left: 8, right: 8),
-                              //   child: Divider(
-                              //     height: 1,
-                              //     color: Colors.grey.shade300,
-                              //     thickness: 1,
-                              //   ),
-                              // ),
-                              // ListTile(
-                              //   title: Text(
-                              //     'Privacy',
-                              //     style: GoogleFonts.cabin(
-                              //       textStyle: TextStyle(
-                              //           color: Colors.white,
-                              //           fontSize: 15,
-                              //           fontWeight: FontWeight.normal),
-                              //     ),
-                              //   ),
-                              //   trailing: Container(
-                              //       height: 20,
-                              //       width: 20,
-                              //       child: Icon(
-                              //         Icons.privacy_tip,
-                              //         color: Colors.white,
-                              //       )),
-                              //   onTap: () {
-                              //     Navigator.push(
-                              //       context,
-                              //       MaterialPageRoute(
-                              //         builder: (context) {
-                              //           return WebViewExample(
-                              //             title: 'Privacy',
-                              //             url:
-                              //             'https://www.freeprivacypolicy.com/live/79492741-6341-4ea2-a3b1-87ffc1154bda',
-                              //           );
-                              //         },
-                              //       ),
-                              //     );
-                              //   },
-                              // ),
-                              // Padding(
-                              //   padding:
-                              //   EdgeInsets.only(left: 8, right: 8),
-                              //   child: Divider(
-                              //     height: 1,
-                              //     color: Colors.grey.shade300,
-                              //     thickness: 1,
-                              //   ),
-                              // ),
-                              // ListTile(
-                              //   title: Text(
-                              //     'Terms & Condition',
-                              //     style: GoogleFonts.cabin(
-                              //       textStyle: TextStyle(
-                              //           color: Colors.white,
-                              //           fontSize: 15,
-                              //           fontWeight: FontWeight.normal),
-                              //     ),
-                              //   ),
-                              //   trailing: Container(
-                              //       height: 20,
-                              //       width: 20,
-                              //       child: Icon(
-                              //         Icons.event_note_outlined,
-                              //         color: Colors.white,
-                              //       )),
-                              //   onTap: () {
-                              //     Navigator.push(
-                              //       context,
-                              //       MaterialPageRoute(
-                              //         builder: (context) {
-                              //           return WebViewExample(
-                              //             title: 'Terms & Condition',
-                              //             url:
-                              //             'https://www.freeprivacypolicy.com/live/79492741-6341-4ea2-a3b1-87ffc1154bda',
-                              //           );
-                              //         },
-                              //       ),
-                              //     );
-                              //   },
-                              // ),
-
-
-
-                              Padding(
-                                padding:
-                                EdgeInsets.only(left: 8, right: 8),
-                                child: Divider(
-                                  height: 1,
-                                  color: Colors.grey.shade300,
-                                  thickness: 1,
-                                ),
-                              ),
-                              ListTile(
-                                title: Text(
-                                  'Logout',
-                                  style: GoogleFonts.cabin(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
                                   ),
                                 ),
-                                trailing: Container(
+
+                                // ListTile(
+                                //   title: Text(
+                                //     'FAQs',
+                                //     style: GoogleFonts.cabin(
+                                //       textStyle: TextStyle(
+                                //           color: Colors.white,
+                                //           fontSize: 15,
+                                //           fontWeight: FontWeight.normal),
+                                //     ),
+                                //   ),
+                                //   trailing: Container(
+                                //       height: 20,
+                                //       width: 20,
+                                //       child: Image.asset('assets/faq.png')),
+                                //   onTap: () {
+                                //     Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) {
+                                //           return FaqScreen(appBar: 'FAQ',);
+                                //         },
+                                //       ),
+                                //     );
+                                //   },
+                                // ),
+                                // Padding(
+                                //   padding:
+                                //   EdgeInsets.only(left: 8, right: 8),
+                                //   child: Divider(
+                                //     height: 1,
+                                //     color: Colors.grey.shade300,
+                                //     thickness: 1,
+                                //   ),
+                                // ),
+                                // ListTile(
+                                //   title: Text(
+                                //     'Privacy',
+                                //     style: GoogleFonts.cabin(
+                                //       textStyle: TextStyle(
+                                //           color: Colors.white,
+                                //           fontSize: 15,
+                                //           fontWeight: FontWeight.normal),
+                                //     ),
+                                //   ),
+                                //   trailing: Container(
+                                //       height: 20,
+                                //       width: 20,
+                                //       child: Icon(
+                                //         Icons.privacy_tip,
+                                //         color: Colors.white,
+                                //       )),
+                                //   onTap: () {
+                                //     Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) {
+                                //           return WebViewExample(
+                                //             title: 'Privacy',
+                                //             url:
+                                //             'https://www.freeprivacypolicy.com/live/79492741-6341-4ea2-a3b1-87ffc1154bda',
+                                //           );
+                                //         },
+                                //       ),
+                                //     );
+                                //   },
+                                // ),
+                                // Padding(
+                                //   padding:
+                                //   EdgeInsets.only(left: 8, right: 8),
+                                //   child: Divider(
+                                //     height: 1,
+                                //     color: Colors.grey.shade300,
+                                //     thickness: 1,
+                                //   ),
+                                // ),
+                                // ListTile(
+                                //   title: Text(
+                                //     'Terms & Condition',
+                                //     style: GoogleFonts.cabin(
+                                //       textStyle: TextStyle(
+                                //           color: Colors.white,
+                                //           fontSize: 15,
+                                //           fontWeight: FontWeight.normal),
+                                //     ),
+                                //   ),
+                                //   trailing: Container(
+                                //       height: 20,
+                                //       width: 20,
+                                //       child: Icon(
+                                //         Icons.event_note_outlined,
+                                //         color: Colors.white,
+                                //       )),
+                                //   onTap: () {
+                                //     Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) {
+                                //           return WebViewExample(
+                                //             title: 'Terms & Condition',
+                                //             url:
+                                //             'https://www.freeprivacypolicy.com/live/79492741-6341-4ea2-a3b1-87ffc1154bda',
+                                //           );
+                                //         },
+                                //       ),
+                                //     );
+                                //   },
+                                // ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.grey.shade300,
+                                    thickness: 1,
+                                  ),
+                                ),
+                                ListTile(
+                                  title: Text(
+                                    'Logout',
+                                    style: GoogleFonts.cabin(
+                                      textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: Container(
                                     height: 20,
                                     width: 20,
                                     child: Icon(
                                       Icons.logout,
                                       color: Colors.white,
-                                    )),
-                                onTap: () async {
-                                  final prefs = await SharedPreferences.getInstance();
-                                  await prefs.clear(); // Clear the stored token
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 15.sp),
-                        ),
-                        Center(
-                          child: Text('Version :-  $currentVersion',
-                            style: GoogleFonts.cabin(
-                              textStyle: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8.sp,
-                                  fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs
+                                        .clear(); // Clear the stored token
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const LoginPage(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
-                        )
-                      ],
+
+                          Padding(padding: EdgeInsets.only(bottom: 15.sp)),
+                          Center(
+                            child: Text(
+                              'Version :-  $currentVersion',
+                              style: GoogleFonts.cabin(
+                                textStyle: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-
-
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-
         ),
-
-
       ),
-
     );
-
-
   }
 }
-

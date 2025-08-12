@@ -17,9 +17,11 @@ import 'package:html/parser.dart' as html_parser;
 import '../../constants.dart';
 import '../Assignment/assignment.dart';
 import '../Auth/login_screen.dart';
+import '../Documents/documents.dart';
 import '../Gallery/gallery_tab.dart';
 import '../HomeWork/home_work.dart';
 import '../Leaves/leaves_tab.dart';
+import '../Message/message.dart';
 import '../Notice/notice.dart';
 import '../Report/report_card.dart';
 import '../Subject/subject.dart';
@@ -39,6 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? studentData;
   List assignments = []; // Declare a list to hold API data
   bool isLoading = true;
+  double attendancePercent=0;
+  int? messageViewPermissionsApp;
+  int? messageSendPermissionsApp;
   late CleanCalendarController calendarController;
   final List<Map<String, String>> items = [
     {
@@ -51,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
     },
     {
       'name': 'Messages',
-      'image': 'assets/home_work.png',
+      'image': 'assets/message_home.png',
+
     },
     {
       'name': 'Attendance',
@@ -70,8 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
       'image': 'assets/calendar_activity.png',
     },
     {
-      'name': 'Gallery',
-      'image': 'assets/gallery.png',
+      'name': 'Document',
+      'image': 'assets/home_work.png',
     },
     // {
     //   'name': 'Report Card',
@@ -83,12 +89,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    fetchData();
     calendarController = CleanCalendarController(
       minDate: DateTime.now().subtract(const Duration(days: 30)),
       maxDate: DateTime.now().add(const Duration(days: 365)),
     );
     fetchStudentData();
-    fetchDasboardData();
+    // fetchDasboardData();
   }
 
   Future<void> fetchStudentData() async {
@@ -97,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
     print("Token: $token");
 
     if (token == null) {
-      _showLoginDialog();
+      // _showLoginDialog();
       return;
     }
 
@@ -118,32 +125,69 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> fetchDasboardData() async {
+  Future<void> fetchData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    print("Token: $token");
+    final url = Uri.parse(ApiRoutes.getDashboard); // Ensure ApiRoutes.getDashboard is valid
 
-    if (token == null) {
-      _showLoginDialog();
-      return;
-    }
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
-    final response = await http.get(
-      Uri.parse(ApiRoutes.getDashboard),
-      headers: {'Authorization': 'Bearer $token'},
-    );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body)['data'];
+        setState(() {
+          // Handle attendance_percent as double to support decimal values
+          // attendancePercent = (data['attendance_percent'] as num?)?.toDouble() ?? 0.0;
+          // Uncomment and fix if permissions are needed
+          messageViewPermissionsApp = (data['permisions']?[0]['app_status'] as num?)?.toInt() ?? 0;
+          messageSendPermissionsApp = (data['permisions']?[1]['app_status'] as num?)?.toInt() ?? 0;
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+        });
+      } else {
+        setState(() {
+
+        });
+      }
+    } catch (e) {
       setState(() {
-        assignments = data['data']['assignments'];
-        isLoading = false;
-        print(assignments);
+        // attendancePercent = 0.0; // Default value for error case
+
       });
-    } else {
-      // _showLoginDialog();
+      // Optionally log the error for debugging
+      debugPrint('Error fetching data: $e');
     }
   }
+
+
+  // Future<void> fetchDasboardData() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final token = prefs.getString('token');
+  //   print("Token: $token");
+  //
+  //   if (token == null) {
+  //     // _showLoginDialog();
+  //     return;
+  //   }
+  //
+  //   final response = await http.get(
+  //     Uri.parse(ApiRoutes.getDashboard),
+  //     headers: {'Authorization': 'Bearer $token'},
+  //   );
+  //
+  //   if (response.statusCode == 200) {
+  //     final data = json.decode(response.body);
+  //     setState(() {
+  //       assignments = data['data']['assignments'];
+  //       isLoading = false;
+  //       print(assignments);
+  //     });
+  //   } else {
+  //     // _showLoginDialog();
+  //   }
+  // }
 
   void _showLoginDialog() {
     showCupertinoDialog(
@@ -206,26 +250,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   CarouselExample(),
                   SizedBox(height: 10),
 
-                  CarouselFees(
-                    status: 'due',
-                    dueDate: '',
-                    onPayNow: () {
-                      // print("Processing payment for ₹${fess[index]['to_pay_amount']}");
-
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(builder: (context) => HomeGateway()),
-                      // );
-                    },
-                    custFirstName: studentData?['student_name']?? '',
-                    custLastName: 'N/A',
-                    mobile: studentData?['contact_no']??'',
-                    email:studentData?['contact_mail']??'',
-                    address: studentData?['address']??'',
-                    payDate: '',
-                    dueAmount: '0',
-
-                  ),
+                  // CarouselFees(
+                  //   status: 'due',
+                  //   dueDate: '',
+                  //   onPayNow: () {
+                  //     // print("Processing payment for ₹${fess[index]['to_pay_amount']}");
+                  //
+                  //     // Navigator.push(
+                  //     //   context,
+                  //     //   MaterialPageRoute(builder: (context) => HomeGateway()),
+                  //     // );
+                  //   },
+                  //   custFirstName: studentData?['student_name']?? '',
+                  //   custLastName: 'N/A',
+                  //   mobile: studentData?['contact_no']??'',
+                  //   email:studentData?['contact_mail']??'',
+                  //   address: studentData?['address']??'',
+                  //   payDate: '',
+                  //   dueAmount: '0',
+                  //
+                  // ),
 
                   // _buildsellAll('Promotions', 'See All'),
 
@@ -239,8 +283,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildGridview(),
                   const SizedBox(height: 10),
 
-                  _buildsellAll('Assignment', ''),
-                  _buildListView(),
+                  // _buildsellAll('Assignment', ''),
+                  // _buildListView(),
 
                   Container(
                     height: 220,
@@ -391,12 +435,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 );
-              } else if (items[index]['name'] == 'Gallery') {
+              } else if (items[index]['name'] == 'Document') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return GalleryVideoTabScreen();
+                      return WorkInProgressScreen();
                     },
                   ),
                 );
@@ -454,7 +498,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return HomeWorkScreen(title: 'Messages',);
+                      return MesssageListScreen(messageSendPermissionsApp: messageSendPermissionsApp,);
                     },
                   ),
                 );
@@ -462,7 +506,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: Card(
               elevation: 5,
-              color: AppColors.primary,
+              color: Colors.red.shade600,
               // decoration: BoxDecoration(
               //     borderRadius: BorderRadius.circular(10)
               // ),
@@ -478,16 +522,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(
                       height: 20,
                     ),
-                    Text(
-                      items[index]['name']!,
-                      style: GoogleFonts.montserrat(
-                        textStyle: Theme.of(context).textTheme.displayLarge,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        fontStyle: FontStyle.normal,
-                        color: AppColors.textwhite,
+                    Padding(
+                      padding: EdgeInsets.only(left: 10.0, right: 10),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          items[index]['name']!,
+                          textAlign: TextAlign.center, // <-- ये जोड़ा
+                          style: GoogleFonts.montserrat(
+                            textStyle: Theme.of(context).textTheme.displayLarge,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.normal,
+                            color: AppColors.textwhite,
+                          ),
+                        ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),

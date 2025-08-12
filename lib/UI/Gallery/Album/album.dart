@@ -19,6 +19,9 @@ import '../ImageList/image_list.dart';
 
 
 class GalleryScreen extends StatefulWidget {
+  final String type;
+  const GalleryScreen({super.key, required this.type});
+
   @override
   State<GalleryScreen> createState() => _GalleryScreenState();
 }
@@ -70,86 +73,107 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? WhiteCircularProgressWidget()
-        : images.isEmpty
-        ? Center(child: DataNotFoundWidget(title: 'Image  Not Available.',))
-        : GridView.builder(
-      padding:  EdgeInsets.all(0.sp),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 0.0,
-        mainAxisSpacing: 0.0,
-      ),
-      itemCount: images.length,
-      cacheExtent: 1000,
-      shrinkWrap: true, // Fix overflow issue
-      physics: NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: (){
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return ImageListScreen(data: images[index],);
-                },
+
+
+    return Scaffold(
+      backgroundColor: AppColors.secondary,
+
+      appBar: widget.type == 'NewUser'
+          ? AppBar(
+        title: Text(
+          'Gallery',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: AppColors.secondary,
+      )
+          : null,
+      body: SingleChildScrollView(
+        child: isLoading
+            ? WhiteCircularProgressWidget()
+            : images.isEmpty
+            ? Center(child: DataNotFoundWidget(title: 'Image  Not Available.',))
+            : GridView.builder(
+          padding:  EdgeInsets.all(0.sp),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 0.0,
+            mainAxisSpacing: 0.0,
+          ),
+          itemCount: images.length,
+          cacheExtent: 1000,
+          shrinkWrap: true, // Fix overflow issue
+          physics: NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return ImageListScreen(data: images[index],);
+                    },
+                  ),
+                );
+              },
+              child: Card(
+                color: Colors.white,
+                child: Padding(
+                  padding:  EdgeInsets.all(1.sp),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: CachedNetworkImage(
+                            imageUrl: images[index]['cover_image_url'].toString(),
+                            fit: BoxFit.cover,
+                            height: 100.sp,
+                            placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                            errorWidget: (context, url, error) => Icon(Icons.error),
+                          ),
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 4.h), // Spacing
+
+                          Text(
+                            images[index]['album_name'].toString(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.sp,
+                              color: Colors.black87,
+                            ),
+                          ),
+
+                          SizedBox(height:2.h),
+
+                          _buildInfoRow(Icons.calendar_today,
+                              'Event Date: ${images[index]['event_date']}'),
+
+                          _buildInfoRow(Icons.photo_library,
+                              'Total Photo(s): 5'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             );
           },
-          child: Card(
-            color: Colors.white,
-            child: Padding(
-              padding:  EdgeInsets.all(1.sp),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: CachedNetworkImage(
-                        imageUrl: images[index]['cover_image_url'].toString(),
-                        fit: BoxFit.cover,
-                        height: 100.sp,
-                        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
-                        errorWidget: (context, url, error) => Icon(Icons.error),
-                      ),
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 4.h), // Spacing
-
-                      Text(
-                        images[index]['album_name'].toString(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.sp,
-                          color: Colors.black87,
-                        ),
-                      ),
-
-                      SizedBox(height:2.h),
-
-                      _buildInfoRow(Icons.calendar_today,
-                          'Event Date: ${images[index]['event_date']}'),
-
-                      _buildInfoRow(Icons.photo_library,
-                          'Total Photo(s): 5'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+        ),
+      ),
     );
 
 

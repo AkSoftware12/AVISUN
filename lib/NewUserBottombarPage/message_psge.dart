@@ -93,6 +93,7 @@ class _MessageListScreenState extends State<MessageListScreen> {
           ),
         ),
         backgroundColor: AppColors.secondary,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body:  isLoading
           ? _buildShimmerLoading()

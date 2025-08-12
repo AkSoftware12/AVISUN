@@ -2,15 +2,20 @@ import 'package:avi/HexColorCode/HexColor.dart';
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // static const Color primary = Color(0xFF041B7F); // Example primary color (blue)
-  static  Color primary = HexColor('#db7276'); // Example primary color (blue)
-  static  Color secondary =HexColor('#7c444f'); // Secondary color (gray)
-  // static const Color secondary = Color(0xFF074799); // Secondary color (gray)
+  static  Color primary = HexColor('#d0241a');
+  // static  Color primary = HexColor('#db7276');
+  //  static  Color secondary =HexColor('#7c444f');
+  static  Color secondary =HexColor('#d0241a');
+
+
+
+
+
+
   static const Color grey = Color(0xFFAAAEB2); // Secondary color (gray)
   static const Color background = Color(0xFFF8F9FA); // Light background color
   static const Color textblack = Color(0xFF212529); // Dark text color
     static const Color textwhite = Color.fromARGB(255, 255, 255, 255); // Dark text color
-    // static  Color textwhite = Colors.grey.shade500; // Dark text color
   static const Color error = Color(0xFFDC3545); // Error color (red)
   static const Color success = Color(0xFF28A745); // Success color (green)
   static const Color yellow = Color(0xFFCCAB21); // Success color (green)
@@ -20,28 +25,28 @@ class AppAssets {
   static const String logo = 'assets/images/logo.png'; 
   static const String cjm = 'assets/cjm.png';
   static const String cjmlogo = 'assets/playstore.png';
-  // static const String cjmlogo2 = 'assets/playstore2.png';
 }
 
 class ApiRoutes {
 
 
   // Gallery App url
-  static const String baseUrl2 = "https://webcjm.cjmambala.co.in/api";
 
 
   // Main App Url
   static const String baseUrl = "https://softcjm.cjmambala.co.in/api";
-  static const String baseUrlNewUser = "https://webcjm.akdesire.com/api";
+  static const String baseUrlNewUser = "https://cjmambala.co.in/api";
+
 
 
   static const String downloadUrl = "https://softcjm.cjmambala.co.in/student/fee-receipt/";
-  static const String newUserdownloadUrl = "https://webcjm.akdesire.com/api/fees/";
+  static const String newUserdownloadUrl = "https://cjmambala.co.in/api/fees/";
 
 // Local  App Url
 
 
-  // static const String baseUrlNewUser = "http://192.168.1.7/cjmweb/api";
+  // static const String baseUrlNewUser = "http://192.168.1.5/cjmweb/api";
+  // static const String baseUrl = "http://192.168.1.5/cjm_ambala/api";
 
 
   // New Admission Api
@@ -49,6 +54,7 @@ class ApiRoutes {
   static const String getProfileNewUser = "$baseUrlNewUser/student-get";
   static const String orderCreateNewUser  = "$baseUrlNewUser/initiatepayment";
   static const String payFeesNewUser  = "$baseUrlNewUser/payfees";
+  static const String admissionDownload  = "$baseUrlNewUser/profile/";
 
 
 
@@ -61,8 +67,8 @@ class ApiRoutes {
   static const String loginstudent = "$baseUrl/loginstudent";
   static const String clear = "$baseUrl/clear";
   static const String getProfile = "$baseUrl/student-get";
-  static const String getPhotos = "$baseUrl2/getPhotos";
-  static const String getVideos = "$baseUrl2/getVideos";
+  static const String getPhotos = "$baseUrlNewUser/getPhotos";
+  static const String getVideos = "$baseUrlNewUser/getVideos";
   static const String getDashboard = "$baseUrl/dashboard";
   static const String getFees = "$baseUrl/get-fees";
   static const String getAssignments = "$baseUrl/get-assignments";
@@ -86,4 +92,8 @@ class ApiRoutes {
   static const String forgotPassword= "$baseUrl/forgot-password";
   static const String verifyOtp= "$baseUrl/verifyOtp";
   static const String applyleave= "$baseUrl/applyleave";
+
+  static const String getAllMessages = "$baseUrl/messages";
+  static const String getUserMessagesConversation = "$baseUrl/messages/conversation/";
+  static const String sendMessage = "$baseUrl/messages";
 }

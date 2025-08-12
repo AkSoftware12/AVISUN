@@ -176,7 +176,7 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
                               padding: EdgeInsets.symmetric(horizontal: 15.sp, vertical: 15.sp),
                               margin: const EdgeInsets.symmetric(horizontal: 5),
                               decoration: BoxDecoration(
-                                color: isSelected ? HexColor('#93a0e8') : Colors.grey[300],
+                                color: isSelected ? AppColors.primary : Colors.grey[300],
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Center(
