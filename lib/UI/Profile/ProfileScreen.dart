@@ -37,13 +37,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     super.dispose();
   }
 
+
   Future<void> fetchProfileData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     print("token: $token");
 
     if (token == null) {
-      _showLoginDialog();
+      if (mounted) _showLoginDialog();
       return;
     }
 
@@ -52,15 +53,19 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       headers: {'Authorization': 'Bearer $token'},
     );
 
+    if (!mounted) return; // ✅ Prevent running code after dispose
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      setState(() {
-        studentData = data['student'];
-        isLoading = false;
+      if (mounted) {
+        setState(() {
+          studentData = data['student'];
+          isLoading = false;
+        });
         _controller.forward(); // Start animation once data is loaded
-      });
+      }
     } else {
-      _showLoginDialog();
+      if (mounted) _showLoginDialog();
     }
   }
 

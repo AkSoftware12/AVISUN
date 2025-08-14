@@ -13,7 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../../CommonCalling/data_not_found.dart';
 import '../../CommonCalling/progressbarWhite.dart';
-import '../../demo.dart';
 import '../Auth/login_screen.dart';
 
 class TimeTableScreen extends StatefulWidget {

@@ -343,19 +343,26 @@ class _NewUserPaymentScreenState extends State<DocumentsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
 
                             children: [
+                              Padding(
+                                padding:  EdgeInsets.all(0.sp),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.account_circle,size: 15.sp,),
+                                    SizedBox(width: 3.sp,),
+                                    Text('${studentData!['name']??''}',style: TextStyle(color: Colors.black,fontSize: 14.sp,fontWeight: FontWeight.bold),),
+                                  ],
+                                ),
+                              ),
+
                               Row(
                                 children: [
-                                  Icon(Icons.account_circle,size: 15.sp,),
+                                  Icon(Icons.school,size: 15.sp,),
                                   SizedBox(width: 3.sp,),
-                                  Text('${studentData!['name']??''} / ${studentData!['class_name']??''}',style: TextStyle(color: Colors.black,fontSize: 14.sp,fontWeight: FontWeight.bold),),
+                                  Text('${studentData!['class_name']??''}',style: TextStyle(color: Colors.black87,fontSize: 12.sp,fontWeight: FontWeight.bold),),
                                 ],
                               ),
-                              Row(
-                                children: [
-                                  Icon(Icons.shopping_cart,size: 15.sp,),
-                                  SizedBox(width: 3.sp,),
-                                  Text(fee['order_id']??'',style: TextStyle(color: Colors.grey,fontSize: 14.sp,fontWeight: FontWeight.bold),),
-                                ],
+                              SizedBox(
+                                height: 5.sp,
                               ),
                             ],
                           ),

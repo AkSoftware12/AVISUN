@@ -50,15 +50,22 @@ class _ProfileScreenState extends State<NewUserProfileScreen>
       headers: {'Authorization': 'Bearer $token'},
     );
 
+    if (!mounted) return; // ✅ stop here if widget is gone
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
+
+      if (!mounted) return; // ✅ double-check before setState
       setState(() {
         studentData = data['student'];
         isLoading = false;
         _controller.forward(); // Start animation once data is loaded
       });
     } else {
-      isLoading = false;
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 

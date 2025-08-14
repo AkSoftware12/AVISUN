@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
 import 'UI/Auth/login_screen.dart';
-import 'UI/Auth/login_screen_demo.dart';
 import 'UI/bottom_navigation.dart';
 
 
@@ -29,71 +28,58 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> postRequestWithToken() async {
     try {
+      final response = await http.get(Uri.parse(ApiRoutes.clear));
 
+      if (!mounted) return; // Check before updating state
 
-      // Make the POST request
-      final response = await http.get(
-        Uri.parse(ApiRoutes.clear),
-      );
-
-      // Check the status code and handle the response
       if (response.statusCode == 200) {
         setState(() {
-
-          print('Api Hit ');
-
+          print('Api Hit');
         });
-        // Handle success response
       } else {
-
-        // Handle error response
         print('Failed: ${response.statusCode}, ${response.body}');
       }
     } catch (e) {
-      // Handle any exceptions
       print('Error: $e');
     }
   }
 
-
-  // Check internet connectivity
   Future<void> _checkConnectivity() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     String? newUsertoken = prefs.getString('newusertoken');
     final connectivityResult = await Connectivity().checkConnectivity();
+
+    if (!mounted) return; // Check before using setState or Navigator
+
     if (connectivityResult == ConnectivityResult.none) {
-      setState(() {
-        _isConnected = false;
-      });
-      // Show the dialog if there is no internet
+      setState(() => _isConnected = false);
       _showNoInternetDialog();
     } else {
-      setState(() {
-        _isConnected = true;
-      });
-      // Save the token in shared preferences
-      // await _setTokenInSharedPreferences();
-      // Navigate to BottomNavBarScreen after 5 seconds if connected
+      setState(() => _isConnected = true);
+
       if (token != null && token.isNotEmpty) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomNavBarScreen(initialIndex: 0,)),
+          MaterialPageRoute(builder: (_) => BottomNavBarScreen(initialIndex: 0)),
         );
-      } else  if (newUsertoken != null && newUsertoken.isNotEmpty) {
+      } else if (newUsertoken != null && newUsertoken.isNotEmpty) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => NewUserBottombarPage()),
+          MaterialPageRoute(builder: (_) => NewUserBottombarPage()),
         );
-      }
-
-      else {
+      } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
+          MaterialPageRoute(builder: (_) => LoginPage()),
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
 

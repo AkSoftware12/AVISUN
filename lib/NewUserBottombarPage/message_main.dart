@@ -294,9 +294,9 @@ class _MessageListScreenState extends State<MessageMainScreen> {
                         child: Padding(
                           padding:  EdgeInsets.only(top: 18.sp),
                           child: Text(
-                            'Instructions',
+                            'Instructions For Applicants',
                             style: GoogleFonts.montserrat(
-                              fontSize: 18.sp,
+                              fontSize: 15.sp,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),

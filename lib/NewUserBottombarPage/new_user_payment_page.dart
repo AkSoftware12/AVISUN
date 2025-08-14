@@ -1120,13 +1120,16 @@ class _NewUserPaymentScreenState extends State<NewUserPaymentScreen> {
                                   Text('${studentData!['name']??''} / ${studentData!['class_name']??''}',style: TextStyle(color: Colors.black,fontSize: 14.sp,fontWeight: FontWeight.bold),),
                                 ],
                               ),
-                              Row(
-                                children: [
-                                  Icon(Icons.shopping_cart,size: 15.sp,),
-                                  SizedBox(width: 3.sp,),
-                                  Text(fee['order_id']??'',style: TextStyle(color: Colors.grey,fontSize: 14.sp,fontWeight: FontWeight.bold),),
-                                ],
-                              ),
+                              SizedBox(
+                                height: 5.sp,
+                              )
+                              // Row(
+                              //   children: [
+                              //     Icon(Icons.shopping_cart,size: 15.sp,),
+                              //     SizedBox(width: 3.sp,),
+                              //     Text(fee['order_id']??'',style: TextStyle(color: Colors.grey,fontSize: 14.sp,fontWeight: FontWeight.bold),),
+                              //   ],
+                              // ),
                             ],
                           ),
                           subtitle: Column(
