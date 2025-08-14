@@ -78,8 +78,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
     return Scaffold(
       backgroundColor: AppColors.secondary,
 
-      appBar: widget.type == 'NewUser'
-          ? AppBar(
+      appBar:AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         title: Text(
           'Gallery',
           style: TextStyle(
@@ -89,8 +89,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
         ),
         backgroundColor: AppColors.secondary,
-      )
-          : null,
+      ),
       body: SingleChildScrollView(
         child: isLoading
             ? WhiteCircularProgressWidget()

@@ -66,7 +66,7 @@ class _MessageListScreenState extends State<MessageMainScreen> {
           SliverAppBar(
             expandedHeight: 130.sp,
             floating: false,
-            pinned: true,
+            pinned: false,
             backgroundColor: AppColors.secondary,
             flexibleSpace: FlexibleSpaceBar(
               background: _buildProfileHeader(),
@@ -219,217 +219,220 @@ class _MessageListScreenState extends State<MessageMainScreen> {
               padding: EdgeInsets.symmetric(horizontal:10.w, vertical: 40.h),
               child: Column(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(35.r),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppColors.secondary.withOpacity(0.1), AppColors.secondary.withOpacity(0.1)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(20.r),
-                      border: Border.all(width: 1.sp,color: Colors.pink.shade100),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10.r,
-                          offset: Offset(0, 5.h),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal:10.w, vertical: 0.h),
+                    child: Container(
+                      padding: EdgeInsets.all(35.r),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppColors.secondary.withOpacity(0.1), AppColors.secondary.withOpacity(0.1)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'New Messages',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            AnimatedContainer(
-                              duration: Duration(milliseconds: 500),
-                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              child:Text(
-                                '${messages?.length ?? 0} ',
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(width: 1.sp,color: Colors.pink.shade100),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10.r,
+                            offset: Offset(0, 5.h),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'New Messages',
                                 style: GoogleFonts.montserrat(
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.blueAccent,
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
                                 ),
-                              )
-                  
-                            ),
-                          ],
-                        ),
-                        CircleAvatar(
-                          radius: 30.r,
-                          backgroundColor: Colors.white.withOpacity(0.2),
-                          child: Icon(
-                            Icons.message,
-                            color: Colors.white,
-                            size: 24.sp,
+                              ),
+                              SizedBox(height: 8.h),
+                              AnimatedContainer(
+                                duration: Duration(milliseconds: 500),
+                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                child:Text(
+                                  '${messages?.length ?? 0} ',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.blueAccent,
+                                  ),
+                                )
+
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          CircleAvatar(
+                            radius: 30.r,
+                            backgroundColor: Colors.white.withOpacity(0.2),
+                            child: Icon(
+                              Icons.message,
+                              color: Colors.white,
+                              size: 24.sp,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   
-                  Align(
-                    alignment: Alignment.topLeft,
-                      child: Padding(
-                        padding:  EdgeInsets.only(top: 18.sp),
-                        child: Text(
-                          'Interaction',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal:0.w, vertical: 10.h),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                        child: Padding(
+                          padding:  EdgeInsets.only(top: 18.sp),
+                          child: Text(
+                            'Instructions',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
 
+                    ),
                   ),
                   Align(
                     alignment: Alignment.topLeft,
-                      child: Padding(
-                        padding:  EdgeInsets.only(top: 0.sp),
-                        child:Card(
-                          child:SingleChildScrollView(
-                            child: Html(
-                              anchorKey: staticAnchorKey,
-                              data: instruction?['description'].toString() ?? '',
-                              style: {
-                                "table": Style(
-                                  backgroundColor: const Color.fromARGB(0x50, 0xee, 0xee, 0xee),
-                                ),
-                                "th": Style(
-                                  padding: HtmlPaddings.all(6),
-                                  backgroundColor: Colors.grey,
-                                ),
-                                "td": Style(
-                                  padding: HtmlPaddings.all(6),
-                                  border: const Border(bottom: BorderSide(color: Colors.grey)),
-                                ),
-                                'h5': Style(maxLines: 2, textOverflow: TextOverflow.ellipsis),
-                                'flutter': Style(
-                                  display: Display.block,
-                                  fontSize: FontSize(5, Unit.em),
-                                ),
-                                ".second-table": Style(
-                                  backgroundColor: Colors.transparent,
-                                ),
-                                ".second-table tr td:first-child": Style(
-                                  fontWeight: FontWeight.bold,
-                                  textAlign: TextAlign.end,
-                                ),
-                              },
-                              extensions: [
-                                TagWrapExtension(
-                                    tagsToWrap: {"table"},
-                                    builder: (child) {
-                                      return SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: child,
-                                      );
-                                    }),
-
-                                TagExtension.inline(
-                                  tagsToExtend: {"bird"},
-                                  child: const TextSpan(text: "🐦"),
-                                ),
-                                TagExtension(
-                                  tagsToExtend: {"flutter"},
-                                  builder: (context) => CssBoxWidget(
-                                    style: context.styledElement!.style,
-                                    child: FlutterLogo(
-                                      style: context.attributes['horizontal'] != null
-                                          ? FlutterLogoStyle.horizontal
-                                          : FlutterLogoStyle.markOnly,
-                                      textColor: context.styledElement!.style.color!,
-                                      size: context.styledElement!.style.fontSize!.value,
-                                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 0.sp),
+                      child: Card(
+                        margin: EdgeInsets.zero,
+                        color: Colors.white,
+                        elevation: 4, // Added subtle shadow for depth
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), // Rounded corners
+                        child: SingleChildScrollView(
+                          child: Html(
+                            anchorKey: staticAnchorKey,
+                            data: instruction?['description'].toString() ?? '',
+                            style: {
+                              // Default body styling with custom font and color
+                              "body": Style(
+                                fontFamily: 'Roboto', // Modern, clean font
+                                fontSize: FontSize(16.sp),
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange, // Dark grey for readability
+                              ),
+                              // Paragraph styling
+                              "p": Style(
+                                fontFamily: 'Roboto',
+                                fontSize: FontSize(14.sp),
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              // Heading 1 with bold color and larger size
+                              "h1": Style(
+                                fontFamily: 'Poppins',
+                                fontSize: FontSize(28.sp),
+                                color: Colors.blueAccent, // Vibrant blue for emphasis
+                                fontWeight: FontWeight.bold,
+                              ),
+                              // Heading 2 with slightly muted color
+                              "h2": Style(
+                                fontFamily: 'Poppins',
+                                fontSize: FontSize(22.sp),
+                                color: Colors.blueGrey[600],
+                                fontWeight: FontWeight.w600,
+                              ),
+                              // Table cell styling with borders
+                              "td": Style(
+                                fontFamily: 'Roboto',
+                                fontSize: FontSize(14.sp),
+                                color: Colors.orange,
+                                padding: HtmlPaddings.all(8.sp), // Added padding for table cells
+                                border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+                              ),
+                              // Table styling for better structure
+                              "table": Style(
+                                border: Border.all(color: Colors.grey[300]!), // Table border
+                                backgroundColor: Colors.white, // Light background for tables
+                              ),
+                            },
+                            extensions: [
+                              // Wrap tables in horizontal scroll
+                              TagWrapExtension(
+                                tagsToWrap: {"table"},
+                                builder: (child) {
+                                  return SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: child,
+                                  );
+                                },
+                              ),
+                              // Custom tag for bird emoji
+                              TagExtension.inline(
+                                tagsToExtend: {"bird"},
+                                child: const TextSpan(text: "🐦"),
+                              ),
+                              // Flutter logo tag
+                              TagExtension(
+                                tagsToExtend: {"flutter"},
+                                builder: (context) => CssBoxWidget(
+                                  style: context.styledElement!.style,
+                                  child: FlutterLogo(
+                                    style: context.attributes['horizontal'] != null
+                                        ? FlutterLogoStyle.horizontal
+                                        : FlutterLogoStyle.markOnly,
+                                    textColor: Colors.blueAccent, // Updated to match h1 color
+                                    size: context.styledElement!.style.fontSize!.value,
                                   ),
                                 ),
-                                ImageExtension(
-                                  handleAssetImages: false,
-                                  handleDataImages: false,
-                                  networkDomains: {"flutter.dev"},
-                                  child: const FlutterLogo(size: 36),
-                                ),
-                                ImageExtension(
-                                  handleAssetImages: false,
-                                  handleDataImages: false,
-                                  networkDomains: {"mydomain.com"},
-                                  networkHeaders: {"Custom-Header": "some-value"},
-                                ),
-
-                              ],
-                              onLinkTap: (url, _, __) {
-                                debugPrint("Opening $url...");
-                              },
-                              onCssParseError: (css, messages) {
-                                debugPrint("css that errored: $css");
-                                debugPrint("error messages:");
-                                for (var element in messages) {
-                                  debugPrint(element.toString());
-                                }
-                                return '';
-                              },
-                            ),
+                              ),
+                              // Image extension for flutter.dev
+                              ImageExtension(
+                                handleAssetImages: false,
+                                handleDataImages: false,
+                                networkDomains: {"flutter.dev"},
+                                child: const FlutterLogo(size: 36),
+                              ),
+                              // Image extension for mydomain.com with custom headers
+                              ImageExtension(
+                                handleAssetImages: false,
+                                handleDataImages: false,
+                                networkDomains: {"mydomain.com"},
+                                networkHeaders: {"Custom-Header": "some-value"},
+                              ),
+                            ],
+                            onLinkTap: (url, _, __) {
+                              debugPrint("Opening $url...");
+                            },
+                            onCssParseError: (css, messages) {
+                              debugPrint("CSS parsing error in: $css");
+                              debugPrint("Error messages:");
+                              for (var element in messages) {
+                                debugPrint(element.toString());
+                              }
+                              return '';
+                            },
                           ),
-
-
-
-//                           Html(
-//                             data: instruction?['description'].toString() ?? '',
-//                             extensions: [
-//                               TagExtension(
-//                                 tagsToExtend: {"flutter"},
-//                                 child: const FlutterLogo(),
-//                               ),
-//                             ],
-//                             style: {
-//                               "p.fancy": Style(
-//                                 textAlign: TextAlign.center,
-//                                 padding: HtmlPaddings.all(16),
-//                                 backgroundColor: Colors.grey[200], // Changed from Colors.white to light gray
-//                                 color: Colors.black, // Changed from Colors.white to black
-//                                 margin: Margins(left: Margin(50, Unit.px), right: Margin.auto()),
-//                                 width: Width(300, Unit.px),
-//                                 fontWeight: FontWeight.bold,
-//                                 fontSize: FontSize(20, Unit.px),
-//                                 fontFamily: GoogleFonts.poppins().fontFamily, // Google Font: Roboto
-// // Set text size to 15 pixels
-//                               ),
-//                             },
-//                           ),
                         ),
-
-
-
                       ),
-
-                  ),
+                    ),
+                  )
                 ],
               ),
             ),
             Container(
-              height: 100.sp, // Sets the height to 50 scaled pixels
+              height: 100.sp,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(
                     70.sp,
-                  ), // Rounds the top-left corner
+                  ),
+                  // Rounds the top-left corner
                 ),
                 border: Border(
                   left: BorderSide(
@@ -450,29 +453,6 @@ class _MessageListScreenState extends State<MessageMainScreen> {
     );
   }
 
-  Widget _buildShimmerLoading() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.secondary,
-      highlightColor:AppColors.secondary,
-      child: Column(
-        children: [
-          Container(
-            height: 200.h,
-            color: AppColors.secondary,
-          ),
-          SizedBox(height: 20.h),
-          Container(
-            height: 100.h,
-            margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: BoxDecoration(
-              color: AppColors.secondary,
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEmptyState() {
     return Center(

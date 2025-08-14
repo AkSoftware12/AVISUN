@@ -2,10 +2,10 @@ import 'package:avi/HexColorCode/HexColor.dart';
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static  Color primary = HexColor('#d0241a');
-  // static  Color primary = HexColor('#db7276');
-  //  static  Color secondary =HexColor('#7c444f');
-  static  Color secondary =HexColor('#d0241a');
+  // static  Color primary = HexColor('#FF2C2C');
+  static  Color primary = Colors.red.shade500;
+   static  Color secondary =Colors.red.shade500;
+  // static  Color secondary41 =HexColor('#FF2C2C');
 
 
 

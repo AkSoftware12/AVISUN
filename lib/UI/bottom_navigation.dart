@@ -18,7 +18,7 @@ import 'dart:convert';
 import 'Auth/login_screen.dart';
 import 'Auth/login_student.dart';
 import 'Auth/login_student_userlist.dart';
-import 'Documents/documents.dart';
+import '../NewUserBottombarPage/documents.dart';
 import 'Fees/fee_demo.dart';
 import 'Gallery/gallery_tab.dart';
 import 'Help/help.dart';
@@ -54,14 +54,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
     ProfileScreen(),
   ];
 
-  // List of titles corresponding to the screens
-  final List<String> _titles = [
-    AppStrings.homeLabel,
-    AppStrings.attendanceLabel,
-    AppStrings.libraryLabel,
-    AppStrings.feesLabel,
-    AppStrings.profileLabel,
-  ];
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -463,45 +456,6 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                                   ),
                                 ),
 
-                                ListTile(
-                                  title: Text(
-                                    'Documents',
-                                    style: GoogleFonts.cabin(
-                                      textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  trailing: Container(
-                                    height: 20,
-                                    width: 20,
-                                    color: AppColors.primary,
-                                    child: Icon(
-                                      CupertinoIcons.book,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) {
-                                          return WorkInProgressScreen();
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 8, right: 8),
-                                  child: Divider(
-                                    height: 1,
-                                    color: Colors.grey.shade300,
-                                    thickness: 1,
-                                  ),
-                                ),
 
                                 ListTile(
                                   title: Text(

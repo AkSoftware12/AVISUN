@@ -17,7 +17,7 @@ import 'package:html/parser.dart' as html_parser;
 import '../../constants.dart';
 import '../Assignment/assignment.dart';
 import '../Auth/login_screen.dart';
-import '../Documents/documents.dart';
+import '../../NewUserBottombarPage/documents.dart';
 import '../Gallery/gallery_tab.dart';
 import '../HomeWork/home_work.dart';
 import '../Leaves/leaves_tab.dart';
@@ -436,14 +436,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               } else if (items[index]['name'] == 'Document') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return WorkInProgressScreen();
-                    },
-                  ),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) {
+                //       return WorkInProgressScreen();
+                //     },
+                //   ),
+                // );
               } else if (items[index]['name'] == 'Leaves') {
                 Navigator.push(
                   context,
