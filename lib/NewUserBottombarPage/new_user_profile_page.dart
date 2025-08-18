@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
 import '../../constants.dart';
+import '../UI/Auth/login_student_userlist.dart';
 import '/UI/Auth/login_screen.dart';
 
 class NewUserProfileScreen extends StatefulWidget {
@@ -90,6 +91,7 @@ class _ProfileScreenState extends State<NewUserProfileScreen>
         },
       ),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           'Profile',
           style: TextStyle(
@@ -316,6 +318,76 @@ class _ProfileScreenState extends State<NewUserProfileScreen>
                       buildProfileRow('Email', studentData!['email'] ?? ''),
                       buildProfileRow('Address', studentData!['address'] ?? ''),
                     ]),
+
+                    const SizedBox(height: 20),
+
+                    GestureDetector(
+                      onTap: (){
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginUserLIst(),
+                          ),
+                        );
+
+                      },
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.account_circle,size: 20,color: Colors.black,),
+                                    SizedBox(width: 5.sp,),
+                                    Text('Users List',style: TextStyle(color: Colors.black,fontSize: 12.sp,fontWeight: FontWeight.bold),)
+
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    GestureDetector(
+                      onTap: (){
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginPage()),
+                        );
+
+                      },
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.add_circle_outline,size: 20,color: Colors.black,),
+                                    SizedBox(width: 5.sp,),
+                                    Text('Add Account',style: TextStyle(color: Colors.black,fontSize: 12.sp,fontWeight: FontWeight.bold),)
+
+                                  ],
+                                ),
+                                Text('Add another account',style: TextStyle(color: Colors.grey,fontSize: 10.sp),)
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 50),
                   ],
                 ),

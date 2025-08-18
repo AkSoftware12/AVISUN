@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../NewUserBottombarPage/new_user_bottombar_page.dart';
+import '../../TecaherUi/UI/bottom_navigation.dart';
 import '/constants.dart';
 import '../../strings.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -95,11 +96,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!_formKey.currentState!.validate()) return;
 
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
+    if (mounted) setState(() => _isLoading = true);
 
     try {
       final url = Uri.parse(ApiRoutes.loginNewUser);
@@ -114,33 +111,122 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        String token = jsonData['student']['token'];
+        final jsonResponse = json.decode(response.body);
 
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('newusertoken', token);
-        await _saveCredentials(); // Save credentials if Remember Me is checked
+        if (jsonResponse['success'] == true) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          // Save token (अगर API student में token भेजती है)
+          if (jsonResponse['students'] != null &&
+              jsonResponse['students'].isNotEmpty &&
+              jsonResponse['students'][0]['token'] != null) {
+            await prefs.setString('newusertoken', jsonResponse['students'][0]['token']);
+          }
+          await _saveCredentials();
 
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const NewUserBottombarPage()),
-          );
+          // पहले studentList को save करें
+          await prefs.setString('studentList', jsonEncode(jsonResponse['students']));
+
+          setState(() {
+            loginStudent = List<Map<String, dynamic>>.from(jsonResponse['students']);
+            _isLoading = false;
+            print('Login Student: $loginStudent');
+          });
+
+          // नए students लाएं
+          List<Map<String, dynamic>> newStudents =
+          List<Map<String, dynamic>>.from(jsonResponse['students']);
+
+          // पुरानी history लाएं
+          loginHistory = await _getStoredLoginList();
+
+          // अगर student_id पहले से exist नहीं करता, तो add करो
+          for (var student in newStudents) {
+            bool exists = loginHistory.any(
+                  (s) => s['student_id'] == student['student_id'],
+            );
+            if (!exists) {
+              loginHistory.insert(0, student); // नया user list के top में
+            }
+          }
+
+          // updated list save करें
+          await _saveLoginList(loginHistory);
+
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const NewUserBottombarPage()),
+            );
+          }
+        } else {
+          _showError("Login failed: ${jsonResponse['message']}");
         }
       } else {
-        print('Login1 failed, attempting Login2');
+        print("Login1 failed, attempting Login2");
         await _login2();
       }
     } catch (e) {
       _handleError(e, AppStrings.unexpectedError);
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
+
+
+  // Future<void> _login1() async {
+  //   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  //   String? deviceToken = await _firebaseMessaging.getToken();
+  //   print('Device id: $deviceToken');
+  //
+  //   if (!_formKey.currentState!.validate()) return;
+  //
+  //   if (mounted) {
+  //     setState(() {
+  //       _isLoading = true;
+  //     });
+  //   }
+  //
+  //   try {
+  //     final url = Uri.parse(ApiRoutes.loginNewUser);
+  //     final response = await http.post(
+  //       url,
+  //       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+  //       body: {
+  //         'email': _emailController.text,
+  //         'password': _passwordController.text,
+  //         'fcm': deviceToken ?? '',
+  //       },
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       final jsonData = json.decode(response.body);
+  //       String token = jsonData['student']['token'];
+  //
+  //       SharedPreferences prefs = await SharedPreferences.getInstance();
+  //       await prefs.setString('newusertoken', token);
+  //       await _saveCredentials(); // Save credentials if Remember Me is checked
+  //
+  //
+  //       if (mounted) {
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(builder: (context) => const NewUserBottombarPage()),
+  //         );
+  //       }
+  //     } else {
+  //       print('Login1 failed, attempting Login2');
+  //       await _login2();
+  //     }
+  //   } catch (e) {
+  //     _handleError(e, AppStrings.unexpectedError);
+  //   } finally {
+  //     if (mounted) {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //     }
+  //   }
+  // }
 
   Future<void> _login2() async {
     if (!_formKey.currentState!.validate()) return;
@@ -213,20 +299,106 @@ class _LoginPageState extends State<LoginPage> {
             MaterialPageRoute(builder: (context) => LoginStudentPage()),
           );
         } else {
-          _showError2(context,);
+          _login3();
         }
       } else {
-        _showError2(context,);
+        _login3() ;
       }
     } on DioException catch (e) {
-      _showError2(context,);
-
+      _login3();
     } catch (e) {
       _showError2(context,);
     } finally {
       setState(() => _isLoading = false);
     }
   }
+
+
+  Future<void> _login3() async {
+    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+    String? deviceToken = await _firebaseMessaging.getToken();
+    print('Device id: $deviceToken');
+
+    if (!_formKey.currentState!.validate()) return;
+
+    if (mounted) setState(() => _isLoading = true);
+
+    try {
+      final url = Uri.parse(ApiRoutes.teacherlogin);
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'email': _emailController.text,
+          'password': _passwordController.text,
+          'fcm': deviceToken ?? '',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+
+        if (jsonResponse['success'] == true) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+
+          // token save करना
+          if (jsonResponse['students'] != null &&
+              jsonResponse['students'].isNotEmpty &&
+              jsonResponse['students'][0]['token'] != null) {
+            await prefs.setString('teachertoken', jsonResponse['students'][0]['token']);
+          }
+
+          await _saveCredentials();
+
+          // पहले studentList को save करें
+          await prefs.setString('studentList', jsonEncode(jsonResponse['students']));
+
+          setState(() {
+            loginStudent = List<Map<String, dynamic>>.from(jsonResponse['students']);
+            _isLoading = false;
+            print('Login Student: $loginStudent');
+          });
+
+          // नए students लाएं
+          List<Map<String, dynamic>> newStudents =
+          List<Map<String, dynamic>>.from(jsonResponse['students']);
+
+          // पुरानी history लाएं
+          loginHistory = await _getStoredLoginList();
+
+          // अगर student_id पहले से exist नहीं करता, तो add करो
+          for (var student in newStudents) {
+            bool exists = loginHistory.any(
+                  (s) => s['student_id'] == student['student_id'],
+            );
+            if (!exists) {
+              loginHistory.insert(0, student); // नया user list के top में
+            }
+          }
+
+          // updated list save करें
+          await _saveLoginList(loginHistory);
+
+
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => TeacherBottomNavBarScreen(initialIndex: 0)),
+            );
+          }
+        } else {
+          _showError("Login failed: ${jsonResponse['message']}");
+        }
+      } else {
+        _showError("Login failed with status: ${response.statusCode}");
+      }
+    } catch (e) {
+      _handleError(e, AppStrings.unexpectedError);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   void _showError2(BuildContext context,) {
     showDialog(
       context: context,

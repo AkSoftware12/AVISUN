@@ -67,6 +67,7 @@ class _MessageListScreenState extends State<MessageMainScreen> {
             expandedHeight: 130.sp,
             floating: false,
             pinned: false,
+            automaticallyImplyLeading: false,
             backgroundColor: AppColors.secondary,
             flexibleSpace: FlexibleSpaceBar(
               background: _buildProfileHeader(),

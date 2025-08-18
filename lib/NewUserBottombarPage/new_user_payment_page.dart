@@ -823,6 +823,7 @@ class _NewUserPaymentScreenState extends State<NewUserPaymentScreen> {
     return Scaffold(
       backgroundColor: AppColors.secondary,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           " Fees",
           style: TextStyle(

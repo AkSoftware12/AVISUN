@@ -6,7 +6,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../NewUserBottombarPage/new_user_bottombar_page.dart';
+import '../../TecaherUi/UI/bottom_navigation.dart';
 import '/UI/bottom_navigation.dart';
 import '/constants.dart';
 import '../../strings.dart';
@@ -31,6 +34,8 @@ class _LoginPageState extends State<LoginUserLIst> {
 
   // Radio Button List Data
   String? selectedOption;
+  String? selectedAdmNo;     // adm_no alag store karne ke liye
+  String? staffPass;
 
   @override
   void initState() {
@@ -73,14 +78,10 @@ class _LoginPageState extends State<LoginUserLIst> {
         if (responseData['success'] == true) {
           // Save token in SharedPreferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.remove('teachertoken');  // Sirf token clear hoga
+          await prefs.remove('newusertoken');  // Sirf token clear hoga
           await prefs.setString('token', responseData['token']);
-          print('${AppStrings.tokenSaved}${responseData['token']}'); // Debug: Print the saved token
 
-          // Retrieve the token
-          String? token = prefs.getString('token');
-          print('${AppStrings.tokenRetrieved}$token'); // Debug: Print retrieved token
-
-          // Navigate to the BottomNavBarScreen with the token
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -121,6 +122,137 @@ class _LoginPageState extends State<LoginUserLIst> {
       });
     }
   }
+
+  Future<void> _loginNewUser() async {
+    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+    String? deviceToken = await _firebaseMessaging.getToken();
+    print('Device id: $deviceToken');
+    // if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _dio.post(
+        ApiRoutes.loginstudentNewUser,
+        data: {
+          'student_id': selectedOption,
+          'fcm': deviceToken,
+        },
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      print(' Device token : - $deviceToken');
+
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+
+        if (responseData['success'] == true) {
+          // Save token in SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.remove('teachertoken');  // Sirf token clear hoga
+          await prefs.remove('token');  // Sirf token clear hoga
+          await prefs.setString('newusertoken', responseData['token']);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const NewUserBottombarPage()),
+          );
+        } else {
+          print('${AppStrings.loginFailedDebug}${responseData['message']}'); // Debug: Print failure message
+          _showErrorDialog(responseData['message']);
+        }
+      } else {
+        print('${AppStrings.loginFailedMessage} ${response.statusCode}'); // Debug: Unexpected status code
+        _showErrorDialog(AppStrings.loginFailedMessage);
+      }
+    } on DioException catch (e) {
+      print('${AppStrings.dioExceptionDebug}${e.message}'); // Debug: Print DioException message
+
+      String errorMessage = AppStrings.unexpectedError;
+      if (e.response != null) {
+        print('${AppStrings.errorResponseDebug}${e.response?.data}'); // Debug: Print error response data
+
+        if (e.response?.data is Map<String, dynamic>) {
+          errorMessage = e.response?.data['message'] ?? errorMessage;
+        } else if (e.response?.data is String) {
+          errorMessage = e.response?.data;
+        }
+      } else {
+        errorMessage = e.message ?? 'Unable to connect to the server.';
+      }
+
+      _showErrorDialog(errorMessage);
+    } catch (e) {
+      print('${AppStrings.generalErrorDebug}$e'); // Catch any other errors
+      _showErrorDialog(AppStrings.unexpectedError);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loginTeacher() async {
+    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+    String? deviceToken = await _firebaseMessaging.getToken();
+    print('Device id: $deviceToken');
+
+
+    if (mounted) setState(() => _isLoading = true);
+
+    try {
+      final url = Uri.parse(ApiRoutes.teacherlogin);
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'email': selectedOption,
+          'password': staffPass,
+          'fcm': deviceToken ?? '',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+
+        if (jsonResponse['success'] == true) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+
+          // token save करना
+          if (jsonResponse['students'] != null &&
+              jsonResponse['students'].isNotEmpty &&
+              jsonResponse['students'][0]['token'] != null) {
+
+            await prefs.remove('newusertoken');  // Sirf token clear hoga
+            await prefs.remove('token');
+            await prefs.setString('teachertoken', jsonResponse['students'][0]['token']);
+          }
+
+
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => TeacherBottomNavBarScreen(initialIndex: 0)),
+            );
+          }
+        } else {
+          // _showError("Login failed: ${jsonResponse['message']}");
+        }
+      } else {
+        // _showError("Login failed with status: ${response.statusCode}");
+      }
+    } catch (e) {
+      // _handleError(e, AppStrings.unexpectedError);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -256,58 +388,101 @@ class _LoginPageState extends State<LoginUserLIst> {
                             title: Text('Invalid Student Data'),
                           );
                         }
-                        return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(12),
-                            // boxShadow: [
-                            //   BoxShadow(
-                            //     color: Colors.black,
-                            //     blurRadius: 10,
-                            //     offset: const Offset(2, 2),
-                            //   ),
-                            // ],
-                          ),
-                          child: RadioListTile<String>(
-                            contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                            title: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  student['name'].toString(),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 14,
-                                  ),
+                        return Stack(
+                          children: [
+
+                            Container(
+                              margin: const EdgeInsets.symmetric(vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(12),
+                                // boxShadow: [
+                                //   BoxShadow(
+                                //     color: Colors.black,
+                                //     blurRadius: 10,
+                                //     offset: const Offset(2, 2),
+                                //   ),
+                                // ],
+                              ),
+                              child: RadioListTile<String>(
+                                contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      student['name'].toString(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      student['student_id'].toString(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                                subtitle: (student['adm_no']=='null')?
                                 Text(
-                                  student['student_id'].toString(),
+                                  '',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ):Text(
+                                  student['adm_no'].toString(),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 12,
                                   ),
                                 ),
-                              ],
-                            ),
-                            subtitle: Text(
-                              student['adm_no'].toString(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
+                                value: student['student_id'].toString(),
+                                groupValue: selectedOption,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedOption = value;
+                                    selectedAdmNo = student['adm_no'].toString(); // adm_no alag store
+                                    staffPass = student['password'].toString(); // adm_no alag store
+
+                                  });
+                                  _saveSelectedStudent(value!);
+                                },
+                                activeColor: AppColors.secondary,
                               ),
                             ),
-                            value: student['student_id'].toString(),
-                            groupValue: selectedOption,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedOption = value;
-                              });
-                              _saveSelectedStudent(value!);
-                            },
-                            activeColor: AppColors.secondary,
-                          ),
+                            Align(
+                              alignment: Alignment.topLeft,
+
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(3), // Rounded corners
+                                ),
+                                elevation: 5,
+                                margin: EdgeInsets.zero,
+                                color: Colors.white,
+                                child: Padding(
+                                  padding:  EdgeInsets.all(3.sp),
+                                  child: student['password']!=null?Text(
+                                    'Teacher',
+                                    style:  TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 8.sp,
+                                    ),
+                                  ):Text(
+                                    'Student',
+                                    style:  TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 8.sp,
+                                    ),
+                                  )
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
@@ -321,7 +496,17 @@ class _LoginPageState extends State<LoginUserLIst> {
                     child: CustomLoginButton(
                       onPressed: () {
                         if (selectedOption != null) {
-                          _login();
+                          if(selectedAdmNo=='null'){
+                            if(staffPass=='null'){
+                              _loginNewUser();
+                            }else{
+                              _loginTeacher();
+                            }
+                          }else{
+                            _login();
+
+                          }
+
                           print("Selected Option: $selectedOption");
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(

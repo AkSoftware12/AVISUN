@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upgrader/upgrader.dart';
 import '../UI/Auth/login_screen.dart';
+import '../UI/Auth/login_student_userlist.dart';
 import 'documents.dart';
 import '../UI/Gallery/gallery_tab.dart';
 import '../utils/upgrader_config.dart';
@@ -150,11 +151,11 @@ class _BottomNavBarScreenState extends State<NewUserBottombarPage> {
                 //
                 // },
                 onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   // MaterialPageRoute(builder: (context) => LoginStudentPage()),
-                  //   MaterialPageRoute(builder: (context) => LoginUserLIst()),
-                  // );
+                  Navigator.push(
+                    context,
+                    // MaterialPageRoute(builder: (context) => LoginStudentPage()),
+                    MaterialPageRoute(builder: (context) => LoginUserLIst()),
+                  );
                 },
                 child: Row(
                   children: [
@@ -168,7 +169,7 @@ class _BottomNavBarScreenState extends State<NewUserBottombarPage> {
                         color: AppColors.textwhite,
                       ),
                     ),
-                    // Icon(Icons.arrow_drop_down, color: Colors.white),
+                    Icon(Icons.arrow_drop_down, color: Colors.white),
                   ],
                 ),
               ),

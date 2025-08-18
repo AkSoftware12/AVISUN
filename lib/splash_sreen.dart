@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
+import 'TecaherUi/UI/bottom_navigation.dart';
 import 'UI/Auth/login_screen.dart';
 import 'UI/bottom_navigation.dart';
 
@@ -48,6 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     String? newUsertoken = prefs.getString('newusertoken');
+    String? teacherToken = prefs.getString('teachertoken');
     final connectivityResult = await Connectivity().checkConnectivity();
 
     if (!mounted) return; // Check before using setState or Navigator
@@ -59,16 +61,31 @@ class _SplashScreenState extends State<SplashScreen> {
       setState(() => _isConnected = true);
 
       if (token != null && token.isNotEmpty) {
+        print('CheckToken:$token');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => BottomNavBarScreen(initialIndex: 0)),
         );
       } else if (newUsertoken != null && newUsertoken.isNotEmpty) {
+        print('CheckNewToken:$newUsertoken');
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => NewUserBottombarPage()),
         );
-      } else {
+      } else if (teacherToken != null && teacherToken.isNotEmpty) {
+        print('CheckNTeacherToken:$teacherToken');
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TeacherBottomNavBarScreen(initialIndex: 0,),
+          ),
+        );
+
+      }
+
+      else {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => LoginPage()),

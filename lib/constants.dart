@@ -21,6 +21,21 @@ class AppColors {
   static const Color yellow = Color(0xFFCCAB21); // Success color (green)
 }
 
+class AppColors2 {
+  // static const Color primary = Color(0xFF041B7F); // Example primary color (blue)
+  static  Color primary = HexColor('#f5f1e0'); // Example primary color (blue)
+  static  Color secondary =HexColor('#7da4d1'); // Secondary color (gray)
+  // static const Color secondary = Color(0xFF074799); // Secondary color (gray)
+  static const Color grey = Color(0xFFAAAEB2); // Secondary color (gray)
+  static const Color background = Color(0xFFF8F9FA); // Light background color
+  static const Color textblack = Color(0xFF212529); // Dark text color
+  static const Color textwhite = Color.fromARGB(255, 255, 255, 255); // Dark text color
+  // static  Color textwhite = Colors.grey.shade500; // Dark text color
+  static const Color error = Color(0xFFDC3545); // Error color (red)
+  static const Color success = Color(0xFF28A745); // Success color (green)
+  static const Color yellow = Color(0xFFCCAB21); // Success color (green)
+}
+
 class AppAssets {
   static const String logo = 'assets/images/logo.png'; 
   static const String cjm = 'assets/cjm.png';
@@ -34,8 +49,8 @@ class ApiRoutes {
 
 
   // Main App Url
-  static const String baseUrl = "https://softcjm.cjmambala.co.in/api";
-  static const String baseUrlNewUser = "https://cjmambala.co.in/api";
+  // static const String baseUrl = "https://softcjm.cjmambala.co.in/api";
+  // static const String baseUrlNewUser = "https://cjmambala.co.in/api";
 
 
 
@@ -45,13 +60,15 @@ class ApiRoutes {
 // Local  App Url
 
 
-  // static const String baseUrlNewUser = "http://192.168.1.5/cjmweb/api";
-  // static const String baseUrl = "http://192.168.1.5/cjm_ambala/api";
+  static const String baseUrlNewUser = "http://192.168.1.4/cjmweb/api";
+  static const String baseUrl = "http://192.168.1.4/cjm_ambala/api";
 
 
   // New Admission Api
   static const String loginNewUser = "$baseUrlNewUser/login";
+  static const String loginstudentNewUser = "$baseUrlNewUser/loginstudent";
   static const String getProfileNewUser = "$baseUrlNewUser/student-get";
+  static const String msgMarkSeenNewUser = "$baseUrlNewUser/mark-seen";
   static const String orderCreateNewUser  = "$baseUrlNewUser/initiatepayment";
   static const String payFeesNewUser  = "$baseUrlNewUser/payfees";
   static const String admissionDownload  = "$baseUrlNewUser/profile/";
@@ -96,4 +113,33 @@ class ApiRoutes {
   static const String getAllMessages = "$baseUrl/messages";
   static const String getUserMessagesConversation = "$baseUrl/messages/conversation/";
   static const String sendMessage = "$baseUrl/messages";
+
+
+
+  // Teacher Api
+
+  static const String teacherlogin = "$baseUrl/teacher-login";
+  static const String getTeacheProfile = "$baseUrl/teacher";
+  static const String getTeacherPhotos = "$baseUrlNewUser/getPhotos";
+  static const String getTeacherVideos = "$baseUrlNewUser/getVideos";
+  static const String getTeacherlibrary = "$baseUrl/library-get";
+  static const String getTeacherBookTypes = "$baseUrl/book-types";
+  static const String getTeacherBookCategories = "$baseUrl/book-categories";
+  static const String getTeacherBookPublishers = "$baseUrl/book-publishers";
+  static const String getTeacherBookSupplier= "$baseUrl/book-supplier";
+  static const String uploadTeacherAssignment = "$baseUrl/teacher-assignment";
+  static const String deleteTeacherAssignment = "$baseUrl/teacher-assignment-delete";
+  static const String getTeacherDashboard = "$baseUrl/dashboard";
+  static const String getTeacherFees = "$baseUrl/get-fees";
+  static const String getTeacherAssignments = "$baseUrl/teacher-assignment";
+  // static const String getTimeTable = "$baseUrl/teacher-subjects";
+  static const String getTeacherTimeTable = "$baseUrl/teacher-timetable?day=";
+  static const String getTeacherSubject = "$baseUrl/get-subjects";
+  static const String studentTeacherDashboard = "$baseUrl/dashboard";
+  static const String Teacherattendance = "$baseUrl/get-attendance-monthly";
+  static const String Teacherevents = "$baseUrl/events";
+  static const String TeachergetTeacherBanners = "$baseUrl/get-banners";
+  static const String Teachernotifications = "$baseUrl/teacher-notifications";
+  static const String getTeacherClass = "$baseUrl/teacher-student-atttendance";
+  static const String getTeacherTeacherSubject = "$baseUrl/teacher-assigned-subjects";
 }

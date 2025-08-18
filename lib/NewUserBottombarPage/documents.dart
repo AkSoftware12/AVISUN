@@ -93,6 +93,8 @@ class _NewUserPaymentScreenState extends State<DocumentsScreen> {
     return Scaffold(
       backgroundColor: AppColors.secondary,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+
         title: Text(
           'Documents',
           style: TextStyle(

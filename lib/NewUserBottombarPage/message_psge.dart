@@ -132,23 +132,82 @@ class _MessageListScreenState extends State<MessageListScreen> {
               ),
 
               subtitle: Text(
-                formatDateTime(msg['created_at'] ?? ''),
+                formatDateTime(msg['updated_at'] ?? ''),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
 
               trailing: Icon(CupertinoIcons.right_chevron,color: Colors.black,),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MessageDetailScreen(
-                      name: msg['title']!,
-                      message: msg['message']!,
-                      time:  formatDateTime(msg['created_at'] ?? '')!,
+              onTap: () async {
+                try {
+                  // Token load from SharedPreferences
+                  final prefs = await SharedPreferences.getInstance();
+                  final token = prefs.getString('newusertoken');
+
+                  if (token == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Token not found, please login again")),
+                    );
+                    return;
+                  }
+
+                  // API URL
+                  const String apiUrl = ApiRoutes.msgMarkSeenNewUser;
+
+                  // API Body
+                  final body = {
+                    "message_id": msg['id'].toString(),
+                  };
+
+                  // API Call
+                  final response = await http.post(
+                    Uri.parse(apiUrl),
+                    headers: {
+                      "Content-Type": "application/json",
+                      "Authorization": "Bearer $token",
+                    },
+                    body: jsonEncode(body),
+                  );
+
+                  if (response.statusCode == 200) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MessageDetailScreen(
+                          name: msg['title']!,
+                          message: msg['message']!,
+                          time:  formatDateTime(msg['updated_at'] ?? '')!,
+                        ),
+                      ),
+                    );
+
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MessageDetailScreen(
+                          name: msg['title']!,
+                          message: msg['message']!,
+                          time:  formatDateTime(msg['updated_at'] ?? '')!,
+                        ),
+                      ),
+                    );
+
+                  }
+                } catch (e) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MessageDetailScreen(
+                        name: msg['title']!,
+                        message: msg['message']!,
+                        time:  formatDateTime(msg['updated_at'] ?? '')!,
+                      ),
                     ),
-                  ),
-                );
+                  );
+
+                }
+
               },
             ),
           );
@@ -159,6 +218,11 @@ class _MessageListScreenState extends State<MessageListScreen> {
 
 
   }
+
+
+
+
+
   Widget _buildShimmerLoading() {
     return Center(
       child: CupertinoActivityIndicator(radius: 20),
