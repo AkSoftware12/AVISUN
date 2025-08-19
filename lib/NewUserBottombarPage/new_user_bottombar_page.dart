@@ -163,7 +163,7 @@ class _BottomNavBarScreenState extends State<NewUserBottombarPage> {
                       '${studentData?['name'].toString() ?? ' Student'}',
                       style: GoogleFonts.montserrat(
                         textStyle: Theme.of(context).textTheme.displayLarge,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                         fontStyle: FontStyle.normal,
                         color: AppColors.textwhite,

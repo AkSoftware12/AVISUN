@@ -83,11 +83,12 @@ class _ProfileScreenState extends State<NewUserProfileScreen>
         ),
         onPressed: () async {
           final prefs = await SharedPreferences.getInstance();
-          await prefs.remove('newusertoken'); // Only removes the token
+          await prefs.clear(); // Clear the stored token
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LoginPage()),
           );
+
         },
       ),
       appBar: AppBar(
@@ -398,14 +399,18 @@ class _ProfileScreenState extends State<NewUserProfileScreen>
 
   Widget _buildAnimatedSection(String title, List<Widget> rows) {
     return AnimatedContainer(
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 10 ),
       curve: Curves.easeInOut,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
+        color:Colors.black54,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.grey, blurRadius: 10, spreadRadius: 2),
+          BoxShadow(
+            color: Colors.grey,
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
         ],
       ),
       child: Column(

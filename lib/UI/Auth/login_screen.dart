@@ -89,14 +89,36 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _login1() async {
+  Future<void> tryLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Step 1: Try Login1
+      bool login1Success = await _login1();
+      if (login1Success) return;
+
+      // Step 2: Try Login2
+      bool login2Success = await _login2();
+      if (login2Success) return;
+
+      // Step 3: Try Login3
+      bool login3Success = await _login3();
+      if (login3Success) return;
+
+      // Agar teenon fail ho gaye
+      _showError("Invalid User");
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+
+  Future<bool> _login1() async {
     final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
     String? deviceToken = await _firebaseMessaging.getToken();
     print('Device id: $deviceToken');
-
-    if (!_formKey.currentState!.validate()) return;
-
-    if (mounted) setState(() => _isLoading = true);
 
     try {
       final url = Uri.parse(ApiRoutes.loginNewUser);
@@ -115,41 +137,24 @@ class _LoginPageState extends State<LoginPage> {
 
         if (jsonResponse['success'] == true) {
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          // Save token (अगर API student में token भेजती है)
           if (jsonResponse['students'] != null &&
               jsonResponse['students'].isNotEmpty &&
               jsonResponse['students'][0]['token'] != null) {
             await prefs.setString('newusertoken', jsonResponse['students'][0]['token']);
           }
-          await _saveCredentials();
 
-          // पहले studentList को save करें
+          await _saveCredentials();
           await prefs.setString('studentList', jsonEncode(jsonResponse['students']));
 
           setState(() {
             loginStudent = List<Map<String, dynamic>>.from(jsonResponse['students']);
-            _isLoading = false;
-            print('Login Student: $loginStudent');
           });
 
-          // नए students लाएं
-          List<Map<String, dynamic>> newStudents =
-          List<Map<String, dynamic>>.from(jsonResponse['students']);
-
-          // पुरानी history लाएं
           loginHistory = await _getStoredLoginList();
-
-          // अगर student_id पहले से exist नहीं करता, तो add करो
-          for (var student in newStudents) {
-            bool exists = loginHistory.any(
-                  (s) => s['student_id'] == student['student_id'],
-            );
-            if (!exists) {
-              loginHistory.insert(0, student); // नया user list के top में
-            }
+          for (var student in loginStudent) {
+            bool exists = loginHistory.any((s) => s['student_id'] == student['student_id']);
+            if (!exists) loginHistory.insert(0, student);
           }
-
-          // updated list save करें
           await _saveLoginList(loginHistory);
 
           if (mounted) {
@@ -158,100 +163,19 @@ class _LoginPageState extends State<LoginPage> {
               MaterialPageRoute(builder: (context) => const NewUserBottombarPage()),
             );
           }
-        } else {
-          _showError("Login failed: ${jsonResponse['message']}");
+
+          return true; // ✅ success
         }
-      } else {
-        print("Login1 failed, attempting Login2");
-        await _login2();
       }
+      return false; // ❌ fail
     } catch (e) {
-      _handleError(e, AppStrings.unexpectedError);
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      return false; // ❌ fail
     }
   }
 
 
-  // Future<void> _login1() async {
-  //   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  //   String? deviceToken = await _firebaseMessaging.getToken();
-  //   print('Device id: $deviceToken');
-  //
-  //   if (!_formKey.currentState!.validate()) return;
-  //
-  //   if (mounted) {
-  //     setState(() {
-  //       _isLoading = true;
-  //     });
-  //   }
-  //
-  //   try {
-  //     final url = Uri.parse(ApiRoutes.loginNewUser);
-  //     final response = await http.post(
-  //       url,
-  //       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-  //       body: {
-  //         'email': _emailController.text,
-  //         'password': _passwordController.text,
-  //         'fcm': deviceToken ?? '',
-  //       },
-  //     );
-  //
-  //     if (response.statusCode == 200) {
-  //       final jsonData = json.decode(response.body);
-  //       String token = jsonData['student']['token'];
-  //
-  //       SharedPreferences prefs = await SharedPreferences.getInstance();
-  //       await prefs.setString('newusertoken', token);
-  //       await _saveCredentials(); // Save credentials if Remember Me is checked
-  //
-  //
-  //       if (mounted) {
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(builder: (context) => const NewUserBottombarPage()),
-  //         );
-  //       }
-  //     } else {
-  //       print('Login1 failed, attempting Login2');
-  //       await _login2();
-  //     }
-  //   } catch (e) {
-  //     _handleError(e, AppStrings.unexpectedError);
-  //   } finally {
-  //     if (mounted) {
-  //       setState(() {
-  //         _isLoading = false;
-  //       });
-  //     }
-  //   }
-  // }
 
-  Future<void> _login2() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    // Load previously saved studentList
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? storedList = prefs.getString('studentList');
-    List<Map<String, dynamic>> studentList = [];
-    if (storedList != null) {
-      studentList = List<Map<String, dynamic>>.from(jsonDecode(storedList));
-    }
-
-    // Check if email already exists in studentList
-    bool alreadyExists = studentList.any(
-          (student) => (student['adm_no']?.toString().toLowerCase() ?? '') ==
-          _emailController.text.trim().toLowerCase(),
-    );
-
-    if (alreadyExists) {
-      _showError("User already exists!");
-      return; // Stop login process
-    }
-
-    setState(() => _isLoading = true);
-
+  Future<bool> _login2() async {
     try {
       final response = await _dio.post(
         ApiRoutes.login,
@@ -264,64 +188,40 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode == 200) {
         final jsonResponse = response.data;
-
         if (jsonResponse['success'] == true) {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('studentList', jsonEncode(jsonResponse['students']));
-
-          await _saveCredentials(); // Save credentials if Remember Me is checked
+          await _saveCredentials();
 
           setState(() {
             loginStudent = List<Map<String, dynamic>>.from(jsonResponse['students']);
-            _isLoading = false;
-            print('Login Student: $loginStudent');
           });
 
-          // New students from API
-          List<Map<String, dynamic>> newStudents =
-          List<Map<String, dynamic>>.from(jsonResponse['students']);
-
-          // Load previously stored list
           loginHistory = await _getStoredLoginList();
-
-          for (var student in newStudents) {
+          for (var student in loginStudent) {
             bool exists = loginHistory.any((s) => s['adm_no'] == student['adm_no']);
-            if (!exists) {
-              loginHistory.insert(0, student); // Insert at start
-            }
+            if (!exists) loginHistory.insert(0, student);
           }
-
-          // Save updated list
           await _saveLoginList(loginHistory);
 
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => LoginStudentPage()),
           );
-        } else {
-          _login3();
+
+          return true; // ✅ success
         }
-      } else {
-        _login3() ;
       }
-    } on DioException catch (e) {
-      _login3();
+      return false; // ❌ fail
     } catch (e) {
-      _showError2(context,);
-    } finally {
-      setState(() => _isLoading = false);
+      return false; // ❌ fail
     }
   }
 
 
-  Future<void> _login3() async {
+  Future<bool> _login3() async {
     final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
     String? deviceToken = await _firebaseMessaging.getToken();
-    print('Device id: $deviceToken');
-
-    if (!_formKey.currentState!.validate()) return;
-
-    if (mounted) setState(() => _isLoading = true);
 
     try {
       final url = Uri.parse(ApiRoutes.teacherlogin);
@@ -338,64 +238,39 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
 
-        if (jsonResponse['success'] == true) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-
-          // token save करना
-          if (jsonResponse['students'] != null &&
-              jsonResponse['students'].isNotEmpty &&
-              jsonResponse['students'][0]['token'] != null) {
-            await prefs.setString('teachertoken', jsonResponse['students'][0]['token']);
-          }
-
-          await _saveCredentials();
-
-          // पहले studentList को save करें
-          await prefs.setString('studentList', jsonEncode(jsonResponse['students']));
-
-          setState(() {
-            loginStudent = List<Map<String, dynamic>>.from(jsonResponse['students']);
-            _isLoading = false;
-            print('Login Student: $loginStudent');
-          });
-
-          // नए students लाएं
-          List<Map<String, dynamic>> newStudents =
-          List<Map<String, dynamic>>.from(jsonResponse['students']);
-
-          // पुरानी history लाएं
-          loginHistory = await _getStoredLoginList();
-
-          // अगर student_id पहले से exist नहीं करता, तो add करो
-          for (var student in newStudents) {
-            bool exists = loginHistory.any(
-                  (s) => s['student_id'] == student['student_id'],
-            );
-            if (!exists) {
-              loginHistory.insert(0, student); // नया user list के top में
-            }
-          }
-
-          // updated list save करें
-          await _saveLoginList(loginHistory);
-
-
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => TeacherBottomNavBarScreen(initialIndex: 0)),
-            );
-          }
-        } else {
-          _showError("Login failed: ${jsonResponse['message']}");
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        if (jsonResponse['students'] != null &&
+            jsonResponse['students'].isNotEmpty &&
+            jsonResponse['students'][0]['token'] != null) {
+          await prefs.setString('teachertoken', jsonResponse['students'][0]['token']);
         }
-      } else {
-        _showError("Login failed with status: ${response.statusCode}");
+
+        await _saveCredentials();
+        await prefs.setString('studentList', jsonEncode(jsonResponse['students']));
+
+        setState(() {
+          loginStudent = List<Map<String, dynamic>>.from(jsonResponse['students']);
+        });
+
+        loginHistory = await _getStoredLoginList();
+        for (var student in loginStudent) {
+          bool exists = loginHistory.any((s) => s['student_id'] == student['student_id']);
+          if (!exists) loginHistory.insert(0, student);
+        }
+        await _saveLoginList(loginHistory);
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => TeacherBottomNavBarScreen(initialIndex: 0)),
+          );
+        }
+
+        return true; // ✅ success
       }
+      return false; // ❌ fail
     } catch (e) {
-      _handleError(e, AppStrings.unexpectedError);
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      return false; // ❌ fail
     }
   }
 
@@ -663,7 +538,7 @@ class _LoginPageState extends State<LoginPage> {
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: 18.sp),
                               child: ElevatedButton(
-                                onPressed: _isLoading ? null : _login1,
+                                onPressed: _isLoading ? null : tryLogin,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.secondary,
                                   foregroundColor: Colors.white,

@@ -358,7 +358,7 @@ class _LoginPageState extends State<LoginUserLIst> {
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Select Student",
+                      "Select Student ",
                       style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
                     ),
                   ),
