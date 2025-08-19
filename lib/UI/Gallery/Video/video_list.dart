@@ -24,9 +24,9 @@ class _ImageListScreenState extends State<VideoListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.secondary,
+      backgroundColor: AppColors.primary,
       appBar: AppBar(
-        backgroundColor: AppColors.secondary,
+        backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           widget.data['album_name'].toString(),

@@ -1,4 +1,6 @@
+import 'package:avi/UI/Gallery/Album/album.dart' show Album;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,8 +10,7 @@ import '../../../constants.dart';
 import 'ImageFull/image_full.dart';
 
 class ImageListScreen extends StatefulWidget {
-  final Map<String, dynamic> data;
-
+  final Album data;
   const ImageListScreen({super.key, required this.data});
 
   @override
@@ -24,7 +25,7 @@ class _ImageListScreenState extends State<ImageListScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => FullScreenImageSlider(
-          images: widget.data['album_image'],
+          images: widget.data,
           initialIndex: index,
         ),
       ),
@@ -39,18 +40,18 @@ class _ImageListScreenState extends State<ImageListScreen> {
         backgroundColor: AppColors.secondary,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          widget.data['album_name'].toString(),
+          widget.data.albumName.toString(),
           style: GoogleFonts.montserrat(
             textStyle: Theme.of(context).textTheme.displayLarge,
-            fontSize: 18,
+            fontSize: 15.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textwhite,
           ),
         ),
       ),
       body: isLoading
-          ? const WhiteCircularProgressWidget()
-          : widget.data['album_image'].isEmpty
+          ? Center(child: CupertinoActivityIndicator(radius: 20))
+          : widget.data.albumImages.isEmpty
           ? const Center(child: DataNotFoundWidget(title: 'Image Not Available.'))
           : GridView.builder(
         padding: EdgeInsets.all(3.sp),
@@ -59,17 +60,17 @@ class _ImageListScreenState extends State<ImageListScreen> {
           crossAxisSpacing: 5.0,
           mainAxisSpacing: 5.0,
         ),
-        itemCount: widget.data['album_image'].length,
+        itemCount: widget.data.albumImages.length,
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () => _openFullScreenSlider(index),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: CachedNetworkImage(
-                imageUrl: widget.data['album_image'][index]['image_url_full'].toString(),
+                imageUrl: widget.data.albumImages[index].imageUrlFull.toString(),
                 fit: BoxFit.cover,
                 height: 100.sp,
-                placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                placeholder: (context, url) => Center(child: CupertinoActivityIndicator(radius: 20)),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             ),

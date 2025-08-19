@@ -20,6 +20,7 @@ import 'Auth/login_student.dart';
 import 'Auth/login_student_userlist.dart';
 import '../NewUserBottombarPage/documents.dart';
 import 'Fees/fee_demo.dart';
+import 'Gallery/Album/album.dart' show GalleryScreen;
 import 'Gallery/gallery_tab.dart';
 import 'Help/help.dart';
 import 'Library/LibraryScreen.dart';
@@ -699,7 +700,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) {
-                                      return GalleryVideoTabScreen();
+                                      return GalleryScreen();
                                     },
                                   ),
                                 );

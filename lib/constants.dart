@@ -60,8 +60,8 @@ class ApiRoutes {
 // Local  App Url
 
 
-  // static const String baseUrlNewUser = "http://192.168.1.4/cjmweb/api";
-  // static const String baseUrl = "http://192.168.1.4/cjm_ambala/api";
+  // static const String baseUrlNewUser = "http://192.168.1.9/cjmweb/api";
+  // static const String baseUrl = "http://192.168.1.9/cjm_ambala/api";
 
 
   // New Admission Api

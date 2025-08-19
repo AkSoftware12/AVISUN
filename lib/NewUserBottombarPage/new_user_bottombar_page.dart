@@ -432,7 +432,7 @@ class _BottomNavBarScreenState extends State<NewUserBottombarPage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) {
-                                      return GalleryScreen(type: '',);
+                                      return GalleryScreen();
                                     },
                                   ),
                                 );
