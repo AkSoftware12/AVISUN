@@ -26,31 +26,47 @@ class LoginUserLIst extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginUserLIst> {
-
   final Dio _dio = Dio(); // Initialize Dio
   bool _isLoading = false;
-  // List<dynamic> studentList = []; // ✅ Dropdown ke liye data list
   List<Map<String, dynamic>> studentList = [];
-
-  // Radio Button List Data
   String? selectedOption;
-  String? selectedAdmNo;     // adm_no alag store karne ke liye
+  String? selectedAdmNo; // adm_no alag store karne ke liye
   String? staffPass;
 
   @override
   void initState() {
     super.initState();
     _loadLoginHistory();
+    _loadSelectedStudent(); // Load the previously selected student
+  }
 
+  // Load previously selected student_id from SharedPreferences
+  Future<void> _loadSelectedStudent() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedStudentId = prefs.getString('selected_student_id');
+
+    if (savedStudentId != null && studentList.isNotEmpty) {
+      // Find the student in the studentList with the matching student_id
+      var selectedStudent = studentList.firstWhere(
+            (student) => student['student_id'].toString() == savedStudentId,
+        orElse: () => {}, // Return empty map if not found
+      );
+
+      if (selectedStudent.isNotEmpty) {
+        setState(() {
+          selectedOption = savedStudentId;
+          selectedAdmNo = selectedStudent['adm_no']?.toString();
+          staffPass = selectedStudent['password']?.toString();
+        });
+      }
+    }
   }
 
   Future<void> _login() async {
     final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
     String? deviceToken = await _firebaseMessaging.getToken();
     print('Device id: $deviceToken');
-    // if (!_formKey.currentState!.validate()) return;
 
-    print('${AppStrings.apiLoginUrl}${ApiRoutes.loginstudent}'); // Debug: Print the API URL
     setState(() {
       _isLoading = true;
     });
@@ -67,42 +83,39 @@ class _LoginPageState extends State<LoginUserLIst> {
         ),
       );
 
-      print(' Device token : - $deviceToken');
-
-      print('${AppStrings.responseStatusDebug}${response.statusCode}'); // Debug: Print status code
-      print('${AppStrings.responseDataDebug}${response.data}'); // Debug: Print the response data
+      print('Device token: $deviceToken');
+      print('${AppStrings.responseStatusDebug}${response.statusCode}');
+      print('${AppStrings.responseDataDebug}${response.data}');
 
       if (response.statusCode == 200) {
         final responseData = response.data;
 
         if (responseData['success'] == true) {
-          // Save token in SharedPreferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.remove('teachertoken');  // Sirf token clear hoga
-          await prefs.remove('newusertoken');  // Sirf token clear hoga
+          await prefs.remove('teachertoken');
+          await prefs.remove('newusertoken');
           await prefs.setString('token', responseData['token']);
+          await prefs.setString('selected_student_id', selectedOption!); // Save selected student_id
 
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => BottomNavBarScreen(initialIndex: 0,),
+              builder: (context) => BottomNavBarScreen(initialIndex: 0),
             ),
           );
         } else {
-          print('${AppStrings.loginFailedDebug}${responseData['message']}'); // Debug: Print failure message
+          print('${AppStrings.loginFailedDebug}${responseData['message']}');
           _showErrorDialog(responseData['message']);
         }
       } else {
-        print('${AppStrings.loginFailedMessage} ${response.statusCode}'); // Debug: Unexpected status code
+        print('${AppStrings.loginFailedMessage} ${response.statusCode}');
         _showErrorDialog(AppStrings.loginFailedMessage);
       }
     } on DioException catch (e) {
-      print('${AppStrings.dioExceptionDebug}${e.message}'); // Debug: Print DioException message
-
+      print('${AppStrings.dioExceptionDebug}${e.message}');
       String errorMessage = AppStrings.unexpectedError;
       if (e.response != null) {
-        print('${AppStrings.errorResponseDebug}${e.response?.data}'); // Debug: Print error response data
-
+        print('${AppStrings.errorResponseDebug}${e.response?.data}');
         if (e.response?.data is Map<String, dynamic>) {
           errorMessage = e.response?.data['message'] ?? errorMessage;
         } else if (e.response?.data is String) {
@@ -111,10 +124,9 @@ class _LoginPageState extends State<LoginUserLIst> {
       } else {
         errorMessage = e.message ?? 'Unable to connect to the server.';
       }
-
       _showErrorDialog(errorMessage);
     } catch (e) {
-      print('${AppStrings.generalErrorDebug}$e'); // Catch any other errors
+      print('${AppStrings.generalErrorDebug}$e');
       _showErrorDialog(AppStrings.unexpectedError);
     } finally {
       setState(() {
@@ -127,7 +139,6 @@ class _LoginPageState extends State<LoginUserLIst> {
     final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
     String? deviceToken = await _firebaseMessaging.getToken();
     print('Device id: $deviceToken');
-    // if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
@@ -145,37 +156,35 @@ class _LoginPageState extends State<LoginUserLIst> {
         ),
       );
 
-      print(' Device token : - $deviceToken');
-
+      print('Device token: $deviceToken');
 
       if (response.statusCode == 200) {
         final responseData = response.data;
 
         if (responseData['success'] == true) {
-          // Save token in SharedPreferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.remove('teachertoken');  // Sirf token clear hoga
-          await prefs.remove('token');  // Sirf token clear hoga
+          await prefs.remove('teachertoken');
+          await prefs.remove('token');
           await prefs.setString('newusertoken', responseData['token']);
+          await prefs.setString('selected_student_id', selectedOption!); // Save selected student_id
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const NewUserBottombarPage()),
           );
         } else {
-          print('${AppStrings.loginFailedDebug}${responseData['message']}'); // Debug: Print failure message
+          print('${AppStrings.loginFailedDebug}${responseData['message']}');
           _showErrorDialog(responseData['message']);
         }
       } else {
-        print('${AppStrings.loginFailedMessage} ${response.statusCode}'); // Debug: Unexpected status code
+        print('${AppStrings.loginFailedMessage} ${response.statusCode}');
         _showErrorDialog(AppStrings.loginFailedMessage);
       }
     } on DioException catch (e) {
-      print('${AppStrings.dioExceptionDebug}${e.message}'); // Debug: Print DioException message
-
+      print('${AppStrings.dioExceptionDebug}${e.message}');
       String errorMessage = AppStrings.unexpectedError;
       if (e.response != null) {
-        print('${AppStrings.errorResponseDebug}${e.response?.data}'); // Debug: Print error response data
-
+        print('${AppStrings.errorResponseDebug}${e.response?.data}');
         if (e.response?.data is Map<String, dynamic>) {
           errorMessage = e.response?.data['message'] ?? errorMessage;
         } else if (e.response?.data is String) {
@@ -184,10 +193,9 @@ class _LoginPageState extends State<LoginUserLIst> {
       } else {
         errorMessage = e.message ?? 'Unable to connect to the server.';
       }
-
       _showErrorDialog(errorMessage);
     } catch (e) {
-      print('${AppStrings.generalErrorDebug}$e'); // Catch any other errors
+      print('${AppStrings.generalErrorDebug}$e');
       _showErrorDialog(AppStrings.unexpectedError);
     } finally {
       setState(() {
@@ -200,7 +208,6 @@ class _LoginPageState extends State<LoginUserLIst> {
     final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
     String? deviceToken = await _firebaseMessaging.getToken();
     print('Device id: $deviceToken');
-
 
     if (mounted) setState(() => _isLoading = true);
 
@@ -222,16 +229,14 @@ class _LoginPageState extends State<LoginUserLIst> {
         if (jsonResponse['success'] == true) {
           SharedPreferences prefs = await SharedPreferences.getInstance();
 
-          // token save करना
           if (jsonResponse['students'] != null &&
               jsonResponse['students'].isNotEmpty &&
               jsonResponse['students'][0]['token'] != null) {
-
-            await prefs.remove('newusertoken');  // Sirf token clear hoga
+            await prefs.remove('newusertoken');
             await prefs.remove('token');
             await prefs.setString('teachertoken', jsonResponse['students'][0]['token']);
+            await prefs.setString('selected_student_id', selectedOption!); // Save selected student_id
           }
-
 
           if (mounted) {
             Navigator.pushReplacement(
@@ -240,18 +245,17 @@ class _LoginPageState extends State<LoginUserLIst> {
             );
           }
         } else {
-          // _showError("Login failed: ${jsonResponse['message']}");
+          _showErrorDialog(jsonResponse['message'] ?? 'Login failed');
         }
       } else {
-        // _showError("Login failed with status: ${response.statusCode}");
+        _showErrorDialog('Login failed with status: ${response.statusCode}');
       }
     } catch (e) {
-      // _handleError(e, AppStrings.unexpectedError);
+      _showErrorDialog(AppStrings.unexpectedError);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -270,12 +274,11 @@ class _LoginPageState extends State<LoginUserLIst> {
       ),
     );
   }
-// Save selected student_id to SharedPreferences
+
   Future<void> _saveSelectedStudent(String studentId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_student_id', studentId);
   }
-
 
   Future<void> _loadLoginHistory() async {
     final prefs = await SharedPreferences.getInstance();
@@ -284,21 +287,10 @@ class _LoginPageState extends State<LoginUserLIst> {
       setState(() {
         studentList = List<Map<String, dynamic>>.from(jsonDecode(data));
       });
+      // Load selected student after loading login history
+      _loadSelectedStudent();
     }
   }
-  // Future<void> _loadStudents() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String? savedData = prefs.getString('studentList');
-  //
-  //   if (savedData != null) {
-  //     setState(() {
-  //       studentList = jsonDecode(savedData);
-  //       print('Student List $studentList');
-  //
-  //       // selectedStudent = studentList.isNotEmpty ? studentList[0]['name'] : null;
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -344,9 +336,9 @@ class _LoginPageState extends State<LoginUserLIst> {
                           width: 90.sp,
                           child: Image.asset(
                             AppAssets.cjmlogo,
-                            fit: BoxFit.contain, // Ensure image fits properly
+                            fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.error); // Fallback for image loading failure
+                              return const Icon(Icons.error);
                             },
                           ),
                         ),
@@ -362,7 +354,7 @@ class _LoginPageState extends State<LoginUserLIst> {
                       style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
                     ),
                   ),
-                   Align(
+                  Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       '(${studentList.length.toString()})',
@@ -371,15 +363,14 @@ class _LoginPageState extends State<LoginUserLIst> {
                   ),
                   // Constrain ListView height
                   SizedBox(
-                    height: 250.sp, // Set a fixed height for the ListView
+                    height: 250.sp,
                     child: ListView.builder(
                       padding: EdgeInsets.zero,
-                      shrinkWrap: true, // Ensure ListView takes only the space it needs
-                      physics: const ClampingScrollPhysics(), // Smooth scrolling
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
                       itemCount: studentList.length,
                       itemBuilder: (context, index) {
                         final student = studentList[index];
-                        // Check for null or missing keys
                         if (student == null ||
                             student['name'] == null ||
                             student['student_id'] == null ||
@@ -390,19 +381,11 @@ class _LoginPageState extends State<LoginUserLIst> {
                         }
                         return Stack(
                           children: [
-
                             Container(
                               margin: const EdgeInsets.symmetric(vertical: 5),
                               decoration: BoxDecoration(
                                 color: Colors.grey.shade200,
                                 borderRadius: BorderRadius.circular(12),
-                                // boxShadow: [
-                                //   BoxShadow(
-                                //     color: Colors.black,
-                                //     blurRadius: 10,
-                                //     offset: const Offset(2, 2),
-                                //   ),
-                                // ],
                               ),
                               child: RadioListTile<String>(
                                 contentPadding:
@@ -426,14 +409,15 @@ class _LoginPageState extends State<LoginUserLIst> {
                                     ),
                                   ],
                                 ),
-                                subtitle: (student['adm_no']=='null')?
-                                Text(
+                                subtitle: (student['adm_no'] == 'null')
+                                    ? Text(
                                   '',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 12,
                                   ),
-                                ):Text(
+                                )
+                                    : Text(
                                   student['adm_no'].toString(),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
@@ -445,9 +429,8 @@ class _LoginPageState extends State<LoginUserLIst> {
                                 onChanged: (value) {
                                   setState(() {
                                     selectedOption = value;
-                                    selectedAdmNo = student['adm_no'].toString(); // adm_no alag store
-                                    staffPass = student['password'].toString(); // adm_no alag store
-
+                                    selectedAdmNo = student['adm_no'].toString();
+                                    staffPass = student['password'].toString();
                                   });
                                   _saveSelectedStudent(value!);
                                 },
@@ -456,29 +439,30 @@ class _LoginPageState extends State<LoginUserLIst> {
                             ),
                             Align(
                               alignment: Alignment.topLeft,
-
                               child: Card(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(3), // Rounded corners
+                                  borderRadius: BorderRadius.circular(3),
                                 ),
                                 elevation: 5,
                                 margin: EdgeInsets.zero,
                                 color: Colors.white,
                                 child: Padding(
-                                  padding:  EdgeInsets.all(3.sp),
-                                  child: student['password']!=null?Text(
+                                  padding: EdgeInsets.all(3.sp),
+                                  child: student['password'] != null
+                                      ? Text(
                                     'Teacher',
-                                    style:  TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 8.sp,
-                                    ),
-                                  ):Text(
-                                    'Student',
-                                    style:  TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.w900,
                                       fontSize: 8.sp,
                                     ),
                                   )
+                                      : Text(
+                                    'Student',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 8.sp,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -496,17 +480,15 @@ class _LoginPageState extends State<LoginUserLIst> {
                     child: CustomLoginButton(
                       onPressed: () {
                         if (selectedOption != null) {
-                          if(selectedAdmNo=='null'){
-                            if(staffPass=='null'){
+                          if (selectedAdmNo == 'null') {
+                            if (staffPass == 'null') {
                               _loginNewUser();
-                            }else{
+                            } else {
                               _loginTeacher();
                             }
-                          }else{
+                          } else {
                             _login();
-
                           }
-
                           print("Selected Option: $selectedOption");
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -523,7 +505,6 @@ class _LoginPageState extends State<LoginUserLIst> {
                 ],
               ),
             ),
-            // Footer Text
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
@@ -541,8 +522,8 @@ class _LoginPageState extends State<LoginUserLIst> {
         ),
       ),
     );
-  }}
-
+  }
+}
 class CustomLoginButton extends StatefulWidget {
   final VoidCallback onPressed;
   final String title;

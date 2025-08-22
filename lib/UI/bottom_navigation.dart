@@ -24,6 +24,7 @@ import 'Gallery/Album/album.dart' show GalleryScreen;
 import 'Gallery/gallery_tab.dart';
 import 'Help/help.dart';
 import 'Library/LibraryScreen.dart';
+import 'Message/message.dart';
 import 'Notice/notice.dart';
 import 'Profile/ProfileScreen.dart';
 import 'TimeTable/time_table.dart';
@@ -43,6 +44,8 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
   Map<String, dynamic>? studentData;
   bool isLoading = true;
   String currentVersion = '';
+  int? messageViewPermissionsApp;
+  int? messageSendPermissionsApp;
 
   // List of screens
   final List<Widget> _screens = [
@@ -67,6 +70,8 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
   void initState() {
     super.initState();
     checkForVersion(context);
+
+    fetchData();
 
     fetchStudentData();
     _selectedIndex = widget.initialIndex; // Set the initial tab index
@@ -112,6 +117,43 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
       _showLoginDialog();
     }
   }
+
+  Future<void> fetchData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final url = Uri.parse(ApiRoutes.getDashboard); // Ensure ApiRoutes.getDashboard is valid
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body)['data'];
+        setState(() {
+          // Handle attendance_percent as double to support decimal values
+          // attendancePercent = (data['attendance_percent'] as num?)?.toDouble() ?? 0.0;
+          // Uncomment and fix if permissions are needed
+          messageViewPermissionsApp = (data['permisions']?[0]['app_status'] as num?)?.toInt() ?? 0;
+          messageSendPermissionsApp = (data['permisions']?[1]['app_status'] as num?)?.toInt() ?? 0;
+
+        });
+      } else {
+        setState(() {
+
+        });
+      }
+    } catch (e) {
+      setState(() {
+        // attendancePercent = 0.0; // Default value for error case
+
+      });
+      // Optionally log the error for debugging
+      debugPrint('Error fetching data: $e');
+    }
+  }
+
 
   void _showLoginDialog() {
     showCupertinoDialog(
@@ -674,6 +716,48 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
                             //     thickness: 1,
                             //   ),
                             // ),
+
+
+                            ListTile(
+                              title: Text(
+                                'Messages',
+                                style: GoogleFonts.cabin(
+                                  textStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              trailing: Container(
+                                height: 20,
+                                width: 20,
+                                color: AppColors.primary,
+                                child: Image.asset(
+                                  'assets/message_home.png',
+                                  height: 80, // Adjust the size as needed
+                                  width: 80,
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      return MesssageListScreen(messageSendPermissionsApp: messageSendPermissionsApp,);
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 8, right: 8),
+                              child: Divider(
+                                height: 1,
+                                color: Colors.grey.shade300,
+                                thickness: 1,
+                              ),
+                            ),
                             ListTile(
                               title: Text(
                                 'Gallery',

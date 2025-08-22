@@ -14,8 +14,6 @@ import '../../HexColorCode/HexColor.dart';
 import '../../constants.dart';
 import '../Auth/login_screen.dart';
 
-
-
 class CalendarScreen extends StatefulWidget {
   final String title;
   const CalendarScreen({super.key, required this.title});
@@ -58,7 +56,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode == 200) {
-      // final jsonResponse = json.decode(response.body);
       Map<String, dynamic> data = json.decode(response.body);
       List<dynamic> events = data['events'];
 
@@ -103,15 +100,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _monthlyEvents = tempMonthlyEvents; // Only unique events will be stored
       });
       isLoading = false; // Stop progress bar
-
     } else {
       _showLoginDialog();
       setState(() {
         isLoading = true; // Show progress bar
       });
     }
-
-
   }
 
   List<Map<String, dynamic>> _getEventsForDay(DateTime day) {
@@ -138,7 +132,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
   }
 
-
   void _showEventDetails(BuildContext context, List<Map<String, dynamic>> events) {
     showDialog(
       context: context,
@@ -154,20 +147,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: events.map((event) {
+                  // Determine colors based on event type
+                  Color cardColor = event['type'] == 'Academic' ? Colors.green[50]! : Colors.red[50]!;
+                  Color iconColor = event['type'] == 'Academic' ? Colors.green[600]! : Colors.red[600]!;
+                  Color textColor = event['type'] == 'Academic' ? Colors.green[800]! : Colors.red[800]!;
+                  Color subtitleColor = event['type'] == 'Academic' ? Colors.green[700]! : Colors.red[700]!;
+
                   return Card(
                     elevation: 4,
                     margin: EdgeInsets.symmetric(vertical: 3.sp),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    color: Colors.red[50],
+                    color: cardColor,
                     child: ListTile(
                       contentPadding: EdgeInsets.all(3.sp),
-                      leading: Icon(Icons.event, color: Colors.red[600]),
+                      leading: Icon(Icons.event, color: iconColor),
                       title: Text(
                         event['name'],
                         style: TextStyle(
-                          color: Colors.red[800],
+                          color: textColor,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -176,13 +175,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         padding: const EdgeInsets.only(top: 5),
                         child: Text(
                           "📅 ${event['start_date']} - ${event['end_date']}\n📌 Type: ${event['type']}",
-                          style: TextStyle(color: Colors.red[700], fontSize: 14),
+                          style: TextStyle(color: subtitleColor, fontSize: 14),
                         ),
                       ),
                     ),
                   );
-
-
                 }).toList(),
               ),
             ),
@@ -209,6 +206,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       },
     );
   }
+
   void _showLoginDialog() {
     showCupertinoDialog(
       context: context,
@@ -235,7 +233,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.secondary,
-
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(
@@ -243,20 +240,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
           style: GoogleFonts.montserrat(
             fontSize: 15.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.white, // Set text color to white
-
+            color: Colors.white,
           ),
         ),
         backgroundColor: AppColors.secondary,
       ),
-
       body: Padding(
-        padding:  EdgeInsets.all(5.sp),
+        padding: EdgeInsets.all(5.sp),
         child: Column(
           children: [
             Card(
               color: Colors.white,
-
               elevation: 10,
               child: TableCalendar(
                 focusedDay: _focusedDay,
@@ -275,7 +269,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                   List<Map<String, dynamic>> selectedEvents = _getEventsForDay(selectedDay);
                   if (selectedEvents.isNotEmpty) {
-                    _showEventDetails(context,selectedEvents);
+                    _showEventDetails(context, selectedEvents);
                   }
                 },
                 onPageChanged: (focusedDay) {
@@ -287,16 +281,60 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 calendarBuilders: CalendarBuilders(
                   defaultBuilder: (context, date, _) {
                     bool isHighlighted = _highlightedDays.contains(DateTime(date.year, date.month, date.day));
+                    List<Map<String, dynamic>> dayEvents = _getEventsForDay(date);
+                    Color? bgColor;
+                    if (isHighlighted) {
+                      // Check if any event is Academic
+                      bool hasAcademic = dayEvents.any((event) => event['type'] == 'Academic');
+                      bgColor = hasAcademic ? Colors.green.shade300 : Colors.red.shade300;
+                    }
+
                     return Container(
                       margin: EdgeInsets.all(4),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isHighlighted ? Colors.red.shade300 : null, // Highlight event duration
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${date.day}',
-                        style: TextStyle(color: isHighlighted ? Colors.white : Colors.black),
+                      child: Card(
+                        elevation: isHighlighted ? 3 : 0,
+                        color: bgColor ?? Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(2.sp),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                '${date.day}',
+                                style: TextStyle(
+                                  color: bgColor != null ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                              if (isHighlighted)
+                                Expanded(
+                                  child: Column(
+                                    children: dayEvents.take(2).map((event) {
+                                      // Truncate event name to avoid overflow
+                                      String eventName = event['name'].toString();
+                                      if (eventName.length > 10) {
+                                        eventName = '${eventName.substring(0, 8)}...';
+                                      }
+                                      return Text(
+                                        eventName,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 8.sp,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        maxLines: 1,
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -305,8 +343,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             SizedBox(height: 0.sp),
             Card(
-              // width: double.infinity,
-              // height: 20.sp,
               color: HexColor('#f0afb2'),
               child: Center(
                 child: Text(
@@ -314,88 +350,86 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   style: GoogleFonts.montserrat(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.red[800], // Set text color to white
-
+                    color: Colors.red[800],
                   ),
-
-                  // style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-
             isLoading
                 ? Center(
                 child: Container(
                     height: MediaQuery.of(context).size.height * 0.3,
-                    child: CupertinoActivityIndicator(radius: 25,color: Colors.white,)))
+                    child: CupertinoActivityIndicator(radius: 25, color: Colors.white)))
                 : _monthlyEvents.isEmpty
-                ? Center(child:  Center(
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.3,
+                ? Center(
                 child: Container(
-                  child: Center(
-                      child: ClipRRect(
-                          borderRadius:
-                          BorderRadius.circular(10.sp),
-                          child:
-                          Column(
-                            children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                      height: MediaQuery.of(context).size.height * 0.3,
-                                      child: Center(child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          SizedBox(
-                                              height: 100.sp,
-                                              child: Image.asset('assets/no_attendance.png')),
-                                          Center(child: Padding(
-                                            padding:  EdgeInsets.only(top: 0.sp),
-                                            child: Text( 'Event  Not Available. ',
-                                              style: GoogleFonts.radioCanada(
-                                                textStyle: TextStyle(
-                                                  fontSize: 12.sp,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                          ))
-
-                                        ],
-                                      ))
-                                  ),
-                                ],
-                              ),
-
-                            ],
-                          ))),
-                ),
-              ),
-            ))
-                :
-            Expanded(
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  child: Container(
+                    child: Center(
+                        child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.sp),
+                            child: Column(
+                              children: [
+                                Stack(
+                                  children: [
+                                    Container(
+                                        height: MediaQuery.of(context).size.height * 0.3,
+                                        child: Center(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                SizedBox(
+                                                    height: 100.sp,
+                                                    child: Image.asset('assets/no_attendance.png')),
+                                                Center(
+                                                    child: Padding(
+                                                      padding: EdgeInsets.only(top: 0.sp),
+                                                      child: Text(
+                                                        'Event Not Available.',
+                                                        style: GoogleFonts.radioCanada(
+                                                          textStyle: TextStyle(
+                                                            fontSize: 12.sp,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: Colors.black,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ))
+                                              ],
+                                            )))
+                                  ],
+                                ),
+                              ],
+                            ))),
+                  ),
+                ))
+                : Expanded(
               child: ListView.builder(
                 itemCount: _monthlyEvents.length,
                 padding: EdgeInsets.symmetric(horizontal: 3.sp, vertical: 0.sp),
                 itemBuilder: (context, index) {
                   var event = _monthlyEvents[index];
+                  // Determine colors based on event type
+                  Color cardColor = event['type'] == 'Academic' ? Colors.green[50]! : Colors.red[50]!;
+                  Color iconColor = event['type'] == 'Academic' ? Colors.green[600]! : Colors.red[600]!;
+                  Color textColor = event['type'] == 'Academic' ? Colors.green[800]! : Colors.red[800]!;
+                  Color subtitleColor = event['type'] == 'Academic' ? Colors.green[700]! : Colors.red[700]!;
+
                   return Card(
                     elevation: 4,
                     margin: EdgeInsets.symmetric(vertical: 3.sp),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    color: Colors.red[50],
+                    color: cardColor,
                     child: ListTile(
                       contentPadding: EdgeInsets.all(3.sp),
-                      leading: Icon(Icons.event, color: Colors.red[600]),
+                      leading: Icon(Icons.event, color: iconColor),
                       title: Text(
                         event['name'].toString().toUpperCase(),
                         style: TextStyle(
-                          color: Colors.red[800],
+                          color: textColor,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -404,11 +438,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         padding: const EdgeInsets.only(top: 5),
                         child: Text(
                           "📅 ${event['start_date']} - ${event['end_date']}\n📌 Type: ${event['type']}",
-                          style: TextStyle(color: Colors.red[700], fontSize: 14),
+                          style: TextStyle(color: subtitleColor, fontSize: 14),
                         ),
                       ),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 18, color: Colors.red[700]),
-                      onTap: () => _showEventDetails(context,[event]),
+                      trailing: Icon(Icons.arrow_forward_ios, size: 18, color: subtitleColor),
+                      onTap: () => _showEventDetails(context, [event]),
                     ),
                   );
                 },
