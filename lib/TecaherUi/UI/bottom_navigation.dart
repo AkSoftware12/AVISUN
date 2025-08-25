@@ -148,30 +148,6 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
               ),
             ),
             GestureDetector(
-              // onTap: () {
-              //   showModalBottomSheet(
-              //     context: context,
-              //     isScrollControlled: true,
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              //     ),
-              //     builder: (BuildContext context) {
-              //       return WillPopScope(
-              //         onWillPop: () async {
-              //           Navigator.pop(context); // Close bottom sheet on back press
-              //           return false; // Prevent app from closing
-              //         },
-              //         child: Container(
-              //           color: Colors.transparent,
-              //           height: MediaQuery.of(context).size.height * 0.6, // Set height to 60% of screen
-              //           padding: EdgeInsets.all(16),
-              //           child: LoginStudentPage(),
-              //         ),
-              //       );
-              //     },
-              //   );
-              //
-              // },
               onTap: () {
                 Navigator.push(
                   context,
@@ -191,7 +167,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                       color: AppColors2.textblack,
                     ),
                   ),
-                  Icon(Icons.arrow_drop_down, color: Colors.black),
+                  Icon(Icons.arrow_drop_down, color: Colors.white),
                 ],
               ),
             ),

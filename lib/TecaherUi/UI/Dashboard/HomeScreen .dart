@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
 import '../../../HexColorCode/HexColor.dart';
+import '../../../UI/Message/message.dart';
 import '../../../constants.dart';
 import '../Assignment/assignment.dart';
 import '../Auth/login_screen.dart';
@@ -19,6 +20,7 @@ import '../HomeWork/home_work.dart';
 import '../Notice/notice.dart';
 import '../Report/report_card.dart';
 import '../Subject/subject.dart';
+import '../TeacherMessage/message.dart';
 import '../TimeTable/time_table.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -36,6 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? teacherData;
   List assignments = []; // Declare a list to hold API data
   bool isLoading = true;
+  int? messageViewPermissionsApp;
+  int? messageSendPermissionsApp;
   late CleanCalendarController calendarController;
   final List<Map<String, String>> items = [
     {
@@ -63,8 +67,8 @@ class _HomeScreenState extends State<HomeScreen> {
       'image': 'assets/gallery.png',
     },
     {
-      'name': 'Report Card',
-      'image': 'assets/report.png',
+      'name': 'Messages',
+      'image': 'assets/message_home.png',
     },
   ];
 
@@ -106,30 +110,36 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> fetchDasboardData() async {
+  Future<void> fetchData() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('teachertoken');
-    print("Token: $token");
+    final token = prefs.getString('token');
+    final url = Uri.parse(ApiRoutes.getDashboard); // Ensure ApiRoutes.getDashboard is valid
 
-    if (token == null) {
-      _showLoginDialog();
-      return;
-    }
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
-    final response = await http.get(
-      Uri.parse(ApiRoutes.getDashboard),
-      headers: {'Authorization': 'Bearer $token'},
-    );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body)['data'];
+        setState(() {
+          messageViewPermissionsApp = (data['permisions']?[0]['app_status'] as num?)?.toInt() ?? 0;
+          messageSendPermissionsApp = (data['permisions']?[1]['app_status'] as num?)?.toInt() ?? 0;
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+        });
+      } else {
+        setState(() {
+
+        });
+      }
+    } catch (e) {
       setState(() {
-        assignments = data['data']['assignments'];
-        isLoading = false;
-        print(assignments);
+        // attendancePercent = 0.0; // Default value for error case
+
       });
-    } else {
-      _showLoginDialog();
+      // Optionally log the error for debugging
+      debugPrint('Error fetching data:  $e');
     }
   }
 
@@ -403,13 +413,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
 
 
-              } else if (items[index]['name'] == 'Report Card') {
-
+              } else if (items[index]['name'] == 'Messages') {
                 Navigator.push(
                   context,
                   PageRouteBuilder(
                     transitionDuration: Duration(milliseconds: 500), // Animation Speed
-                    pageBuilder: (context, animation, secondaryAnimation) => ReportCardScreen(),
+                    pageBuilder: (context, animation, secondaryAnimation) =>  TeacherMesssageListScreen(messageSendPermissionsApp: messageSendPermissionsApp,),
                     transitionsBuilder: (context, animation, secondaryAnimation, child) {
                       var begin = Offset(1.0, 0.0); // Right to Left
                       var end = Offset.zero;
@@ -490,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(3.0),
               child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.red.shade700,
                     borderRadius: BorderRadius.circular(10)
                 ),
                 child: Center(

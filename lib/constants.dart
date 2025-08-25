@@ -22,13 +22,15 @@ class AppColors {
 }
 
 class AppColors2 {
-  // static const Color primary = Color(0xFF041B7F); // Example primary color (blue)
-  static  Color primary = HexColor('#f5f1e0'); // Example primary color (blue)
-  static  Color secondary =HexColor('#7da4d1'); // Secondary color (gray)
-  // static const Color secondary = Color(0xFF074799); // Secondary color (gray)
-  static const Color grey = Color(0xFFAAAEB2); // Secondary color (gray)
+
+  static  Color primary = Colors.red.shade500;
+  static  Color secondary =Colors.red.shade500;
+
+  // static  Color primary = HexColor('#f5f1e0'); // Example primary color (blue)
+  // static  Color secondary =HexColor('#7da4d1'); // Secondary color (gray)
+  static const Color grey =  Color.fromARGB(255, 255, 255, 255); // Secondary color (gray)
   static const Color background = Color(0xFFF8F9FA); // Light background color
-  static const Color textblack = Color(0xFF212529); // Dark text color
+  static const Color textblack =  Color.fromARGB(255, 255, 255, 255); // Dark text color
   static const Color textwhite = Color.fromARGB(255, 255, 255, 255); // Dark text color
   // static  Color textwhite = Colors.grey.shade500; // Dark text color
   static const Color error = Color(0xFFDC3545); // Error color (red)
@@ -49,8 +51,8 @@ class ApiRoutes {
 
 
   // Main App Url
-  static const String baseUrl = "https://softcjm.cjmambala.co.in/api";
-  static const String baseUrlNewUser = "https://cjmambala.co.in/api";
+  // static const String baseUrl = "https://softcjm.cjmambala.co.in/api";
+  // static const String baseUrlNewUser = "https://cjmambala.co.in/api";
 
 
 
@@ -60,8 +62,8 @@ class ApiRoutes {
 // Local  App Url
 
 
-  // static const String baseUrlNewUser = "http://192.168.1.9/cjmweb/api";
-  // static const String baseUrl = "http://192.168.1.9/cjm_ambala/api";
+  static const String baseUrlNewUser = "http://192.168.1.10/cjmweb/api";
+  static const String baseUrl = "http://192.168.1.10/cjm_ambala/api";
 
 
   // New Admission Api
@@ -142,4 +144,10 @@ class ApiRoutes {
   static const String Teachernotifications = "$baseUrl/teacher-notifications";
   static const String getTeacherClass = "$baseUrl/teacher-student-atttendance";
   static const String getTeacherTeacherSubject = "$baseUrl/teacher-assigned-subjects";
+
+
+
+  static const String getAllTeacherMessages = "$baseUrl/teacher/messages";
+  static const String getTeacherMessagesConversation = "$baseUrl/teacher/messages/conversation/";
+  static const String sendTeacherMessage = "$baseUrl/teacher/messages";
 }
