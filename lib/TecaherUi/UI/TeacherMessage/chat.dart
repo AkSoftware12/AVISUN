@@ -28,7 +28,7 @@ class _ChatScreenState extends State<TeacherChatScreen> {
 
   // Replace this with the actual user ID/type from logged-in user
   final int currentUserId = 1;
-  final String currentUserType = "App\\Models\\Student";
+  final String currentUserType = "App\\Models\\User";
 
   @override
   void initState() {
@@ -105,7 +105,7 @@ class _ChatScreenState extends State<TeacherChatScreen> {
       return;
     }
 
-    if (currentUserType != "App\\Models\\Student") {
+    if (currentUserType != "App\\Models\\User") {
       _showErrorSnackBar('Only students can send messages');
       return;
     }
@@ -125,7 +125,7 @@ class _ChatScreenState extends State<TeacherChatScreen> {
       request.headers['Authorization'] = 'Bearer $token';
 
       // Add text fields (form data)
-      request.fields['receivers[]'] = 'user_${widget.msgSendId}';
+      request.fields['receivers[]'] = 'student_${widget.msgSendId}';
       request.fields['body'] = messageController.text.trim();
 
       // Add file if selected
@@ -156,6 +156,7 @@ class _ChatScreenState extends State<TeacherChatScreen> {
       _showErrorSnackBar('Error sending message: $e');
     }
   }
+
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -310,7 +311,7 @@ class _ChatScreenState extends State<TeacherChatScreen> {
               },
             ),
           ),
-          if (widget.messageSendPermissionsApp == 1)
+          // if (widget.messageSendPermissionsApp == 1)
             SafeArea(
               child: Card(
                 color: Colors.grey.shade200,

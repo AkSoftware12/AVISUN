@@ -160,7 +160,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       ),
 
                     ),
-                    const SizedBox(width: 16),
                     // User Info
                     Expanded(
 
@@ -186,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                 teacherData?['email']??'',
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
-                                  color: Colors.grey,
+                                  color: Colors.white70,
                                 ),
                               ),
                               const SizedBox(height: 5),
@@ -194,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                 teacherData?['phone']??'',
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
-                                  color: Colors.grey,
+                                  color: Colors.white70,
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -323,7 +322,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       curve: Curves.easeInOut,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: AppColors2.primary,
+        color:Colors.black54,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(

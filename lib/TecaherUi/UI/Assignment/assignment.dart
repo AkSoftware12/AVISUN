@@ -189,8 +189,9 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  HexColor('#003366').withOpacity(0.5),
-                  AppColors2.primary
+                  // HexColor('#003366').withOpacity(0.5),
+                  AppColors2.primary,
+                  AppColors2.primary,
                 ],
                 // Change colors as needed
                 begin: Alignment.topCenter,
@@ -525,13 +526,7 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
                                                       //     'End',
                                                       //     endDate,
                                                       //     Icons.calendar_today),
-                                                      _buildDateInfo(
-                                                          'Total Marks',
-                                                          assignment[
-                                                                  'total_marks']
-                                                              .toString(),
-                                                          Icons
-                                                              .confirmation_number),
+
 
                                                       /// **Marks**
                                                       // Row(

@@ -2,6 +2,7 @@ import 'package:carousel_slider_plus/carousel_slider_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scrollable_clean_calendar/controllers/clean_calendar_controller.dart';
 import 'package:scrollable_clean_calendar/scrollable_clean_calendar.dart';
@@ -11,19 +12,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
 import '../../../HexColorCode/HexColor.dart';
-import '../../../UI/Message/message.dart';
+import '../../../UI/Dashboard/HomeScreen .dart';
+import '../../../UI/Gallery/Album/album.dart';
 import '../../../constants.dart';
 import '../Assignment/assignment.dart';
 import '../Auth/login_screen.dart';
-import '../Gallery/gallery_tab.dart';
 import '../HomeWork/home_work.dart';
 import '../Notice/notice.dart';
-import '../Report/report_card.dart';
 import '../Subject/subject.dart';
 import '../TeacherMessage/message.dart';
-import '../TimeTable/time_table.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-
 import '../TimeTable/time_table_teacher.dart';
 import '../bottom_navigation.dart';
 
@@ -51,25 +48,22 @@ class _HomeScreenState extends State<HomeScreen> {
       'image': 'assets/watch.png',
     },
     {
-      'name': 'Home Work',
-      'image': 'assets/home_work.png',
+      'name': 'Messages',
+      'image': 'assets/message_home.png',
     },
     // {
-    //   'name': 'Subject',
-    //   'image': 'assets/physics.png',
+    //   'name': 'Attendance',
+    //   'image': 'assets/calendar_attendance.png',
     // },
     {
-      'name': 'News & Events',
-      'image': 'assets/event_planner.png',
+      'name': 'Activity Calendar',
+      'image': 'assets/calendar_activity.png',
     },
     {
       'name': 'Gallery',
       'image': 'assets/gallery.png',
     },
-    {
-      'name': 'Messages',
-      'image': 'assets/message_home.png',
-    },
+
   ];
 
   @override
@@ -204,32 +198,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   CarouselExample(),
                   SizedBox(height: 10),
 
-                  // CarouselFees(),
-
-                  // _buildsellAll('Promotions', 'See All'),
-
-                  // PromotionCard(),
-                  // _buildWelcomeHeader(),
-                  // const SizedBox(height: 20),
-                  // _buildsellAll('Promotions', 'See All'),
-
                   _buildsellAll('Category', ''),
 
                   _buildGridview(),
                   const SizedBox(height: 10),
 
-                  _buildsellAll('Assignment', ''),
-                  _buildListView(),
-
                   Container(
                     height: 220,
                     width: double.infinity,
                     child: Image.network(
-                      'https://s3-noi.aces3.ai/franciscan/SchImg/CJMAMB/PhotoAlbum/Thumb/Photo_934749.jpg',
+                      'https://cjmambala.in/images/building.png',
                       fit: BoxFit.fill,
                     ),
                   ),
-
 
 
                 ],
@@ -396,22 +377,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 Navigator.push(
                   context,
-                  PageRouteBuilder(
-                    transitionDuration: Duration(milliseconds: 500), // Animation Speed
-                    pageBuilder: (context, animation, secondaryAnimation) => GalleryVideoTabScreen(),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                      var begin = Offset(1.0, 0.0); // Right to Left
-                      var end = Offset.zero;
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeInOut));
-
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return GalleryScreen();
                     },
                   ),
                 );
-
 
               } else if (items[index]['name'] == 'Messages') {
                 Navigator.push(
@@ -433,21 +404,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
 
 
-              } else if (items[index]['name'] == 'News & Events') {
+              } else if (items[index]['name'] == 'Activity Calendar') {
                 Navigator.push(
                   context,
-                  PageRouteBuilder(
-                    transitionDuration: Duration(milliseconds: 500), // Animation Speed
-                    pageBuilder: (context, animation, secondaryAnimation) => CalendarScreen(),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                      var begin = Offset(1.0, 0.0); // Right to Left
-                      var end = Offset.zero;
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeInOut));
-
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return CalendarScreen(title: 'Activity Calendar',);
                     },
                   ),
                 );
@@ -471,28 +433,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 );
-
-
-              } else if (items[index]['name'] == 'Home Work') {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    transitionDuration: Duration(milliseconds: 500), // Animation Speed
-                    pageBuilder: (context, animation, secondaryAnimation) => HomeWorkScreen(),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                      var begin = Offset(1.0, 0.0); // Right to Left
-                      var end = Offset.zero;
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeInOut));
-
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
-                  ),
-                );
-
-
               }
             },
             child: Padding(
@@ -749,97 +689,6 @@ class SectionCard extends StatelessWidget {
   }
 }
 
-class CarouselExample extends StatefulWidget {
-  @override
-  _CarouselExampleState createState() => _CarouselExampleState();
-}
-
-class _CarouselExampleState extends State<CarouselExample> {
-  final List<String> imgList = [
-    'https://cjmambala.in/images/building.png',
-
-  ];
-
-  int _currentIndex = 0;
-  final CarouselSliderController _controller = CarouselSliderController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Carousel
-        SizedBox(
-          width: MediaQuery.of(context).size.width, // Ensure proper width
-          child: CarouselSlider(
-            controller: _controller,
-            options: CarouselOptions(
-              height: 170,
-              autoPlay: true,
-              viewportFraction: 1,
-              enableInfiniteScroll: true,
-              autoPlayInterval: Duration(seconds: 2),
-              autoPlayAnimationDuration: Duration(milliseconds: 800),
-              autoPlayCurve: Curves.fastOutSlowIn,
-              scrollDirection: Axis.horizontal,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-            ),
-            items: imgList.map((item) {
-              return Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: GestureDetector(
-                  onTap: () {
-                    print('Image Clicked: $item');
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      item,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                            child:
-                                CircularProgressIndicator()); // Show loader while loading
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Center(
-                            child: Icon(Icons.error,
-                                color: Colors
-                                    .red)); // Show error icon if image fails
-                      },
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-
-        // Dots Indicator
-        SizedBox(height: 1),
-        AnimatedSmoothIndicator(
-          activeIndex: _currentIndex,
-          count: imgList.length,
-          effect: ExpandingDotsEffect(
-            dotHeight: 8,
-            dotWidth: 8,
-            activeDotColor: Colors.redAccent,
-            dotColor: Colors.grey.shade400,
-          ),
-          onDotClicked: (index) {
-            _controller.animateToPage(index);
-          },
-        ),
-      ],
-    );
-  }
-}
 
 class CarouselFees extends StatelessWidget {
   final List<Map<String, String>> imgList = [

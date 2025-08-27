@@ -116,7 +116,7 @@ class _AssignmentUploadScreenState extends State<AssignmentUploadScreen> {
       String? token = prefs.getString('teachertoken');
 
       final response = await http.get(
-        Uri.parse(ApiRoutes.getTeacherSubject),
+        Uri.parse(ApiRoutes.getTeacherTeacherSubject),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -284,377 +284,350 @@ class _AssignmentUploadScreenState extends State<AssignmentUploadScreen> {
       ),
 
       body: Padding(
-        padding: EdgeInsets.all(0.0),
+        padding: EdgeInsets.all(10.0),
         child: SingleChildScrollView(
           child:Padding(
-            padding: EdgeInsets.all(0),
+            padding: EdgeInsets.all(5),
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
+                  // SizedBox(height: 20.sp,),
 
                   Container(
+                    width: double.infinity,
+                    height: 50.sp,
                     decoration: BoxDecoration(
-                      // color:AppColors2.primary,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.grey.shade400, Colors.transparent], // Top red, fading down
-                      ),
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(40.sp),topRight: Radius.circular(40.sp)),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.2),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
                     ),
-                    child:Padding(
-                      padding:  EdgeInsets.all( 10.0),
-                      child: Column(
+                    child: Padding(
+                      padding: EdgeInsets.all(0.0),
+                      child: Row(
                         children: [
-                          SizedBox(height: 20.sp,),
+                          Expanded(
+                            child: DropdownButtonFormField<int>(
+                              value: selectedClass,
+                              decoration: const InputDecoration(
+                                labelText: "Select Class",
+                                border: InputBorder.none, // Removes the border
+                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
 
-                          Container(
-                            width: double.infinity,
-                            height: 50.sp,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(0.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: DropdownButtonFormField<int>(
-                                      value: selectedClass,
-                                      decoration: const InputDecoration(
-                                        labelText: "Select Class",
-                                        border: InputBorder.none, // Removes the border
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-
-                                      ),
-
-                                      items: classes.map((c) {
-                                        return DropdownMenuItem<int>(
-                                          value: c["id"],
-                                          child: Text(c["title"].toString()),
-                                        );
-                                      }).toList(),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          selectedClass = value;
-                                        });
-                                      },
-
-                                    ),
-                                  ),
-
-                                ],
                               ),
 
+                              items: classes.map((c) {
+                                return DropdownMenuItem<int>(
+                                  value: c["id"],
+                                  child: Text(c["title"].toString()),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedClass = value;
+                                });
+                              },
 
                             ),
                           ),
-
-                          SizedBox(height: 20),
-                          Container(
-                            height: 50.sp,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(0.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child:DropdownButtonFormField<int>(
-                                      value: selectedSection,
-                                      decoration: InputDecoration(
-                                        labelText: "Select Section",
-                                        border: InputBorder.none, // Removes the border
-
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                                      ),
-
-                                      items: section.map((c) {
-                                        return DropdownMenuItem<int>(
-                                          value: c["id"],
-                                          child: Text(c["title"].toString()),
-                                        );
-                                      }).toList(),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          selectedSection = value;
-                                        });
-                                      },
-                                    ),
-
-                                  ),
-
-                                ],
-                              ),
-
-
-                            ),
-                          ),
-
-                          SizedBox(height: 20),
-
-                          // Section Dropdown (Only shows if a class is selected)
-
-                          Container(
-                            height: 50.sp,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(0.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: DropdownButtonFormField<int>(
-                                      value: selectedSubject,
-                                      decoration: InputDecoration(
-                                        labelText: "Select Subject",
-                                        border: InputBorder.none, // Removes the border
-
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                                      ),
-                                      items: subject.map((c) {
-                                        return DropdownMenuItem<int>(
-                                          value: c["id"],
-                                          child: Text(c["subject_name"]),
-                                        );
-                                      }).toList(),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          selectedSubject = value;
-                                        });
-                                      },
-                                    ),
-
-
-
-
-                                  ),
-
-                                ],
-                              ),
-
-
-                            ),
-                          ),
-
-                          SizedBox(height: 20),
-
-                          Container(
-                            height: 50.sp,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildDateTile("Start Date", startDate, () => pickDate(context, true)),
-                                  ),
-
-                                  Column(
-                                    children: [
-                                      Container(
-                                        width: 1.sp,
-                                        color: Colors.grey,
-                                        height: 50.sp,
-                                      )
-                                    ],
-
-                                  ),
-                                  Expanded(
-                                    child: _buildDateTile("End Date", endDate, () => pickDate(context, false)),
-                                  ),
-                                ],
-                              ),
-
-
-                            ),
-                          ),
-
-
-
-                          SizedBox(height: 20,),
-                          Container(
-                            width: double.infinity,
-                            height: 50.sp,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(5.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildTextField("Title", titleController),
-
-                                  ),
-
-                                ],
-                              ),
-
-
-                            ),
-                          ),
-                          SizedBox(height: 20),
-
-                          Container(
-                            width: double.infinity,
-                            height: 50.sp,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(5.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildTextField("Total Marks", totalMarksController, keyboardType: TextInputType.number),
-
-
-                                  ),
-
-                                ],
-                              ),
-
-
-                            ),
-                          ),
-
-                          SizedBox(height: 20,),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(5.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child:   _buildTextField("Description", descriptionController, maxLines: 3),
-
-
-
-
-
-                                  ),
-
-                                ],
-                              ),
-
-
-                            ),
-                          ),
-
-
-
-                          SizedBox(height: 20),
-
-
-                          SizedBox(height: 10),
-                          _buildSelectedFile("Attach PDF", Icons.picture_as_pdf, pickFile, selectedPdf != null),
-
-                          SizedBox(height: 20),
-
-                          ElevatedButton(
-                            onPressed: isLoading ? null : uploadAssignmentApi, // Disable button when loading
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              padding: EdgeInsets.symmetric(vertical: 14, horizontal: 50),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            child: isLoading
-                                ? SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 3,
-                              ),
-                            )
-                                : Text("Upload Assignment", style: TextStyle(fontSize: 16, color: Colors.white)),
-                          ),
-
-
 
                         ],
                       ),
+
+
                     ),
+                  ),
+
+                  SizedBox(height: 10),
+                  Container(
+                    height: 50.sp,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.2),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(0.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child:DropdownButtonFormField<int>(
+                              value: selectedSection,
+                              decoration: InputDecoration(
+                                labelText: "Select Section",
+                                border: InputBorder.none, // Removes the border
+
+                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+
+                              items: section.map((c) {
+                                return DropdownMenuItem<int>(
+                                  value: c["id"],
+                                  child: Text(c["title"].toString()),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedSection = value;
+                                });
+                              },
+                            ),
+
+                          ),
+
+                        ],
+                      ),
+
+
+                    ),
+                  ),
+
+                  SizedBox(height: 10),
+
+                  // Section Dropdown (Only shows if a class is selected)
+
+                  Container(
+                    height: 50.sp,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.2),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(0.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<int>(
+                              value: selectedSubject,
+                              decoration: InputDecoration(
+                                labelText: "Select Subject",
+                                border: InputBorder.none, // Removes the border
+
+                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+                              items: subject.map((c) {
+                                return DropdownMenuItem<int>(
+                                  value: c["id"],
+                                  child: Text(c["subject_name"]),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedSubject = value;
+                                });
+                              },
+                            ),
 
 
 
 
+                          ),
+
+                        ],
+                      ),
+
+
+                    ),
+                  ),
+
+                  SizedBox(height: 10),
+
+                  Container(
+                    height: 50.sp,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.2),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildDateTile("Start Date", startDate, () => pickDate(context, true)),
+                          ),
+
+                          Column(
+                            children: [
+                              Container(
+                                width: 1.sp,
+                                color: Colors.grey,
+                                height: 50.sp,
+                              )
+                            ],
+
+                          ),
+                          Expanded(
+                            child: _buildDateTile("End Date", endDate, () => pickDate(context, false)),
+                          ),
+                        ],
+                      ),
+
+
+                    ),
+                  ),
+
+
+
+                  SizedBox(height: 10,),
+                  Container(
+                    width: double.infinity,
+                    height: 50.sp,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.2),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField("Title", titleController),
+
+                          ),
+
+                        ],
+                      ),
+
+
+                    ),
+                  ),
+                  SizedBox(height: 10),
+
+                  // Container(
+                  //   width: double.infinity,
+                  //   height: 50.sp,
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.white,
+                  //     borderRadius: BorderRadius.circular(10),
+                  //     boxShadow: [
+                  //       BoxShadow(
+                  //         color: Colors.blue.withOpacity(0.2),
+                  //         blurRadius: 8,
+                  //         spreadRadius: 2,
+                  //         offset: const Offset(0, 1),
+                  //       ),
+                  //     ],
+                  //   ),
+                  //   child: Padding(
+                  //     padding: EdgeInsets.all(5.0),
+                  //     child: Row(
+                  //       children: [
+                  //         Expanded(
+                  //           child: _buildTextField("Total Marks", totalMarksController, keyboardType: TextInputType.number),
+                  //
+                  //
+                  //         ),
+                  //
+                  //       ],
+                  //     ),
+                  //
+                  //
+                  //   ),
+                  // ),
+
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.2),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(5.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child:   _buildTextField("Description", descriptionController, maxLines: 3),
+
+
+
+
+
+                          ),
+
+                        ],
+                      ),
+
+
+                    ),
+                  ),
+
+
+
+                  SizedBox(height: 20),
+
+
+                  SizedBox(height: 10),
+                  _buildSelectedFile("Attach PDF", Icons.picture_as_pdf, pickFile, selectedPdf != null),
+
+                  SizedBox(height: 20),
+
+                  ElevatedButton(
+                    onPressed: isLoading ? null : uploadAssignmentApi, // Disable button when loading
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade200,
+                      padding: EdgeInsets.symmetric(vertical: 14, horizontal: 50),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: isLoading
+                        ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.blue,
+                        strokeWidth: 3,
+                      ),
+                    )
+                        : Text("Upload Assignment", style: TextStyle(fontSize: 16, color: Colors.black)),
                   ),
 
 
@@ -676,10 +649,10 @@ class _AssignmentUploadScreenState extends State<AssignmentUploadScreen> {
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
-        style: const TextStyle(color: AppColors2.textblack),
+        style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(color:  AppColors2.textblack),
+          labelStyle: const TextStyle(color:  Colors.black),
           border: InputBorder.none, // Removes the border
           filled: false,
           fillColor:  AppColors2.textblack,
@@ -694,7 +667,7 @@ class _AssignmentUploadScreenState extends State<AssignmentUploadScreen> {
         ? Card(
       elevation: 3,
       color: AppColors2.textwhite,
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: EdgeInsets.symmetric(vertical: 10,horizontal: 30),
       child: ListTile(
         leading: Icon(Icons.insert_drive_file, color: Colors.orange),
         title: Text(
@@ -719,13 +692,16 @@ class _AssignmentUploadScreenState extends State<AssignmentUploadScreen> {
       padding: EdgeInsets.all(10),
       child: GestureDetector(
         onTap: pickFile,
-        child: Container(
-          height:150,
-            decoration: BoxDecoration(
-                color: AppColors2.textwhite,
-                borderRadius: BorderRadius.circular(10)
-            ),
-            child: Center(child: Text("No file selected", style: TextStyle(color: Colors.grey)))),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 10,horizontal: 30),
+          child: Container(
+            height:150,
+              decoration: BoxDecoration(
+                  color: AppColors2.textwhite,
+                  borderRadius: BorderRadius.circular(10)
+              ),
+              child: Center(child: Text("No file selected", style: TextStyle(color: Colors.grey)))),
+        ),
       ),
     );
   }
@@ -744,12 +720,12 @@ class _AssignmentUploadScreenState extends State<AssignmentUploadScreen> {
         title: Text(
           date != null ? date.toString().split(' ')[0] : label,
           style: TextStyle(
-            color: AppColors2.textblack,
+            color: Colors.black,
             fontSize: 13.sp,
             fontWeight: FontWeight.w500,
           ),
         ),
-        trailing: Icon(Icons.calendar_today, color:AppColors2.textblack,size: 15.sp,),
+        trailing: Icon(Icons.calendar_today, color:Colors.black,size: 15.sp,),
         onTap: onTap,
       ),
     );

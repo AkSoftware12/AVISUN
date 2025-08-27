@@ -356,11 +356,11 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
 
                 GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
-                    setState(() {
-                      _selectedIndex =
-                      4; // Profile screen index in _screens
-                    });
+                    // Navigator.pop(context);
+                    // setState(() {
+                    //   _selectedIndex =
+                    //   4; // Profile screen index in _screens
+                    // });
                   },
                   child: CircleAvatar(
                     radius: 40,

@@ -166,7 +166,7 @@ class _TimeTableScreenState extends State<TimeTableTeacherScreen> {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [HexColor('#7a211b'), HexColor('#003366')],
+                colors: [AppColors2.primary, AppColors2.primary],
                 // Change colors as needed
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -249,7 +249,7 @@ class _TimeTableScreenState extends State<TimeTableTeacherScreen> {
                       Container(
                         width: double.infinity,
                         decoration:BoxDecoration(
-                          color: HexColor('#27293d'),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(25.sp)
                         ),
                         child: Column(
@@ -288,7 +288,7 @@ class _TimeTableScreenState extends State<TimeTableTeacherScreen> {
                                       padding: EdgeInsets.symmetric(horizontal: 10.sp, vertical: 5.sp),
                                       margin: const EdgeInsets.symmetric(horizontal: 5),
                                       decoration: BoxDecoration(
-                                        color: isSelected ? Colors.white : Colors.grey,
+                                        color: isSelected ? AppColors2.primary : Colors.grey.shade300,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Center(
@@ -303,7 +303,7 @@ class _TimeTableScreenState extends State<TimeTableTeacherScreen> {
                                               style: TextStyle(
                                                 fontSize: 13.sp,
                                                 fontWeight: FontWeight.bold,
-                                                color: isSelected ? Colors.black : Colors.white,
+                                                color: isSelected ? Colors.white : Colors.black,
                                               ),
                                             ),
                                           ],
@@ -371,8 +371,8 @@ class _TimeTableScreenState extends State<TimeTableTeacherScreen> {
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        // color: Colors.orange.shade50,
-                                        color: HexColor('#9d6763'),
+                                        color: Colors.red.shade200,
+                                        // color: HexColor('#9d6763'),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       margin: const EdgeInsets.symmetric(vertical: 0.0),
@@ -535,7 +535,7 @@ class _TimeTableScreenState extends State<TimeTableTeacherScreen> {
               style: GoogleFonts.poppins(
                 fontSize: TextSizes.textmedium,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Colors.black,
               ),
             ),
           ],

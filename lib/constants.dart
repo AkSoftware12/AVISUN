@@ -51,8 +51,8 @@ class ApiRoutes {
 
 
   // Main App Url
-  // static const String baseUrl = "https://softcjm.cjmambala.co.in/api";
-  // static const String baseUrlNewUser = "https://cjmambala.co.in/api";
+  static const String baseUrl = "https://softcjm.cjmambala.co.in/api";
+  static const String baseUrlNewUser = "https://cjmambala.co.in/api";
 
 
 
@@ -60,10 +60,10 @@ class ApiRoutes {
   static const String newUserdownloadUrl = "https://cjmambala.co.in/api/fees/";
 
 // Local  App Url
-
-
-  static const String baseUrlNewUser = "http://192.168.1.10/cjmweb/api";
-  static const String baseUrl = "http://192.168.1.10/cjm_ambala/api";
+//
+//
+//   static const String baseUrlNewUser = "http://192.168.1.2/cjmweb/api";
+//   static const String baseUrl = "http://192.168.1.2/cjm_ambala/api";
 
 
   // New Admission Api
@@ -149,5 +149,5 @@ class ApiRoutes {
 
   static const String getAllTeacherMessages = "$baseUrl/teacher/messages";
   static const String getTeacherMessagesConversation = "$baseUrl/teacher/messages/conversation/";
-  static const String sendTeacherMessage = "$baseUrl/teacher/messages";
+  static const String sendTeacherMessage = "$baseUrl/teacher/messages/send";
 }

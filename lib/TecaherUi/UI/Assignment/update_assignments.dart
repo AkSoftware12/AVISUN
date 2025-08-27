@@ -226,7 +226,7 @@ class _AssignmentUploadScreenState extends State<AssignmentUpdateScreen> {
 
                   SizedBox(height: 20),
 
-                  _buildTextField("Total Marks", totalMarksController, keyboardType: TextInputType.number),
+                  // _buildTextField("Total Marks", totalMarksController, keyboardType: TextInputType.number),
 
 
                   SizedBox(height: 10),

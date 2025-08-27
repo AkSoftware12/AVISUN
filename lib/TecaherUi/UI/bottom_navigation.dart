@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../UI/Auth/login_student_userlist.dart';
+import '../../UI/Gallery/Album/album.dart';
 import '../../constants.dart';
 import '../../strings.dart';
 import '../UI/Dashboard/HomeScreen%20.dart';
@@ -12,17 +15,13 @@ import 'Attendance/AttendanceScreen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'Auth/login_screen.dart';
-import 'FAQ/faq.dart';
-import 'Gallery/gallery_tab.dart';
-import 'Help/help.dart';
 import 'Library/LibraryScreen.dart';
 import 'Notice/notice.dart';
 import 'Notification/notification.dart';
 import 'Profile/ProfileScreen.dart';
 import 'Report/report_card.dart';
-import 'TimeTable/time_table.dart';
+import 'TeacherMessage/message.dart';
 import 'TimeTable/time_table_teacher.dart';
-import 'WebView/webview.dart';
 
 class TeacherBottomNavBarScreen extends StatefulWidget {
   // final String token;
@@ -37,7 +36,9 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
   Map<String, dynamic>? teacherData;
   // Map<String, dynamic>? teacherData;
   bool isLoading = true;
-
+  String currentVersion = '';
+  int? messageViewPermissionsApp;
+  int? messageSendPermissionsApp;
   // List of screens
   final List<Widget> _screens = [
     HomeScreen(),
@@ -58,11 +59,53 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
   @override
   void initState() {
     super.initState();
+    checkForVersion(context);
 
+    fetchData();
     fetchStudentData();
     _selectedIndex = widget.initialIndex; // Set the initial tab index
 
   }
+  Future<void> checkForVersion(BuildContext context) async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    currentVersion = packageInfo.version;
+  }
+  Future<void> fetchData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('teachertoken');
+    final url = Uri.parse(ApiRoutes.getTeacherDashboard); // Ensure ApiRoutes.getDashboard is valid
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body)['data'];
+        setState(() {
+          // Handle attendance_percent as double to support decimal values
+          // attendancePercent = (data['attendance_percent'] as num?)?.toDouble() ?? 0.0;
+          // Uncomment and fix if permissions are needed
+          messageViewPermissionsApp = (data['permisions']?[0]['app_status'] as num?)?.toInt() ?? 0;
+          messageSendPermissionsApp = (data['permisions']?[1]['app_status'] as num?)?.toInt() ?? 0;
+
+        });
+      } else {
+        setState(() {
+
+        });
+      }
+    } catch (e) {
+      setState(() {
+        // attendancePercent = 0.0; // Default value for error case
+
+      });
+      // Optionally log the error for debugging
+      debugPrint('Error fetching data: $e');
+    }
+  }
+
   Future<void> fetchStudentData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('teachertoken');
@@ -226,12 +269,13 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        backgroundColor: AppColors2.primary,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: AppColors2.textblack,
+        backgroundColor: Colors.red.shade900,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.grey,
           showSelectedLabels: true,  // ✅ Ensures selected labels are always visible
           showUnselectedLabels: true, // ✅ Ensures unselected labels are also visible
           type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
         items:  <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.home),
@@ -274,10 +318,10 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
 
               GestureDetector(
                 onTap: (){
-                  Navigator.pop(context);
-                  setState(() {
-                    _selectedIndex = 4; // Profile screen index in _screens
-                  });
+                  // Navigator.pop(context);
+                  // setState(() {
+                  //   _selectedIndex = 4; // Profile screen index in _screens
+                  // });
                 },
                 child: CircleAvatar(
                   radius: 40,
@@ -294,7 +338,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
               Center(
                 child: Container(
                   child: Padding(
-                    padding: EdgeInsets.only(top: 0, bottom: 20),
+                    padding: EdgeInsets.only(top: 0, bottom: 3.sp),
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -303,10 +347,32 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                         '${teacherData?['first_name']??'Teacher'} ${teacherData?['last_name']??''}' ?? 'Teacher', // Fallback to 'Student' if null
                         style: GoogleFonts.montserrat(
                           textStyle: Theme.of(context).textTheme.displayLarge,
-                          fontSize: 16,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors2.textblack,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Center(
+                child: Container(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 0, bottom: 20),
+                    child: Container(
+                      decoration: BoxDecoration(shape: BoxShape.circle),
+                      child: Text(
+                        teacherData?['email'] ?? '',
+                        // Fallback to 'Student' if null
+                        style: GoogleFonts.montserrat(
+                          textStyle: Theme.of(
+                            context,
+                          ).textTheme.displayLarge,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
                           fontStyle: FontStyle.normal,
-                          color: AppColors2.textblack,
+                          color: AppColors.textwhite,
                         ),
                       ),
                     ),
@@ -339,7 +405,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                                 textStyle: TextStyle(
                                     color:AppColors2.textblack,
                                     fontSize: 15,
-                                    fontWeight: FontWeight.normal),
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                             trailing: Container(
@@ -380,7 +446,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                                 textStyle: TextStyle(
                                     color:AppColors2.textblack,
                                     fontSize: 15,
-                                    fontWeight: FontWeight.normal),
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                             trailing: Container(
@@ -425,7 +491,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                                 textStyle: TextStyle(
                                     color:AppColors2.textblack,
                                     fontSize: 15,
-                                    fontWeight: FontWeight.normal),
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                             trailing: Container(
@@ -469,7 +535,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                                 textStyle: TextStyle(
                                     color:AppColors2.textblack,
                                     fontSize: 15,
-                                    fontWeight: FontWeight.normal),
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                             trailing: Container(
@@ -506,50 +572,86 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
 
                           ListTile(
                             title: Text(
-                              'Report Card',
+                              'Messages',
                               style: GoogleFonts.cabin(
                                 textStyle: TextStyle(
-                                    color:AppColors2.textblack,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal),
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             trailing: Container(
                               height: 20,
                               width: 20,
-                              color: AppColors2.primary,
-                              child: Icon(Icons.report,color:AppColors2.textblack,)
-
-                              // Image.asset(
-                              //   'assets/gallery.png',
-                              //   height: 80, // Adjust the size as needed
-                              //   width: 80,
-                              // ),
-
+                              color: AppColors.primary,
+                              child: Image.asset(
+                                'assets/message_home.png',
+                                height: 80, // Adjust the size as needed
+                                width: 80,
+                              ),
                             ),
                             onTap: () {
-                              Navigator.pop(context);
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) {
-                                    return ReportCardScreen();
+                                    return  TeacherMesssageListScreen(messageSendPermissionsApp: messageSendPermissionsApp,);
                                   },
                                 ),
                               );
-
                             },
                           ),
                           Padding(
-                            padding:
-                            EdgeInsets.only(left: 8, right: 8),
+                            padding: EdgeInsets.only(left: 8, right: 8),
                             child: Divider(
                               height: 1,
                               color: Colors.grey.shade300,
                               thickness: 1,
                             ),
                           ),
-
+                          ListTile(
+                            title: Text(
+                              'Activity Calendar',
+                              style: GoogleFonts.cabin(
+                                textStyle: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            trailing: Container(
+                              height: 20,
+                              width: 20,
+                              color: AppColors.primary,
+                              child: Image.asset(
+                                'assets/document.png',
+                                height: 80, // Adjust the size as needed
+                                width: 80,
+                              ),
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return CalendarScreen(
+                                      title: 'Activity Calendar',
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(left: 8, right: 8),
+                            child: Divider(
+                              height: 1,
+                              color: Colors.grey.shade300,
+                              thickness: 1,
+                            ),
+                          ),
 
                           ListTile(
                             title: Text(
@@ -558,7 +660,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                                 textStyle: TextStyle(
                                     color:AppColors2.textblack,
                                     fontSize: 15,
-                                    fontWeight: FontWeight.normal),
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                             trailing: Container(
@@ -577,7 +679,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) {
-                                    return GalleryVideoTabScreen();
+                                    return GalleryScreen();
                                   },
                                 ),
                               );
@@ -594,48 +696,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                           ),
 
 
-                          ListTile(
-                            title: Text(
-                              'Notices',
-                              style: GoogleFonts.cabin(
-                                textStyle: TextStyle(
-                                    color:AppColors2.textblack,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
-                            trailing: Container(
-                              height: 20,
-                              width: 20,
-                              color: AppColors2.primary,
-                              child:  Image.asset(
-                                'assets/document.png',
-                                height: 80, // Adjust the size as needed
-                                width: 80,
-                              ),
 
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return CalendarScreen();
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-
-                          Padding(
-                            padding:
-                            EdgeInsets.only(left: 8, right: 8),
-                            child: Divider(
-                              height: 1,
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
                           ListTile(
                             title: Text(
                               'Logout',
@@ -643,7 +704,7 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                                 textStyle: TextStyle(
                                     color:AppColors2.textblack,
                                     fontSize: 15,
-                                    fontWeight: FontWeight.normal),
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                             trailing: Container(
@@ -665,8 +726,18 @@ class _BottomNavBarScreenState extends State<TeacherBottomNavBarScreen> {
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 15),
+                    Padding(padding: EdgeInsets.only(bottom: 15.sp)),
+                    Center(
+                      child: Text(
+                        'Version :-  $currentVersion',
+                        style: GoogleFonts.cabin(
+                          textStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

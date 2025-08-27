@@ -1,3 +1,6 @@
+import 'package:animated_search_bar/animated_search_bar.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,66 +13,47 @@ import '../../../CommonCalling/progressbarWhite.dart';
 import '../../../constants.dart';
 import 'chat.dart';
 
-void showNewTeacherMessageBottomSheet(BuildContext context, int? messageSendPermissionsApp) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    isDismissible: false, // Prevents dismissing by tapping outside
-    enableDrag: false, // Disables drag-to-dismiss
-    builder: (context) => DraggableScrollableSheet(
-      initialChildSize: 1.0, // Full height by default
-      minChildSize: 1.0, // Minimum size is full height
-      maxChildSize: 1.0, // Maximum size is full height
-      builder: (_, controller) => Container(
-        decoration: BoxDecoration(
-          color: AppColors.secondary,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-        ),
-        child: NewTeacherMessageScreen(
-          messageSendPermissionsApp: messageSendPermissionsApp,
-          scrollController: controller,
-        ),
-      ),
-    ),
-  );
-}
-
 class NewTeacherMessageScreen extends StatefulWidget {
   final int? messageSendPermissionsApp;
-  final ScrollController scrollController;
+
   const NewTeacherMessageScreen({
     super.key,
     required this.messageSendPermissionsApp,
-    required this.scrollController,
   });
 
   @override
-  State<NewTeacherMessageScreen> createState() => _NewTeacherMessageScreenState();
+  State<NewTeacherMessageScreen> createState() =>
+      _NewTeacherMessageScreenState();
 }
 
 class _NewTeacherMessageScreenState extends State<NewTeacherMessageScreen>
     with SingleTickerProviderStateMixin {
-  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController messageController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   bool isLoading = false;
   List messsage = [];
   List students = [];
   List filteredMessages = [];
   List filteredMessages2 = [];
-  Set<int> selectedTeachers = {};
-  Set<int> selectedStudents = {};
+  Set<String> selectedTeachers = {};
+  Set<String> selectedStudents = {};
   late TabController _tabController;
   bool selectAllTeachers = false;
   bool selectAllStudents = false;
+  PlatformFile? selectedFile;
+
+  List<Map<String, dynamic>> classes = [];
+  List<Map<String, dynamic>> section = [];
+  int? selectedClass; // Initialize as null
+  int? selectedSection; // Initialize as null
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    fetchAssignmentsData();
     _searchController.addListener(_filterMessages);
     _tabController.addListener(_onTabChanged);
+    fetchClasses(); // Fetch classes and sections, and set default values afterward
   }
 
   void _onTabChanged() {
@@ -77,6 +61,70 @@ class _NewTeacherMessageScreenState extends State<NewTeacherMessageScreen>
       _searchController.clear();
       _filterMessages();
     });
+  }
+
+  Future<void> fetchClasses() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('teachertoken');
+
+      final response = await http.get(
+        Uri.parse(ApiRoutes.getTeacherTeacherSubject),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        setState(() {
+          classes = List<Map<String, dynamic>>.from(responseData['classes']);
+          section = List<Map<String, dynamic>>.from(responseData['sections']);
+          isLoading = false;
+
+          // Debug: Check for duplicate IDs
+          _checkForDuplicateIds(classes, 'classes');
+          _checkForDuplicateIds(section, 'sections');
+
+          // Set default values only if lists are not empty
+          if (classes.isNotEmpty) {
+            selectedClass = 0;
+          }
+          if (section.isNotEmpty) {
+            selectedSection = 0;
+            fetchAssignmentsData(); // Fetch data after setting section
+          }
+        });
+      } else {
+        throw Exception('Failed to load class and section data');
+      }
+    } catch (e) {
+      print('Error fetching classes and sections: $e');
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error fetching classes: $e')));
+    }
+  }
+
+  // Helper function to check for duplicate IDs in a list
+  void _checkForDuplicateIds(List<Map<String, dynamic>> list, String listName) {
+    final idSet = <int>{};
+    for (var item in list) {
+      final id = item['id'] as int;
+      if (idSet.contains(id)) {
+        print('Warning: Duplicate ID $id found in $listName');
+      } else {
+        idSet.add(id);
+      }
+    }
   }
 
   Future<void> fetchAssignmentsData() async {
@@ -97,8 +145,22 @@ class _NewTeacherMessageScreenState extends State<NewTeacherMessageScreen>
     }
 
     try {
+      // Build the query parameters dynamically
+      final queryParams = <String, String>{};
+      if (selectedClass != null) {
+        queryParams['class_id'] = selectedClass.toString();
+      }
+      if (selectedSection != null) {
+        queryParams['section_id'] = selectedSection.toString();
+      }
+
+      // Construct the URI with query parameters
+      final uri = Uri.parse(
+        ApiRoutes.getAllTeacherMessages,
+      ).replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+
       final response = await http.get(
-        Uri.parse(ApiRoutes.getAllTeacherMessages),
+        uri,
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -107,26 +169,25 @@ class _NewTeacherMessageScreenState extends State<NewTeacherMessageScreen>
         setState(() {
           messsage = jsonResponse['users'] ?? [];
           students = jsonResponse['students'] ?? [];
-          filteredMessages =  messsage;
-          filteredMessages2 =  students;
-          // filteredMessages = _tabController.index == 0 ? messsage : students;
+          filteredMessages = messsage;
+          filteredMessages2 = students;
           isLoading = false;
         });
       } else {
         setState(() {
           isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to fetch data. ')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to fetch data.')));
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -136,150 +197,104 @@ class _NewTeacherMessageScreenState extends State<NewTeacherMessageScreen>
       if (_tabController.index == 0) {
         filteredMessages = messsage.where((assignment) {
           final name = assignment['first_name']?.toString().toLowerCase() ?? '';
-          final designation = assignment['designation']?['title']?.toString().toLowerCase() ?? '';
+          final designation =
+              assignment['designation']?['title']?.toString().toLowerCase() ??
+              '';
           return name.contains(query) || designation.contains(query);
         }).toList();
       } else {
         filteredMessages2 = students.where((assignment) {
-          final name = assignment['student_name']?.toString().toLowerCase() ?? '';
-          final className = assignment['class_name']?.toString().toLowerCase() ?? '';
+          final name =
+              assignment['student_name']?.toString().toLowerCase() ?? '';
+          final className =
+              assignment['class_name']?.toString().toLowerCase() ?? '';
           return name.contains(query) || className.contains(query);
         }).toList();
       }
     });
   }
 
-  Future<void> _sendMessage(String msg, int senderId) async {
+
+  Future<void> _sendMessage() async {
+    if (messageController.text.trim().isEmpty && selectedFile == null) {
+      _showErrorSnackBar('Please enter a message or select a file');
+      return;
+    }
+
+    if (widget.messageSendPermissionsApp == 0) {
+      _showPermissionDeniedPopup(context);
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final token = prefs.getString('teachertoken');
 
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No token found. Please log in.')),
-      );
+      _showErrorSnackBar('No authentication token found');
       return;
     }
 
     try {
-      final uri = Uri.parse(ApiRoutes.sendMessage);
+      final uri = Uri.parse(ApiRoutes.sendTeacherMessage);
       final request = http.MultipartRequest('POST', uri);
 
       request.headers['Authorization'] = 'Bearer $token';
-      request.fields['receivers[]'] = 'user_$senderId';
-      request.fields['body'] = msg;
 
-      final response = await request.send();
+      // ✅ Yaha pe array bana ke JSON encode karna hai
+      List<String> receivers = [...selectedTeachers, ...selectedStudents];
+      print('Send Msg receivers $receivers');
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Message sent successfully.')),
+      request.fields['receivers'] = jsonEncode(receivers); // 👈 important change
+      request.fields['body'] = messageController.text.trim();
+
+      print('Send Msg jsonEncode ${jsonEncode(receivers)}');
+
+
+      if (selectedFile != null && selectedFile!.path != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'attachment',
+            selectedFile!.path!,
+            filename: selectedFile!.name,
+          ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to send message.')),
-        );
+        request.fields['attachment'] = '';
+      }
+
+      final response = await request.send();
+      print('Send Msg response ${response}');
+
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        messageController.clear();
+        setState(() {
+          selectedFile = null;
+          selectedTeachers.clear();
+          selectedStudents.clear();
+          selectAllTeachers = false;
+          selectAllStudents = false;
+        });
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.success,
+          animType: AnimType.scale,
+          title: 'Success',
+          desc: 'Message sent successfully!',
+          btnOkOnPress: () {},
+          btnOkColor: Colors.green,
+        ).show();
+      } else {
+        _showErrorSnackBar('Failed to send message: ${response.statusCode}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending message: $e')),
-      );
+      _showErrorSnackBar('Error sending message: $e');
     }
   }
 
-  void _showMessagePopup(BuildContext context, String name, String subtitle, int id) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        final TextEditingController messageController = TextEditingController();
-
-        return AlertDialog(
-          backgroundColor: Colors.red.shade50,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Send Message\n($name)',
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-          content: TextField(
-            controller: messageController,
-            decoration: InputDecoration(
-              hintText: 'Type your message here...',
-              hintStyle: TextStyle(color: Colors.grey[400]),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-            maxLines: 4,
-            keyboardType: TextInputType.multiline,
-          ),
-          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                String message = messageController.text.trim();
-                if (message.isNotEmpty) {
-                  _sendMessage(message, id);
-                  Navigator.of(dialogContext).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enter a message'),
-                      backgroundColor: Colors.redAccent,
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                backgroundColor: AppColors.primary,
-              ),
-              child: const Text(
-                'Send',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
     );
   }
 
@@ -367,17 +382,19 @@ class _NewTeacherMessageScreenState extends State<NewTeacherMessageScreen>
   void _toggleSelection(int id) {
     setState(() {
       if (_tabController.index == 0) {
-        if (selectedTeachers.contains(id)) {
-          selectedTeachers.remove(id);
+        final teacherId = "user_$id";
+        if (selectedTeachers.contains(teacherId)) {
+          selectedTeachers.remove(teacherId);
         } else {
-          selectedTeachers.add(id);
+          selectedTeachers.add(teacherId);
         }
         selectAllTeachers = selectedTeachers.length == messsage.length;
       } else {
-        if (selectedStudents.contains(id)) {
-          selectedStudents.remove(id);
+        final studentId = "student_$id";
+        if (selectedStudents.contains(studentId)) {
+          selectedStudents.remove(studentId);
         } else {
-          selectedStudents.add(id);
+          selectedStudents.add(studentId);
         }
         selectAllStudents = selectedStudents.length == students.length;
       }
@@ -390,293 +407,755 @@ class _NewTeacherMessageScreenState extends State<NewTeacherMessageScreen>
         if (selectAllTeachers) {
           selectedTeachers.clear();
         } else {
-          selectedTeachers.addAll(messsage.map((user) => user['id'] as int));
+          selectedTeachers.addAll(messsage.map((user) => "user_${user['id']}"));
         }
         selectAllTeachers = !selectAllTeachers;
       } else {
         if (selectAllStudents) {
           selectedStudents.clear();
         } else {
-          selectedStudents.addAll(students.map((student) => student['id'] as int));
+          selectedStudents.addAll(
+            students.map((student) => "student_${student['id']}"),
+          );
         }
         selectAllStudents = !selectAllStudents;
       }
     });
   }
 
+  Future<void> _pickFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          selectedFile = result.files.first;
+        });
+      }
+    } catch (e) {
+      _showErrorSnackBar('Error picking file: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 18.sp),
-          decoration: BoxDecoration(
-            color: AppColors.secondary,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'New Messages',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textwhite,
-                  ),
+    return Scaffold(
+      backgroundColor: AppColors.secondary,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(35.sp), // 👈 Custom Height
+        child: AppBar(
+          backgroundColor: AppColors.secondary,
+          centerTitle: true,
+          leading: SizedBox(
+            height: 50.sp,
+            child: Center(
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 25.sp,
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close, color: AppColors.textwhite),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-        ),
-
-
-        SizedBox(
-          height: 45.sp,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.sp, vertical: 5.sp),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search',
-                hintStyle: TextStyle(color: Colors.grey[400], fontSize: 11.sp),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(horizontal: 10.sp, vertical: 5.sp),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                prefixIcon: Icon(Icons.search, color: Colors.grey, size: 15.sp),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                  icon: Icon(Icons.clear, color: Colors.grey, size: 15.sp),
-                  onPressed: () {
-                    _searchController.clear();
-                    _filterMessages();
-                  },
-                )
-                    : null,
+                onPressed: () {
+                  Navigator.pop(context); // Back action
+                },
               ),
             ),
           ),
-        ),
-        Container(
-          color: AppColors.secondary,
-          child: TabBar(
-            controller: _tabController,
-            labelColor: AppColors.textwhite,
-            unselectedLabelColor: Colors.grey[400],
-            indicatorColor: AppColors.primary,
-            tabs:  [
-              Tab(text: 'Teachers ${'(${filteredMessages.length.toString()})'}'),
-              Tab(text: 'Students ${'(${filteredMessages2.length.toString()})'}'),
-            ],
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.sp, vertical: 5.sp),
-          child: Row(
-            children: [
-              Transform.scale(
-                scale: 0.6, // Smaller checkbox as per your request
-                child: Checkbox(
-                  value: _tabController.index == 0 ? selectAllTeachers : selectAllStudents,
-                  onChanged: (value) => _toggleSelectAll(),
-                  activeColor: AppColors.primary,
-                ),
+          title: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.95,
+            height: 30.sp,
+            child: AnimatedSearchBar(
+              label: 'New Messages',
+              controller: _searchController,
+              labelStyle: GoogleFonts.montserrat(
+                textStyle: Theme.of(context).textTheme.displayLarge,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                fontStyle: FontStyle.normal,
+                color: AppColors.textwhite,
               ),
-              Text(
-                'Select All',
-                style: GoogleFonts.montserrat(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textwhite,
-                ),
+              searchStyle: const TextStyle(color: Colors.white),
+              cursorColor: Colors.white,
+              closeIcon: Icon(Icons.close,color: Colors.white,),
+              searchIcon: Icon(Icons.search,color: Colors.white,),// 🔥 Close icon white
+              textInputAction: TextInputAction.done,
+              autoFocus: false,
+              searchDecoration: const InputDecoration(
+                hintText: 'Search',
+                alignLabelWithHint: true,
+                fillColor: Colors.white,
+                focusColor: Colors.white,
+                hintStyle: TextStyle(color: Colors.white70),
+                border: InputBorder.none,
               ),
-            ],
+              onChanged: (value) {
+                debugPrint('value on Change: $value');
+                setState(() {});
+              },
+              onFieldSubmitted: (value) {
+                debugPrint('value on Field Submitted: $value');
+                setState(() {});
+              },
+            )
+
           ),
+          actions: [
+            Padding(
+              padding:  EdgeInsets.only(right: 8.sp),
+              child: IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                onPressed: () {
+                  messageController.clear();
+                  setState(() {
+                    selectedFile = null;
+                    selectedTeachers.clear();
+                    selectedStudents.clear();
+                    selectAllTeachers = false;
+                    selectAllStudents = false;
+                    selectedClass = null;
+                    selectedSection = null;
+                  });
+                  fetchAssignmentsData();
+                },
+              ),
+            ),
+          ],
         ),
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              // Teachers Tab
-              isLoading
-                  ? const WhiteCircularProgressWidget()
-                  : filteredMessages.isEmpty
-                  ? const Center(
-                child: DataNotFoundWidget(
-                  title: 'No Teachers Found.',
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            height: 45,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              dividerColor: Colors.transparent, // Add this to remove the grey line
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(25.0),
+                color: Colors.red.shade800,
+              ),
+              indicatorSize: TabBarIndicatorSize.tab, // Ensure indicator respects tab boundaries
+              labelColor: Colors.white,
+              labelStyle: TextStyle(
+                fontSize: 15.sp, // Set your desired font size
+                fontWeight: FontWeight.bold, // Optional: Adjust font weight if needed
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontSize: 13.sp, // Slightly smaller font size for unselected tabs
+                fontWeight: FontWeight.bold, // Optional: Different weight for unselected tabs
+              ),
+              unselectedLabelColor: Colors.black,
+              tabs: [
+                Tab(
+                  child: Container(
+                    alignment: Alignment.center, // Explicitly center the text
+                    child: Text(
+                      'Teachers (${filteredMessages.length})',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
-              )
-                  : ListView.builder(
-                controller: widget.scrollController,
-                itemCount: filteredMessages.length,
-                itemBuilder: (context, index) {
-                  final assignment = filteredMessages[index];
-                  final isSelected = selectedTeachers.contains(assignment['id']);
-                  return GestureDetector(
-                    onTap: () {
-                      if (widget.messageSendPermissionsApp == 0) {
-                        _showPermissionDeniedPopup(context);
-                      } else {
-                        _showMessagePopup(
-                          context,
-                          assignment['first_name'] ?? 'Unknown',
-                          assignment['designation']?['title']?.toString() ?? 'No Designation',
-                          assignment['id'],
-                        );
-                      }
-                    },
-                    onLongPress: () => _toggleSelection(assignment['id']),
-                    child: Card(
-                      margin: EdgeInsets.symmetric(vertical: 3.sp, horizontal: 5.sp),
-                      elevation: 6,
-                      color: isSelected ? Colors.blue.shade50 : Colors.white,
-                      shadowColor: Colors.black26,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(11.sp),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(0.sp),
-                        child: Row(
-                          children: [
-                            Transform.scale(
-                              scale: 0.6, // Smaller checkbox
-                              child: Checkbox(
-                                value: isSelected,
-                                onChanged: (value) => _toggleSelection(assignment['id']),
-                                activeColor: AppColors.primary,
-                              ),
+                Tab(
+                  child: Container(
+                    alignment: Alignment.center, // Explicitly center the text
+                    child: Text(
+                      'Students (${filteredMessages2.length})',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Visibility(
+            visible: _tabController.index == 1,
+            child: Card(
+              color: Colors.white70,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.sp,
+                              vertical: 5.sp,
                             ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${assignment['first_name']?.toString().toUpperCase() ?? 'UNKNOWN'}',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.black87,
-                                    ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Class',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black,
                                   ),
-                                  const SizedBox(height: 1),
-                                  Text(
-                                    '(${assignment['designation']?['title']?.toString().toUpperCase() ?? 'NO DESIGNATION'})',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 11.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.sp),
+                            child: Container(
+                              width: double.infinity,
+                              height: 40.sp,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.2),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                    offset: const Offset(0, 1),
                                   ),
                                 ],
                               ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: FocusScope(
+                                        canRequestFocus: false,
+                                        child: DropdownButtonHideUnderline(
+                                          child: DropdownButtonFormField<int?>(
+                                            value:
+                                                classes.isNotEmpty &&
+                                                    classes.any(
+                                                      (c) =>
+                                                          c["id"] == selectedClass,
+                                                    )
+                                                ? selectedClass
+                                                : null,
+                                            decoration: const InputDecoration(
+                                              hintText: "Select Class",
+                                              border: InputBorder.none,
+                                              contentPadding: EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 0,
+                                              ),
+                                            ),
+                                            icon: const SizedBox.shrink(),
+                                            items: classes.isNotEmpty
+                                                ? classes.map((c) {
+                                                    return DropdownMenuItem<int>(
+                                                      value: c["id"],
+                                                      child: Text(
+                                                        c["title"]?.toString() ??
+                                                            'Unknown',
+                                                      ),
+                                                    );
+                                                  }).toList()
+                                                : [
+                                                    const DropdownMenuItem<int>(
+                                                      value: null,
+                                                      child: Text(
+                                                        "No Classes Available",
+                                                      ),
+                                                    ),
+                                                  ],
+                                            onChanged: classes.isNotEmpty
+                                                ? (value) {
+                                                    setState(() {
+                                                      selectedClass = value;
+                                                      // fetchAssignmentsData();
+                                                    });
+                                                  }
+                                                : null,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const Center(
+                                      child: Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 24,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.sp,
+                              vertical: 5.sp,
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Section',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.sp),
+                            child: Container(
+                              width: double.infinity,
+                              height: 40.sp,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.2),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButtonFormField<int?>(
+                                          value:
+                                              section.isNotEmpty &&
+                                                  section.any(
+                                                    (s) =>
+                                                        s["id"] == selectedSection,
+                                                  )
+                                              ? selectedSection
+                                              : null,
+                                          decoration: const InputDecoration(
+                                            hintText: "Select Section",
+                                            border: InputBorder.none,
+                                            contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 0,
+                                            ),
+                                          ),
+                                          icon: const SizedBox.shrink(),
+                                          items: section.isNotEmpty
+                                              ? section.map((s) {
+                                                  return DropdownMenuItem<int>(
+                                                    value: s["id"],
+                                                    child: Text(
+                                                      s["title"]?.toString() ??
+                                                          'Unknown',
+                                                    ),
+                                                  );
+                                                }).toList()
+                                              : [
+                                                  const DropdownMenuItem<int>(
+                                                    value: null,
+                                                    child: Text(
+                                                      "No Sections Available",
+                                                    ),
+                                                  ),
+                                                ],
+                                          onChanged: section.isNotEmpty
+                                              ? (value) {
+                                                  setState(() {
+                                                    selectedSection = value;
+                                                    fetchAssignmentsData();
+                                                  });
+                                                }
+                                              : null,
+                                        ),
+                                      ),
+                                    ),
+                                    const Center(
+                                      child: Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 24,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Card(
+          //   color: Colors.transparent,
+          //   margin: EdgeInsets.zero,
+          //   elevation: 10,
+          //   shape: RoundedRectangleBorder(
+          //     borderRadius: BorderRadius.circular(0.0), // Rounded corners
+          //   ),
+          //   child: SizedBox(
+          //     height: 50.sp,
+          //     child: Padding(
+          //       padding: EdgeInsets.symmetric(horizontal: 8.sp, vertical: 5.sp),
+          //       child: TextField(
+          //         controller: _searchController,
+          //         decoration: InputDecoration(
+          //           hintText: 'Search',
+          //           hintStyle: TextStyle(
+          //             color: Colors.grey[400],
+          //             fontSize: 12.sp,
+          //           ),
+          //           filled: true,
+          //           fillColor: Colors.white,
+          //           contentPadding: EdgeInsets.symmetric(
+          //             horizontal: 10.sp,
+          //             vertical: 5.sp,
+          //           ),
+          //           border: OutlineInputBorder(
+          //             borderRadius: BorderRadius.circular(12),
+          //             borderSide: BorderSide.none,
+          //           ),
+          //           prefixIcon: Icon(
+          //             Icons.search,
+          //             color: Colors.grey,
+          //             size: 18.sp,
+          //           ),
+          //           suffixIcon: _searchController.text.isNotEmpty
+          //               ? IconButton(
+          //                   icon: Icon(
+          //                     Icons.clear,
+          //                     color: Colors.grey,
+          //                     size: 18.sp,
+          //                   ),
+          //                   onPressed: () {
+          //                     _searchController.clear();
+          //                     _filterMessages();
+          //                   },
+          //                 )
+          //               : null,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
+
+          SizedBox(
+            height: 10.sp,
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Card(
+              color: Colors.grey.shade100,
+              child: SizedBox(
+                width: 150.sp,
+                height: 30.sp,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.sp,
+                    vertical: 5.sp,
+                  ),
+                  child: Row(
+                    children: [
+                      Transform.scale(
+                        scale: 1,
+                        child: Checkbox(
+                          value: _tabController.index == 0
+                              ? selectAllTeachers
+                              : selectAllStudents,
+                          onChanged: (value) => _toggleSelectAll(),
+                          activeColor: AppColors.primary,
+                        ),
+                      ),
+                      Text(
+                        'Select All',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 10.sp,
+          ),
+
+
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                isLoading
+                    ? const WhiteCircularProgressWidget()
+                    : filteredMessages.isEmpty
+                    ? const Center(
+                        child: DataNotFoundWidget(title: 'No Teachers Found.'),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredMessages.length,
+                        itemBuilder: (context, index) {
+                          final assignment = filteredMessages[index];
+                          final isSelected = selectedTeachers.contains(
+                            'user_${assignment['id']}',
+                          );
+                          return GestureDetector(
+                            onLongPress: () =>
+                                _toggleSelection(assignment['id']),
+                            child: Card(
+                              margin: EdgeInsets.symmetric(
+                                vertical: 3.sp,
+                                horizontal: 5.sp,
+                              ),
+                              // elevation: 6,
+                              color: isSelected
+                                  ? Colors.blue.shade50
+                                  : Colors.white,
+                              shadowColor: Colors.black26,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.sp),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(0.sp),
+                                child: Row(
+                                  children: [
+                                    Transform.scale(
+                                      scale: 1,
+                                      child: Checkbox(
+                                        value: isSelected,
+                                        onChanged: (value) =>
+                                            _toggleSelection(assignment['id']),
+                                        activeColor: AppColors.primary,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${assignment['first_name']?.toString().toUpperCase() ?? 'UNKNOWN'}',
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 13.sp,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 1),
+                                          Text(
+                                            '(${assignment['designation']?['title']?.toString().toUpperCase() ?? 'NO DESIGNATION'})',
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 11.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                isLoading
+                    ? const WhiteCircularProgressWidget()
+                    : filteredMessages2.isEmpty
+                    ? const Center(
+                        child: DataNotFoundWidget(title: 'No Students Found.'),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredMessages2.length,
+                        itemBuilder: (context, index) {
+                          final assignment = filteredMessages2[index];
+                          final isSelected = selectedStudents.contains(
+                            'student_${assignment['id']}',
+                          );
+                          return GestureDetector(
+                            onLongPress: () =>
+                                _toggleSelection(assignment['id']),
+                            child: Card(
+                              margin: EdgeInsets.symmetric(
+                                vertical: 3.sp,
+                                horizontal: 5.sp,
+                              ),
+                              // elevation: 6,
+                              color: isSelected
+                                  ? Colors.blue.shade50
+                                  : Colors.white,
+                              shadowColor: Colors.black26,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(11.sp),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(0.sp),
+                                child: Row(
+                                  children: [
+                                    Transform.scale(
+                                      scale: 1,
+                                      child: Checkbox(
+                                        value: isSelected,
+                                        onChanged: (value) =>
+                                            _toggleSelection(assignment['id']),
+                                        activeColor: AppColors.primary,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${assignment['student_name']?.toString().toUpperCase() ?? 'UNKNOWN'}',
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 13.sp,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 1),
+                                          Text(
+                                            '${assignment['class_name']?.toString().toUpperCase() ?? 'NO CLASS'} (${assignment['current_enrolled']['section']['title']?.toString().toUpperCase() ?? 'NO SECTION'})',
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 11.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ],
+            ),
+          ),
+          SafeArea(
+            child: Card(
+              color: Colors.grey.shade300,
+              margin: EdgeInsets.zero,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(00.0),
+                  // Use 10.sp if using flutter_screenutil
+                  topRight: Radius.circular(
+                    00.0,
+                  ), // Use 10.sp if using flutter_screenutil
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 5.sp,
+                  vertical: 15.sp,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.attach_file, color: AppColors2.primary),
+                      onPressed: _pickFile,
+                    ),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: messageController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Type a message...',
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                            if (selectedFile != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Text(
+                                  selectedFile!.name,
+                                  style: const TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
-              // Students Tab
-              isLoading
-                  ? const WhiteCircularProgressWidget()
-                  : filteredMessages2.isEmpty
-                  ? const Center(
-                child: DataNotFoundWidget(
-                  title: 'No Students Found.',
-                ),
-              )
-                  : ListView.builder(
-                controller: widget.scrollController,
-                itemCount: filteredMessages2.length,
-                itemBuilder: (context, index) {
-                  final assignment = filteredMessages2[index];
-                  final isSelected = selectedStudents.contains(assignment['id']);
-                  return GestureDetector(
-                    onTap: () {
-                      if (widget.messageSendPermissionsApp == 0) {
-                        _showPermissionDeniedPopup(context);
-                      } else {
-                        _showMessagePopup(
-                          context,
-                          assignment['student_name'] ?? 'Unknown',
-                          '${assignment['class_name']?.toString() ?? 'No Class'} (${assignment['section']?.toString() ?? 'No Section'})',
-                          assignment['id'],
-                        );
-                      }
-                    },
-                    onLongPress: () => _toggleSelection(assignment['id']),
-                    child: Card(
-                      margin: EdgeInsets.symmetric(vertical: 3.sp, horizontal: 5.sp),
-                      elevation: 6,
-                      color: isSelected ? Colors.blue.shade50 : Colors.white,
-                      shadowColor: Colors.black26,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(11.sp),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(0.sp),
-                        child: Row(
-                          children: [
-                            Transform.scale(
-                              scale: 0.7, // Smaller checkbox
-                              child: Checkbox(
-                                value: isSelected,
-                                onChanged: (value) => _toggleSelection(assignment['id']),
-                                activeColor: AppColors.primary,
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${assignment['student_name']?.toString().toUpperCase() ?? 'UNKNOWN'}',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 1),
-                                  Text(
-                                    '${assignment['class_name']?.toString().toUpperCase() ?? 'NO CLASS'} (${assignment['section']?.toString().toUpperCase() ?? 'NO SECTION'})',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 11.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                    const SizedBox(width: 8),
+                    CircleAvatar(
+                      backgroundColor: AppColors2.primary,
+                      child: IconButton(
+                        icon: const Icon(Icons.send, color: Colors.white),
+                        onPressed: _sendMessage,
                       ),
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _messageController.dispose();
+    messageController.dispose();
     _tabController.dispose();
     super.dispose();
   }
 }
+
+
+
+

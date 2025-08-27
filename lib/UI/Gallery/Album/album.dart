@@ -119,23 +119,22 @@ class GalleryNotifier extends StateNotifier<AsyncValue<List<Album>>> {
       final prefs = await ref.read(sharedPrefsProvider.future);
       final token = prefs.getString('token');
 
-      if (token == null || token.isEmpty) {
-        state = AsyncValue.error(
-          Exception('Authentication token not found'),
-          StackTrace.current,
-        );
-        _isFetching = false;
-        return;
+      // if (token == null || token.isEmpty) {
+      //   state = AsyncValue.error(
+      //     Exception('Authentication token not found'),
+      //     StackTrace.current,
+      //   );
+      //   _isFetching = false;
+      //   return;
+      // }
+      final headers = <String, String>{};
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
       }
 
-      final stopwatch = Stopwatch()..start();
       final response = await client.get(
         Uri.parse('$apiUrl?page=$page'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-      stopwatch.stop();
-      print(
-        'API Gallery response time (Page $page): ${stopwatch.elapsedMilliseconds} ms',
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -463,7 +462,9 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   ),
                 ],
               ),
-            ),        ],
+            ),
+
+        ],
       ),
     );
   }
